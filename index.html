@@ -61,10 +61,10 @@
                 </div>
                 <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.04 にカウントアップ -->
+                <!-- バージョン表記を v1.06 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.04</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.06</span>
                 </div>
                 
                 <p class="text-xs text-slate-400 mt-4 px-4 leading-relaxed">
@@ -153,7 +153,7 @@
                         <i data-lucide="volume-2" class="w-4 h-4"></i>
                         <span>お手本</span>
                     </button>
-                    <!-- 判定ボタンを追加 (v1.04) -->
+                    <!-- 判定ボタン -->
                     <button onclick="triggerQuickCheck()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-450 hover:to-rose-450 text-white font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs">
                         <i data-lucide="zap" class="w-4 h-4 fill-white"></i>
                         <span>判定！</span>
@@ -323,7 +323,6 @@
 
             recognition = new SpeechRecognition();
             recognition.continuous = false; 
-            // 【判定速度改善】中間結果（話し途中）をリアルタイムで受け取る設定に変更
             recognition.interimResults = true; 
             recognition.lang = 'en-US'; // 英語判定
 
@@ -335,7 +334,6 @@
             };
 
             recognition.onresult = (event) => {
-                // 【判定速度改善】中間判定テキストをリアルタイムに取り出し結合
                 let interimTranscript = '';
                 let finalTranscript = '';
 
@@ -362,7 +360,6 @@
 
             recognition.onend = () => {
                 isSpeechActive = false;
-                // ゲーム実行中であれば自動的に次のセッションを起動する（常時聞き取り）
                 if (isPlaying) {
                     try {
                         recognition.start();
@@ -386,26 +383,20 @@
             const clean = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
             const speechText = clean(rawText);
             
-            // 認識結果を画面中央にポップアップ表示
             showSpeechBubble(rawText);
 
-            // 認識されたテキストをスペースで単語（ワード）ごとに切り分ける
             const spokenWords = speechText.split(/\s+/);
-
             const list = courses[currentCourse];
             let matched = null;
 
-            // 優先判定①：現在ターゲットに指定されている正解ワードが、言ったこと（全体、または分割された単語）の中に含まれているか
             const activeTargetItem = list[selectedItemIndex];
             const activeTargetClean = clean(activeTargetItem.word);
             
             const isTargetSpoken = spokenWords.some(w => w === activeTargetClean || activeTargetClean.includes(w)) || speechText.includes(activeTargetClean);
             
             if (isTargetSpoken) {
-                // ターゲット単語が含まれていたら最優先でそちらを適用！
                 matched = activeTargetItem;
             } else {
-                // 優先判定②：言ったことの中に、コース内のいずれかのワードが片方でも含まれているか
                 matched = list.find(item => {
                     const itemWord = clean(item.word);
                     return spokenWords.some(w => w === itemWord || itemWord.includes(w)) || speechText.includes(itemWord);
@@ -413,7 +404,6 @@
             }
 
             if (matched) {
-                // 適合した正しい姿に変身！
                 player.transformTo(matched.word, matched.emoji);
             }
         }
@@ -427,7 +417,6 @@
             bubble.classList.remove('scale-0');
             bubble.classList.add('scale-100');
             
-            // 数秒後にフェードアウト
             setTimeout(() => {
                 bubble.classList.remove('scale-100');
                 bubble.classList.add('scale-0');
@@ -444,19 +433,438 @@
             const currentItem = list[selectedItemIndex];
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
             utterance.lang = 'en-US';
-            utterance.rate = 0.85; // ややゆっくり丁寧
+            utterance.rate = 0.85; 
             synth.speak(utterance);
         }
 
-        // --- 判定をいそぐ機能 (v1.04 判定ボタン) ---
+        // --- 判定をいそぐ機能 ---
         function triggerQuickCheck() {
             if (!isPlaying || !activeGate) return;
             
-            // まだゲートが移動中で手前に到達していない場合、一気に判定ライン(0.82)に引き寄せる
             if (activeGate.state === 'moving' && activeGate.z < 0.82) {
-                activeGate.z = 0.82; // 瞬時に判定位置にワープさせて判定をトリガー
-                screenShake = 4; // 少しカメラシェイクを入れて気持ち良いリアクションに
+                activeGate.z = 0.82; 
+                screenShake = 4; 
             }
+        }
+
+        // --- 自作ベクターイラスト描画エンジン (v1.06 細部調整入り) ---
+        function drawCustomGraphic(ctx, name, size) {
+            ctx.save();
+            ctx.translate(0, -size * 0.45); // 描画の基準位置をキャラクター中央へ調整
+
+            // キャラクターのパーツごとに極細の境界線を描いて重なりを見やすくする設定
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = Math.max(1.5, size * 0.02);
+
+            switch (name) {
+                case "Mickey":
+                    // ミッキーマウス風 (丸耳2つ + 黒顔 + 赤いズボン)
+                    // 1. 大きな丸耳（左右上部）
+                    ctx.fillStyle = "#0a0a0a";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. メインの顔球体
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. お腹/ズボン
+                    ctx.fillStyle = "#e11d48"; // 鮮やかな赤
+                    ctx.beginPath();
+                    ctx.arc(0, size * 0.12, size * 0.36, 0, Math.PI); // 下半分を赤く
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 4. 白いズボンのボタン2つ
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.12, size * 0.22, size * 0.06, 0, Math.PI * 2);
+                    ctx.arc(size * 0.12, size * 0.22, size * 0.06, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "Donald":
+                    // ドナルドダック風 (白い丸い頭、青いセーラーハット、黄色い大きなクチバシ)
+                    // 1. ふわふわの白い頭部
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. セーラー帽 (青い長方形 + 赤いリボン)
+                    ctx.fillStyle = "#1d4ed8"; // 青
+                    ctx.beginPath();
+                    ctx.ellipse(0, -size * 0.34, size * 0.24, size * 0.1, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 小さなセーラー帽の上の赤いリボン飾り
+                    ctx.fillStyle = "#dc2626";
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.1, -size * 0.34);
+                    ctx.lineTo(size * 0.25, -size * 0.22);
+                    ctx.lineTo(size * 0.2, -size * 0.42);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. 特徴的な黄色い大きな口ばし
+                    ctx.fillStyle = "#fbbf24"; // 明るいオレンジ
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.15, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#f59e0b";
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.28, size * 0.08);
+                    ctx.quadraticCurveTo(0, size * 0.14, size * 0.28, size * 0.08); // 口のライン
+                    ctx.stroke();
+
+                    // 4. 青いおめめ
+                    ctx.fillStyle = "#06b6d4";
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.09, -size * 0.1, size * 0.05, size * 0.1, 0, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.09, -size * 0.1, size * 0.05, size * 0.1, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "Pooh":
+                    // プーさん風 (黄金色の丸い顔、丸い耳、赤いシャツ)
+                    // 1. ぷっくりした黄色の丸い耳
+                    ctx.fillStyle = "#fbbf24"; // プーさんイエロー
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
+                    ctx.arc(size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. 丸いハニーフェイス
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. 赤いシャツ（お腹の境界）
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath();
+                    ctx.arc(0, size * 0.2, size * 0.35, 0, Math.PI); // 下部を覆う赤いシャツ
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 4. にっこりした目と鼻
+                    ctx.fillStyle = "#451a03"; // 優しい焦げ茶色
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
+                    ctx.arc(size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 三角のハナ
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.06, size * 0.06);
+                    ctx.lineTo(size * 0.06, size * 0.06);
+                    ctx.lineTo(0, size * 0.12);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+
+                case "Panda":
+                    // パンダ (白顔、丸い黒耳、特徴的なたれ目の黒パッチ)
+                    // 1. 左右の黒い耳
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
+                    ctx.arc(size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. 白い輪郭顔
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. 斜めに傾いた黒いたれ目のたれ模様
+                    ctx.fillStyle = "#1e293b";
+                    ctx.save();
+                    ctx.translate(-size * 0.14, -size * 0.02);
+                    ctx.rotate(Math.PI / 6);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.translate(size * 0.14, -size * 0.02);
+                    ctx.rotate(-Math.PI / 6);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 4. つぶらな白い瞳
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
+                    ctx.arc(size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 5. お鼻
+                    ctx.fillStyle = "#000000";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.1, size * 0.05, size * 0.03, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "Apple":
+                    // りんご (ツヤツヤの立体赤ボディ、緑の葉、茶のヘタ)
+                    // 1. 赤いふっくらツインの実
+                    ctx.fillStyle = "#ea580c"; // 影側の朱色
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
+                    ctx.arc(size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = "#dc2626"; // 明るい赤
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
+                    ctx.arc(size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. 茶色のヘタ（茎）
+                    ctx.strokeStyle = "#78350f";
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -size * 0.1);
+                    ctx.quadraticCurveTo(size * 0.15, -size * 0.25, size * 0.1, -size * 0.38);
+                    ctx.stroke();
+
+                    // 3. みずみずしい緑のリーフ（葉っぱ）
+                    ctx.fillStyle = "#22c55e";
+                    ctx.beginPath();
+                    ctx.ellipse(size * 0.15, -size * 0.28, size * 0.15, size * 0.06, -Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 4. ハイライト (ツヤ)
+                    ctx.fillStyle = "rgba(255,255,255,0.45)";
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.12, -size * 0.12, size * 0.06, size * 0.11, Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "Banana":
+                    // バナナ (緩やかなカーブボディ、先端の茶色のヘタ)
+                    ctx.save();
+                    ctx.rotate(-Math.PI / 10);
+                    // 1. 黄色い三日月カーブ
+                    ctx.fillStyle = "#eab308"; // バナナベースイエロー
+                    ctx.beginPath();
+                    ctx.arc(0, -size * 0.2, size * 0.44, 0.2 * Math.PI, 0.8 * Math.PI, false);
+                    ctx.quadraticCurveTo(0, size * 0.12, size * 0.35, size * 0.06);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // 2. 端のグリーン/茶色い先端
+                    ctx.fillStyle = "#4d7c0f"; // 緑
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.32, size * 0.1, size * 0.06, size * 0.05, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#78350f"; // 茶
+                    ctx.beginPath();
+                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.04, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                    break;
+
+                case "Lion":
+                case "Simba":
+                    // ライオン・シンバ風 (フサフサの赤茶色のたてがみ、黄色の顔、ピンクの鼻)
+                    // 1. トゲトゲのたてがみ (外周円を描くように大きなギザギザ)
+                    ctx.fillStyle = "#b45309"; // オレンジブラウンのたてがみ
+                    ctx.beginPath();
+                    for (let i = 0; i < 16; i++) {
+                        const angle = (i * Math.PI * 2) / 16;
+                        const dist = (i % 2 === 0) ? size * 0.52 : size * 0.38;
+                        const rx = Math.cos(angle) * dist;
+                        const ry = Math.sin(angle) * dist;
+                        if (i === 0) ctx.moveTo(rx, ry);
+                        else ctx.lineTo(rx, ry);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. メインのライオンイエロー顔
+                    ctx.fillStyle = "#f59e0b"; // ライオン黄色
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. かわいい丸耳
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 4. キリッとしたキャットアイ
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 5. お鼻（ピンク）
+                    ctx.fillStyle = "#f43f5e";
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.05, size * 0.04);
+                    ctx.lineTo(size * 0.05, size * 0.04);
+                    ctx.lineTo(0, size * 0.1);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+
+                case "Cat":
+                    // 猫風 (オレンジ色の頭、ピンと立った三角耳、ひげ)
+                    ctx.fillStyle = "#f97316"; // オレンジキャット
+                    // 1. 三角の猫耳（左右）
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.34, -size * 0.08);
+                    ctx.lineTo(-size * 0.32, -size * 0.42);
+                    ctx.lineTo(-size * 0.1, -size * 0.15);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#fca5a5"; // ピンクの耳の中
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.3, -size * 0.12);
+                    ctx.lineTo(-size * 0.29, -size * 0.35);
+                    ctx.lineTo(-size * 0.14, -size * 0.18);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#f97316";
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.34, -size * 0.08);
+                    ctx.lineTo(size * 0.32, -size * 0.42);
+                    ctx.lineTo(size * 0.1, -size * 0.15);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#fca5a5";
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.3, -size * 0.12);
+                    ctx.lineTo(size * 0.29, -size * 0.35);
+                    ctx.lineTo(size * 0.14, -size * 0.18);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. まあるい猫輪郭
+                    ctx.fillStyle = "#f97316";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. 目、ひげを描画
+                    ctx.strokeStyle = "#451a03";
+                    ctx.lineWidth = 3;
+                    // ひげ左
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.2, size * 0.06); ctx.lineTo(-size * 0.42, size * 0.04);
+                    ctx.moveTo(-size * 0.2, size * 0.1);  ctx.lineTo(-size * 0.45, size * 0.11);
+                    ctx.stroke();
+                    // ひげ右
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.2, size * 0.06);  ctx.lineTo(size * 0.42, size * 0.04);
+                    ctx.moveTo(size * 0.2, size * 0.1);   ctx.lineTo(size * 0.45, size * 0.11);
+                    ctx.stroke();
+                    // 目
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.11, -size * 0.05, size * 0.04, size * 0.04, 0, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.11, -size * 0.05, size * 0.04, size * 0.04, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "Dog":
+                    // いぬ風 (ブラウンのタレ耳、優しい表情、ペロリと出した可愛い舌)
+                    // 1. まあるいドッグフェイス
+                    ctx.fillStyle = "#d97706"; // ブラウン
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. タレ耳（左右に縦に長い楕円）
+                    ctx.fillStyle = "#78350f"; // 焦げ茶耳
+                    ctx.beginPath();
+                    ctx.ellipse(-size * 0.34, 0, size * 0.12, size * 0.26, Math.PI / 10, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.34, 0, size * 0.12, size * 0.26, -Math.PI / 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 3. 黒い大きめの目
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
+                    ctx.arc(size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 4. ペロリと出したピンクの舌
+                    ctx.fillStyle = "#f43f5e";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.14, size * 0.06, size * 0.09, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 5. お鼻まわりの白いマズル部分
+                    ctx.fillStyle = "#fffbeb";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.08, size * 0.12, size * 0.07, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 黒鼻
+                    ctx.fillStyle = "#000000";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.05, size * 0.06, size * 0.04, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                default:
+                    // 指定がない場合のフォールバック（これまでのマスコットマンなど）
+                    ctx.fillStyle = "#6366f1";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+            ctx.restore();
         }
 
         // --- Canvas 描画エンジン（擬似3D道路） ---
@@ -539,7 +947,6 @@
 
             draw() {
                 const pos = project(this.xOffset, this.z);
-                // 面積比4倍にするため、ベースの描画サイズを 128 に拡大
                 const size = 128 * pos.scale;
 
                 ctx.save();
@@ -557,18 +964,29 @@
                     ctx.shadowBlur = 0;
                 }
 
-                // 本体（Emoji）
-                ctx.font = `${size}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                
                 // 接地影
                 ctx.beginPath();
                 ctx.ellipse(0, 0, size * 0.5, size * 0.1, 0, 0, Math.PI * 2);
                 ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
                 ctx.fill();
 
-                ctx.fillText(this.emoji, 0, -size * 0.1);
+                // 【v1.06 新設: 輪郭線の追加】
+                // 暗い背景や同系色と重なってもミッキー、パンダなどの境界線をクッキリ見せる
+                // 白いネオングロー(光彩)エフェクトを設定して輪郭を際立たせる
+                ctx.shadowColor = "#ffffff";
+                ctx.shadowBlur = 12;
+
+                // 変身中のグラフィックがあれば手描きベクターを描画し、なければ絵文字を使用します
+                if (this.currentAnimal) {
+                    drawCustomGraphic(ctx, this.currentAnimal, size);
+                } else {
+                    // 人間状態（絵文字）
+                    ctx.font = `${size}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(this.emoji, 0, -size * 0.1);
+                }
+                
                 ctx.restore();
             }
         }
@@ -608,10 +1026,6 @@
                             combo = 0; // コンボはリセット
                             updateHUD();
                             screenShake = 12; // 画面を揺らす
-                            
-                            // 【跳ね返り距離＆時間のさらなる調整 - v1.02】
-                            // 再判定時間を前回のさらに「倍」に伸ばすため、
-                            // バウンド初速を滑らかな遠ざかりに維持（-0.0125）しつつ、引き戻しスピードを劇的に落とします。
                             this.velocity = -0.0125; 
                             
                             // プレイヤーを一瞬ペシャンコに潰す
@@ -627,13 +1041,8 @@
                 } else if (this.state === 'bouncing') {
                     // 弾き飛ばされる物理挙動
                     this.z += this.velocity;
-                    
-                    // 【引き戻し加速度の調整 - v1.02 (さらに倍、当初比6倍に引き伸ばし)】
-                    // 前回の引き戻し力 (0.0008) からさらに半分以下 (0.0003) に落とすことで、
-                    // ゲートが奥に浮遊したあ後の戻り時間がさらに倍になり、じっくりと言い直すことが可能です。
                     this.velocity += 0.0003; 
                     
-                    // 復帰速度のしきい値も、新しい減速率に合わせて調整します
                     if (this.velocity > 0.0005) { 
                         this.state = 'moving'; // 再びこちらに向かって移動
                     }
@@ -678,7 +1087,7 @@
                 ctx.lineTo(width / 2, -height);
                 ctx.lineTo(width / 2, 0);
                 
-                // すり抜け用の「くり抜かれた丸穴（または角丸のドア）」を作る
+                // すり抜け用の「くり抜かれた丸穴（または角丸 of ドア）」を作る
                 const holeW = width * 0.45;
                 const holeH = height * 0.8;
                 
@@ -716,12 +1125,20 @@
 
                 // 4. ゲート内のドアの中にヒントとして「変身すべき絵」を点滅
                 if (this.state !== 'passed') {
-                    // 面積比4倍（サイズ2倍）ベース
-                    const emojiSize = 44 + 60 * pos.scale; 
-                    ctx.font = `${emojiSize}px sans-serif`;
+                    ctx.save();
                     // ゆらゆら点滅アニメーション
                     ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() / 150);
-                    ctx.fillText(this.emoji, 0, -holeH * 0.3);
+                    
+                    // 【v1.06 ゲート奥のヒント表示の強化】
+                    // 奥に見えるヒント画像にも白い光彩グローを適用して遠くからでも見やすくする
+                    ctx.shadowColor = "#ffffff";
+                    ctx.shadowBlur = 10;
+                    
+                    const emojiSize = 44 + 60 * pos.scale; 
+                    // 基準位置を補正してカスタムグラフィックを描く
+                    ctx.translate(0, -holeH * 0.22);
+                    drawCustomGraphic(ctx, this.target, emojiSize);
+                    ctx.restore();
                 }
 
                 ctx.restore();
@@ -730,10 +1147,11 @@
 
         // 星屑パーティクル（エフェクト）
         class Particle {
-            constructor(x, y, emoji) {
+            constructor(x, y, emoji, targetWord) {
                 this.x = x;
                 this.y = y;
                 this.emoji = emoji;
+                this.targetWord = targetWord;
                 this.vx = (Math.random() - 0.5) * 12;
                 this.vy = -(Math.random() * 8 + 4);
                 this.alpha = 1.0;
@@ -754,9 +1172,13 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
                 ctx.globalAlpha = this.alpha;
-                // 散らばるパーティクルのサイズも面積比4倍
-                ctx.font = `${64 * this.scale}px sans-serif`;
-                ctx.fillText(this.emoji, 0, 0);
+                
+                // パーティクルも白いアウトライン・グローをうっすら入れる
+                ctx.shadowColor = "#ffffff";
+                ctx.shadowBlur = 6;
+
+                const size = 64 * this.scale;
+                drawCustomGraphic(ctx, this.targetWord, size);
                 ctx.restore();
             }
         }
@@ -783,6 +1205,14 @@
             document.getElementById('target-word').innerText = targetItem.word;
             document.getElementById('next-gate-emoji').innerText = targetItem.emoji;
             document.getElementById('clash-warning').classList.add('hidden');
+        }
+
+        // 通過時のご褒ベエフェクト
+        function createSparkles(emoji) {
+            const pos = project(0, 0.85);
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(pos.x, pos.y - 50, emoji, activeGate.target));
+            }
         }
 
         // --- HUD表示更新 ---
@@ -848,7 +1278,7 @@
             ctx.fill();
 
             // 4. 動いている感を示す側面のチェッカーライン（赤白のガイドライン）の描画
-            roadOffset += 0.003; // スピード係数 (約20% に減速)
+            roadOffset += 0.003; 
             if (roadOffset >= 1.0) roadOffset = 0;
 
             const segments = 12;
@@ -897,14 +1327,6 @@
 
             ctx.restore();
             requestAnimationFrame(gameLoop);
-        }
-
-        // 通過時のご褒美エフェクト（星をたくさん散らす）
-        function createSparkles(emoji) {
-            const pos = project(0, 0.85);
-            for (let i = 0; i < 15; i++) {
-                particles.push(new Particle(pos.x, pos.y - 50, emoji));
-            }
         }
 
         // --- ゲーム開始のトリガー ---
