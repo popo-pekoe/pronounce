@@ -27,6 +27,14 @@
             70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); }
             100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
         }
+        /* スクロールバー非表示 (コース一覧用) */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="bg-slate-900 min-h-screen flex items-center justify-center text-slate-100 p-2 md:p-4 overflow-hidden select-none">
@@ -53,60 +61,69 @@
         </div>
 
         <!-- Course Selector Overlay (Start Screen) -->
-        <div id="start-screen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col justify-between p-6 items-center">
-            <div class="w-full text-center mt-6">
+        <div id="start-screen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col justify-between p-5 items-center">
+            <div class="w-full text-center mt-3">
                 <!-- Title Logo -->
-                <div class="inline-flex w-16 h-16 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-2xl items-center justify-center text-white shadow-lg transform -rotate-6 mb-3">
-                    <i data-lucide="speech" class="w-10 h-10"></i>
+                <div class="inline-flex w-14 h-14 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-2xl items-center justify-center text-white shadow-lg transform -rotate-6 mb-2">
+                    <i data-lucide="speech" class="w-8 h-8"></i>
                 </div>
-                <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
+                <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.06 にカウントアップ -->
+                <!-- バージョン表記を v1.07 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.06</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.07</span>
                 </div>
                 
-                <p class="text-xs text-slate-400 mt-4 px-4 leading-relaxed">
-                    奥から流れてくるゲートの単語を発音して、正しい姿に変身しよう！一致しないとぶつかっちゃうぞ！
+                <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
+                    おくから流れてくるゲートの単語を発音して、正しいすがたに変身しよう！
                 </p>
             </div>
 
-            <!-- Course Selection Buttons -->
-            <div class="w-full flex flex-col gap-3.5 max-w-xs my-auto">
+            <!-- Course Selection Scroll Container (v1.07からは4コースのためスクロール対応) -->
+            <div class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
                 <!-- 1. どうぶつコース -->
-                <button onclick="startGame('animals')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3 px-5 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <button onclick="startGame('animals')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-4xl">🦁</span>
-                        <span class="text-left text-base">どうぶつコース <span class="block text-xs font-normal text-purple-200">Animals (Panda, Cat, etc.)</span></span>
+                        <span class="text-3xl">🦁</span>
+                        <span class="text-left text-sm">どうぶつコース <span class="block text-[10px] font-normal text-purple-200">Animals (Panda, Cat, etc.)</span></span>
                     </div>
-                    <i data-lucide="play" class="w-5 h-5 fill-white"></i>
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
                 <!-- 2. くだものコース -->
-                <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-3 px-5 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-4xl">🍌</span>
-                        <span class="text-left text-base">くだものコース <span class="block text-xs font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
+                        <span class="text-3xl">🍌</span>
+                        <span class="text-left text-sm">くだものコース <span class="block text-[10px] font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
                     </div>
-                    <i data-lucide="play" class="w-5 h-5 fill-white"></i>
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
                 <!-- 3. キャラクターコース -->
-                <button onclick="startGame('characters')" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-350 hover:to-orange-450 text-slate-950 font-black py-3 px-5 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <button onclick="startGame('characters')" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-350 hover:to-orange-450 text-slate-950 font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-4xl">🐭</span>
-                        <span class="text-left text-base font-extrabold text-slate-900">キャラクター <span class="block text-xs font-semibold text-slate-800">Characters (Mickey, Pooh, etc.)</span></span>
+                        <span class="text-3xl">🐭</span>
+                        <span class="text-left text-sm font-extrabold text-slate-900">キャラクター <span class="block text-[10px] font-semibold text-slate-800">Characters (Mickey, Pooh, etc.)</span></span>
                     </div>
-                    <i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>
+                    <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
+                </button>
+
+                <!-- 4. はたらくくるまコース (NEW v1.07!) -->
+                <button onclick="startGame('vehicles')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">🚒</span>
+                        <span class="text-left text-sm">はたらくくるま <span class="block text-[10px] font-normal text-teal-100">Working Vehicles (Police, Fire, etc.)</span></span>
+                    </div>
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
             </div>
 
             <!-- Pre-flight Mic warning -->
-            <div class="text-[10px] text-slate-500 text-center px-4 mb-4">
-                ※遊ぶにはブラウザのマイク許可が必要です。<br>お手本の声や効果音が鳴りますので音量をオンにしてください。
+            <div class="text-[9px] text-slate-500 text-center px-4 mb-2">
+                ※遊ぶにはマイク許可が必要です。音量をオンにしてね。
             </div>
         </div>
 
@@ -186,7 +203,7 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
                 </div>
-                <p class="text-xs font-bold text-pink-400">マイクはONです！いつでも自由に喋ってね</p>
+                <p class="text-xs font-bold text-pink-400">マイクはONです！いつでも自由に喋ね</p>
             </div>
         </div>
 
@@ -209,7 +226,7 @@
     </div>
 
     <script>
-        // --- コース構成データ ---
+        // --- コース構成データ (v1.07 働く車を追加) ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -227,7 +244,6 @@
                 { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
                 { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
-            // キャラクターコース
             characters: [
                 { word: "Mickey", emoji: "🐭", prompt: "ミッキー" },
                 { word: "Donald", emoji: "🦆", prompt: "ドナルド" },
@@ -235,6 +251,14 @@
                 { word: "Elsa", emoji: "❄️", prompt: "エルサ" },
                 { word: "Simba", emoji: "🦁", prompt: "シンバ" },
                 { word: "Stitch", emoji: "👽", prompt: "スティッチ" }
+            ],
+            // 【v1.07新設】はたらくくるまコース
+            vehicles: [
+                { word: "Ambulance", emoji: "🚑", prompt: "救急車" },
+                { word: "Firetruck", emoji: "🚒", prompt: "消防車" },
+                { word: "Policecar", emoji: "🚓", prompt: "パトカー" },
+                { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
+                { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
             ]
         };
 
@@ -447,7 +471,7 @@
             }
         }
 
-        // --- 自作ベクターイラスト描画エンジン (v1.06 細部調整入り) ---
+        // --- 自作ベクターイラスト描画エンジン (v1.07 働く車を追加) ---
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); // 描画の基準位置をキャラクター中央へ調整
@@ -457,34 +481,27 @@
             ctx.lineWidth = Math.max(1.5, size * 0.02);
 
             switch (name) {
+                // ==================== キャラクター ====================
                 case "Mickey":
-                    // ミッキーマウス風 (丸耳2つ + 黒顔 + 赤いズボン)
-                    // 1. 大きな丸耳（左右上部）
+                    // ミッキーマウス風
                     ctx.fillStyle = "#0a0a0a";
                     ctx.beginPath();
                     ctx.arc(-size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
                     ctx.beginPath();
                     ctx.arc(size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. メインの顔球体
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. お腹/ズボン
-                    ctx.fillStyle = "#e11d48"; // 鮮やかな赤
+                    ctx.fillStyle = "#e11d48"; // 赤
                     ctx.beginPath();
-                    ctx.arc(0, size * 0.12, size * 0.36, 0, Math.PI); // 下半分を赤く
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.arc(0, size * 0.12, size * 0.36, 0, Math.PI);
+                    ctx.fill(); ctx.stroke();
 
-                    // 4. 白いズボンのボタン2つ
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.arc(-size * 0.12, size * 0.22, size * 0.06, 0, Math.PI * 2);
@@ -493,45 +510,36 @@
                     break;
 
                 case "Donald":
-                    // ドナルドダック風 (白い丸い頭、青いセーラーハット、黄色い大きなクチバシ)
-                    // 1. ふわふわの白い頭部
+                    // ドナルドダック風
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. セーラー帽 (青い長方形 + 赤いリボン)
                     ctx.fillStyle = "#1d4ed8"; // 青
                     ctx.beginPath();
                     ctx.ellipse(0, -size * 0.34, size * 0.24, size * 0.1, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 小さなセーラー帽の上の赤いリボン飾り
                     ctx.fillStyle = "#dc2626";
                     ctx.beginPath();
                     ctx.moveTo(size * 0.1, -size * 0.34);
                     ctx.lineTo(size * 0.25, -size * 0.22);
                     ctx.lineTo(size * 0.2, -size * 0.42);
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. 特徴的な黄色い大きな口ばし
-                    ctx.fillStyle = "#fbbf24"; // 明るいオレンジ
+                    ctx.fillStyle = "#fbbf24"; // くちばし
                     ctx.beginPath();
                     ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.15, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
                     ctx.fillStyle = "#f59e0b";
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.28, size * 0.08);
-                    ctx.quadraticCurveTo(0, size * 0.14, size * 0.28, size * 0.08); // 口のライン
+                    ctx.quadraticCurveTo(0, size * 0.14, size * 0.28, size * 0.08);
                     ctx.stroke();
 
-                    // 4. 青いおめめ
                     ctx.fillStyle = "#06b6d4";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.09, -size * 0.1, size * 0.05, size * 0.1, 0, 0, Math.PI * 2);
@@ -540,35 +548,28 @@
                     break;
 
                 case "Pooh":
-                    // プーさん風 (黄金色の丸い顔、丸い耳、赤いシャツ)
-                    // 1. ぷっくりした黄色の丸い耳
-                    ctx.fillStyle = "#fbbf24"; // プーさんイエロー
+                    // プーさん風
+                    ctx.fillStyle = "#fbbf24"; // イエロー
                     ctx.beginPath();
                     ctx.arc(-size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
                     ctx.arc(size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. 丸いハニーフェイス
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.4, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. 赤いシャツ（お腹の境界）
-                    ctx.fillStyle = "#ef4444";
+                    ctx.fillStyle = "#ef4444"; // 赤い服
                     ctx.beginPath();
-                    ctx.arc(0, size * 0.2, size * 0.35, 0, Math.PI); // 下部を覆う赤いシャツ
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.arc(0, size * 0.2, size * 0.35, 0, Math.PI);
+                    ctx.fill(); ctx.stroke();
 
-                    // 4. にっこりした目と鼻
-                    ctx.fillStyle = "#451a03"; // 優しい焦げ茶色
+                    ctx.fillStyle = "#451a03";
                     ctx.beginPath();
                     ctx.arc(-size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
                     ctx.arc(size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
                     ctx.fill();
-                    // 三角のハナ
+
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.06, size * 0.06);
                     ctx.lineTo(size * 0.06, size * 0.06);
@@ -577,75 +578,20 @@
                     ctx.fill();
                     break;
 
-                case "Panda":
-                    // パンダ (白顔、丸い黒耳、特徴的なたれ目の黒パッチ)
-                    // 1. 左右の黒い耳
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
-                    ctx.arc(size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // 2. 白い輪郭顔
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // 3. 斜めに傾いた黒いたれ目のたれ模様
-                    ctx.fillStyle = "#1e293b";
-                    ctx.save();
-                    ctx.translate(-size * 0.14, -size * 0.02);
-                    ctx.rotate(Math.PI / 6);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.translate(size * 0.14, -size * 0.02);
-                    ctx.rotate(-Math.PI / 6);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.restore();
-
-                    // 4. つぶらな白い瞳
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
-                    ctx.arc(size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // 5. お鼻
-                    ctx.fillStyle = "#000000";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.1, size * 0.05, size * 0.03, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
+                // ==================== くだもの ====================
                 case "Apple":
-                    // りんご (ツヤツヤの立体赤ボディ、緑の葉、茶のヘタ)
-                    // 1. 赤いふっくらツインの実
-                    ctx.fillStyle = "#ea580c"; // 影側の朱色
+                    ctx.fillStyle = "#ea580c";
                     ctx.beginPath();
                     ctx.arc(-size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
                     ctx.arc(size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
                     
-                    ctx.fillStyle = "#dc2626"; // 明るい赤
+                    ctx.fillStyle = "#dc2626";
                     ctx.beginPath();
                     ctx.arc(-size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
                     ctx.arc(size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. 茶色のヘタ（茎）
                     ctx.strokeStyle = "#78350f";
                     ctx.lineWidth = 5;
                     ctx.beginPath();
@@ -653,14 +599,11 @@
                     ctx.quadraticCurveTo(size * 0.15, -size * 0.25, size * 0.1, -size * 0.38);
                     ctx.stroke();
 
-                    // 3. みずみずしい緑のリーフ（葉っぱ）
                     ctx.fillStyle = "#22c55e";
                     ctx.beginPath();
                     ctx.ellipse(size * 0.15, -size * 0.28, size * 0.15, size * 0.06, -Math.PI / 4, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 4. ハイライト (ツヤ)
                     ctx.fillStyle = "rgba(255,255,255,0.45)";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.12, -size * 0.12, size * 0.06, size * 0.11, Math.PI / 6, 0, Math.PI * 2);
@@ -668,37 +611,71 @@
                     break;
 
                 case "Banana":
-                    // バナナ (緩やかなカーブボディ、先端の茶色のヘタ)
                     ctx.save();
                     ctx.rotate(-Math.PI / 10);
-                    // 1. 黄色い三日月カーブ
-                    ctx.fillStyle = "#eab308"; // バナナベースイエロー
+                    ctx.fillStyle = "#eab308";
                     ctx.beginPath();
                     ctx.arc(0, -size * 0.2, size * 0.44, 0.2 * Math.PI, 0.8 * Math.PI, false);
                     ctx.quadraticCurveTo(0, size * 0.12, size * 0.35, size * 0.06);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
                     
-                    // 2. 端のグリーン/茶色い先端
-                    ctx.fillStyle = "#4d7c0f"; // 緑
+                    ctx.fillStyle = "#4d7c0f";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.32, size * 0.1, size * 0.06, size * 0.05, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    ctx.fillStyle = "#78350f"; // 茶
+                    ctx.fillStyle = "#78350f";
                     ctx.beginPath();
                     ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.04, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
                     ctx.restore();
+                    break;
+
+                // ==================== どうぶつ ====================
+                case "Panda":
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
+                    ctx.arc(size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+
+                    ctx.fillStyle = "#1e293b";
+                    ctx.save();
+                    ctx.translate(-size * 0.14, -size * 0.02);
+                    ctx.rotate(Math.PI / 6);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.translate(size * 0.14, -size * 0.02);
+                    ctx.rotate(-Math.PI / 6);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.restore();
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
+                    ctx.arc(size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = "#000000";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.1, size * 0.05, size * 0.03, 0, 0, Math.PI * 2);
+                    ctx.fill();
                     break;
 
                 case "Lion":
                 case "Simba":
-                    // ライオン・シンバ風 (フサフサの赤茶色のたてがみ、黄色の顔、ピンクの鼻)
-                    // 1. トゲトゲのたてがみ (外周円を描くように大きなギザギザ)
-                    ctx.fillStyle = "#b45309"; // オレンジブラウンのたてがみ
+                    ctx.fillStyle = "#b45309";
                     ctx.beginPath();
                     for (let i = 0; i < 16; i++) {
                         const angle = (i * Math.PI * 2) / 16;
@@ -709,31 +686,24 @@
                         else ctx.lineTo(rx, ry);
                     }
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. メインのライオンイエロー顔
-                    ctx.fillStyle = "#f59e0b"; // ライオン黄色
+                    ctx.fillStyle = "#f59e0b";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. かわいい丸耳
                     ctx.beginPath();
                     ctx.arc(-size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
                     ctx.arc(size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 4. キリッとしたキャットアイ
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
                     ctx.ellipse(size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 5. お鼻（ピンク）
                     ctx.fillStyle = "#f43f5e";
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.05, size * 0.04);
@@ -744,25 +714,21 @@
                     break;
 
                 case "Cat":
-                    // 猫風 (オレンジ色の頭、ピンと立った三角耳、ひげ)
-                    ctx.fillStyle = "#f97316"; // オレンジキャット
-                    // 1. 三角の猫耳（左右）
+                    ctx.fillStyle = "#f97316";
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.34, -size * 0.08);
                     ctx.lineTo(-size * 0.32, -size * 0.42);
                     ctx.lineTo(-size * 0.1, -size * 0.15);
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    ctx.fillStyle = "#fca5a5"; // ピンクの耳の中
+                    ctx.fillStyle = "#fca5a5";
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.3, -size * 0.12);
                     ctx.lineTo(-size * 0.29, -size * 0.35);
                     ctx.lineTo(-size * 0.14, -size * 0.18);
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
                     ctx.fillStyle = "#f97316";
                     ctx.beginPath();
@@ -770,8 +736,7 @@
                     ctx.lineTo(size * 0.32, -size * 0.42);
                     ctx.lineTo(size * 0.1, -size * 0.15);
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
                     ctx.fillStyle = "#fca5a5";
                     ctx.beginPath();
@@ -779,30 +744,25 @@
                     ctx.lineTo(size * 0.29, -size * 0.35);
                     ctx.lineTo(size * 0.14, -size * 0.18);
                     ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. まあるい猫輪郭
                     ctx.fillStyle = "#f97316";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. 目、ひげを描画
                     ctx.strokeStyle = "#451a03";
                     ctx.lineWidth = 3;
-                    // ひげ左
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.2, size * 0.06); ctx.lineTo(-size * 0.42, size * 0.04);
                     ctx.moveTo(-size * 0.2, size * 0.1);  ctx.lineTo(-size * 0.45, size * 0.11);
                     ctx.stroke();
-                    // ひげ右
+
                     ctx.beginPath();
                     ctx.moveTo(size * 0.2, size * 0.06);  ctx.lineTo(size * 0.42, size * 0.04);
                     ctx.moveTo(size * 0.2, size * 0.1);   ctx.lineTo(size * 0.45, size * 0.11);
                     ctx.stroke();
-                    // 目
+
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.11, -size * 0.05, size * 0.04, size * 0.04, 0, 0, Math.PI * 2);
@@ -811,57 +771,290 @@
                     break;
 
                 case "Dog":
-                    // いぬ風 (ブラウンのタレ耳、優しい表情、ペロリと出した可愛い舌)
-                    // 1. まあるいドッグフェイス
-                    ctx.fillStyle = "#d97706"; // ブラウン
+                    ctx.fillStyle = "#d97706";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 2. タレ耳（左右に縦に長い楕円）
-                    ctx.fillStyle = "#78350f"; // 焦げ茶耳
+                    ctx.fillStyle = "#78350f";
                     ctx.beginPath();
                     ctx.ellipse(-size * 0.34, 0, size * 0.12, size * 0.26, Math.PI / 10, 0, Math.PI * 2);
                     ctx.ellipse(size * 0.34, 0, size * 0.12, size * 0.26, -Math.PI / 10, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 3. 黒い大きめの目
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
                     ctx.arc(size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 4. ペロリと出したピンクの舌
                     ctx.fillStyle = "#f43f5e";
                     ctx.beginPath();
                     ctx.ellipse(0, size * 0.14, size * 0.06, size * 0.09, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 5. お鼻まわりの白いマズル部分
                     ctx.fillStyle = "#fffbeb";
                     ctx.beginPath();
                     ctx.ellipse(0, size * 0.08, size * 0.12, size * 0.07, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
 
-                    // 黒鼻
                     ctx.fillStyle = "#000000";
                     ctx.beginPath();
                     ctx.ellipse(0, size * 0.05, size * 0.06, size * 0.04, 0, 0, Math.PI * 2);
                     ctx.fill();
                     break;
 
+                // ==================== 【v1.07新設】はたらくくるま ====================
+                case "Ambulance":
+                    // 救急車 🚑 (白いボディ + 赤いライン + 赤十字マーク + 赤パトランプ)
+                    // タイヤ
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 車体 (白い大きなボックス)
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.38, -size * 0.24, size * 0.76, size * 0.34);
+                    ctx.fill(); ctx.stroke();
+
+                    // 窓 (フロントガラス、青い水色)
+                    ctx.fillStyle = "#38bdf8";
+                    ctx.beginPath();
+                    ctx.rect(size * 0.16, -size * 0.2, size * 0.16, size * 0.12);
+                    ctx.fill(); ctx.stroke();
+
+                    // 赤いライン帯
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.38, -size * 0.06, size * 0.76, size * 0.06);
+                    ctx.fill();
+
+                    // 赤十字マーク
+                    ctx.fillStyle = "#ef4444";
+                    // 縦ライン
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.15, -size * 0.18, size * 0.05, size * 0.15);
+                    ctx.fill();
+                    // 横ライン
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.2, -size * 0.13, size * 0.15, size * 0.05);
+                    ctx.fill();
+
+                    // 赤いパトランプ
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.2, -size * 0.28, size * 0.06, Math.PI, 0);
+                    ctx.arc(size * 0.1, -size * 0.28, size * 0.06, Math.PI, 0);
+                    ctx.fill(); ctx.stroke();
+                    break;
+
+                case "Firetruck":
+                    // 消防車 🚒 (赤い車体 + グレーのはしご + 黄色ノズル + 青パトランプ)
+                    // タイヤ
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.arc(size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 赤いボディ
+                    ctx.fillStyle = "#dc2626"; // 真っ赤
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.42, -size * 0.24, size * 0.84, size * 0.34);
+                    ctx.fill(); ctx.stroke();
+
+                    // フロントガラス (青)
+                    ctx.fillStyle = "#38bdf8";
+                    ctx.beginPath();
+                    ctx.rect(size * 0.2, -size * 0.18, size * 0.18, size * 0.14);
+                    ctx.fill(); ctx.stroke();
+
+                    // 天井のはしご (グレー)
+                    ctx.strokeStyle = "#94a3b8";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.35, -size * 0.32);
+                    ctx.lineTo(size * 0.05, -size * 0.32);
+                    ctx.moveTo(-size * 0.35, -size * 0.27);
+                    ctx.lineTo(size * 0.05, -size * 0.27);
+                    // 格子
+                    for (let x = -size * 0.3; x <= size * 0.01; x += size * 0.1) {
+                        ctx.moveTo(x, -size * 0.33);
+                        ctx.lineTo(x, -size * 0.26);
+                    }
+                    ctx.stroke();
+
+                    // 黄色の放水銃
+                    ctx.fillStyle = "#fbbf24";
+                    ctx.beginPath();
+                    ctx.rect(size * 0.1, -size * 0.32, size * 0.12, size * 0.06);
+                    ctx.fill(); ctx.stroke();
+
+                    // パトランプ（赤）
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath();
+                    ctx.arc(size * 0.25, -size * 0.28, size * 0.06, Math.PI, 0);
+                    ctx.fill(); ctx.stroke();
+                    break;
+
+                case "Policecar":
+                    // パトカー 🚓 (白黒ツートン + 赤いパトランプ)
+                    // タイヤ
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 下部黒ボディ
+                    ctx.fillStyle = "#090d16";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.4, -size * 0.08, size * 0.8, size * 0.18);
+                    ctx.fill(); ctx.stroke();
+
+                    // 上部白キャビン
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.3, -size * 0.24, size * 0.58, size * 0.16);
+                    ctx.fill(); ctx.stroke();
+
+                    // 窓ガラス
+                    ctx.fillStyle = "#475569";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.2, -size * 0.21, size * 0.18, size * 0.11);
+                    ctx.rect(size * 0.02, -size * 0.21, size * 0.18, size * 0.11);
+                    ctx.fill(); ctx.stroke();
+
+                    // 赤いパトランプ (サイレンベース + 赤い半円)
+                    ctx.fillStyle = "#e2e8f0"; // 台座
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.08, -size * 0.28, size * 0.16, size * 0.04);
+                    ctx.fill(); ctx.stroke();
+                    
+                    ctx.fillStyle = "#ef4444"; // サイレン
+                    ctx.beginPath();
+                    ctx.arc(0, -size * 0.28, size * 0.07, Math.PI, 0);
+                    ctx.fill(); ctx.stroke();
+                    break;
+
+                case "Excavator":
+                    // ショベルカー 🚜 (黄色の車体 + 黒いキャタピラ + ショベルアーム)
+                    // クローラー（黒キャタピラ）
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.ellipse(0, size * 0.12, size * 0.36, size * 0.08, 0, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    // キャタピラの中のホイール
+                    ctx.fillStyle = "#94a3b8";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(0, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 黄色いボディ
+                    ctx.fillStyle = "#eab308"; // 黄
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.28, -size * 0.18, size * 0.54, size * 0.22);
+                    ctx.fill(); ctx.stroke();
+
+                    // 運転室 (黒い窓)
+                    ctx.fillStyle = "#0f172a";
+                    ctx.beginPath();
+                    ctx.rect(-size * 0.2, -size * 0.14, size * 0.16, size * 0.13);
+                    ctx.fill(); ctx.stroke();
+
+                    // ショベルアーム (黄色、2段関節)
+                    ctx.strokeStyle = "#eab308";
+                    ctx.lineWidth = size * 0.08;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.15, -size * 0.05); // 付根
+                    ctx.lineTo(size * 0.35, -size * 0.32); // 第1関節
+                    ctx.lineTo(size * 0.5, -size * 0.12);  // 先端
+                    ctx.stroke();
+
+                    // ショベルバケット (焦げ茶)
+                    ctx.fillStyle = "#334155";
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(size * 0.5, -size * 0.08, size * 0.12, -Math.PI / 4, Math.PI * 0.8);
+                    ctx.closePath();
+                    ctx.fill(); ctx.stroke();
+                    break;
+
+                case "Garbagetruck":
+                    // ゴミ収集車 🚚 (緑キャビン + 青い積載ゴミ箱 + タイヤ)
+                    // タイヤ
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 前方キャビン (黄緑)
+                    ctx.fillStyle = "#22c55e"; 
+                    ctx.beginPath();
+                    ctx.rect(size * 0.12, -size * 0.18, size * 0.28, size * 0.28);
+                    ctx.fill(); ctx.stroke();
+
+                    // キャビン窓 (黒)
+                    ctx.fillStyle = "#1e293b";
+                    ctx.beginPath();
+                    ctx.rect(size * 0.22, -size * 0.14, size * 0.14, size * 0.11);
+                    ctx.fill(); ctx.stroke();
+
+                    // 後方ゴミ箱部分 (青い大きな斜めボックス)
+                    ctx.fillStyle = "#2563eb"; // 青
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.42, -size * 0.24);
+                    ctx.lineTo(size * 0.12, -size * 0.24);
+                    ctx.lineTo(size * 0.12, size * 0.1);
+                    ctx.lineTo(-size * 0.3, size * 0.1);
+                    ctx.lineTo(-size * 0.42, -size * 0.05); // 後部傾斜
+                    ctx.closePath();
+                    ctx.fill(); ctx.stroke();
+
+                    // 白い回収枠デザイン
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(-size * 0.1, -size * 0.15);
+                    ctx.lineTo(-size * 0.25, -size * 0.15);
+                    ctx.lineTo(-size * 0.25, 0);
+                    ctx.stroke();
+                    break;
+
                 default:
-                    // 指定がない場合のフォールバック（これまでのマスコットマンなど）
+                    // フォールバック
                     ctx.fillStyle = "#6366f1";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
+                    ctx.fill(); ctx.stroke();
                     break;
             }
             ctx.restore();
@@ -970,8 +1163,7 @@
                 ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
                 ctx.fill();
 
-                // 【v1.06 新設: 輪郭線の追加】
-                // 暗い背景や同系色と重なってもミッキー、パンダなどの境界線をクッキリ見せる
+                // 【v1.06 輪郭線の追加】
                 // 白いネオングロー(光彩)エフェクトを設定して輪郭を際立たせる
                 ctx.shadowColor = "#ffffff";
                 ctx.shadowBlur = 12;
@@ -1001,7 +1193,7 @@
                 this.velocity = 0; // 衝突したときの物理的なバウンド速度
                 this.state = 'moving'; // 'moving', 'bouncing', 'passed'
                 this.shakeOffset = 0; // 衝突時のブルブル用
-                this.color = currentCourse === 'animals' ? '#8b5cf6' : (currentCourse === 'fruits' ? '#ec4899' : '#f59e0b'); // コースごとのテーマカラー
+                this.color = currentCourse === 'animals' ? '#8b5cf6' : (currentCourse === 'fruits' ? '#ec4899' : (currentCourse === 'characters' ? '#f59e0b' : '#0d9488')); // コースごとのテーマカラー
             }
 
             update() {
