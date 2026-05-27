@@ -61,10 +61,10 @@
                 </div>
                 <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.03 にカウントアップ -->
+                <!-- バージョン表記を v1.04 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.03</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.04</span>
                 </div>
                 
                 <p class="text-xs text-slate-400 mt-4 px-4 leading-relaxed">
@@ -147,11 +147,18 @@
                     </div>
                 </div>
                 
-                <!-- Reference Sound Trigger (TTS Assist) -->
-                <button onclick="speakTarget()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold p-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 text-xs">
-                    <i data-lucide="volume-2" class="w-4 h-4"></i>
-                    <span>お手本</span>
-                </button>
+                <div class="flex flex-col gap-2 min-w-[80px]">
+                    <!-- Reference Sound Trigger (TTS Assist) -->
+                    <button onclick="speakTarget()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs">
+                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                        <span>お手本</span>
+                    </button>
+                    <!-- 判定ボタンを追加 (v1.04) -->
+                    <button onclick="triggerQuickCheck()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-450 hover:to-rose-450 text-white font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs">
+                        <i data-lucide="zap" class="w-4 h-4 fill-white"></i>
+                        <span>判定！</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Instant Transform Status Indicator -->
@@ -441,6 +448,17 @@
             synth.speak(utterance);
         }
 
+        // --- 判定をいそぐ機能 (v1.04 判定ボタン) ---
+        function triggerQuickCheck() {
+            if (!isPlaying || !activeGate) return;
+            
+            // まだゲートが移動中で手前に到達していない場合、一気に判定ライン(0.82)に引き寄せる
+            if (activeGate.state === 'moving' && activeGate.z < 0.82) {
+                activeGate.z = 0.82; // 瞬時に判定位置にワープさせて判定をトリガー
+                screenShake = 4; // 少しカメラシェイクを入れて気持ち良いリアクションに
+            }
+        }
+
         // --- Canvas 描画エンジン（擬似3D道路） ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -521,7 +539,7 @@
 
             draw() {
                 const pos = project(this.xOffset, this.z);
-                // 面積比4倍にするため、ベースの描画サイズを 64 から 128 に拡大
+                // 面積比4倍にするため、ベースの描画サイズを 128 に拡大
                 const size = 128 * pos.scale;
 
                 ctx.save();
