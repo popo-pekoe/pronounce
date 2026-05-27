@@ -56,11 +56,16 @@
         <div id="start-screen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col justify-between p-6 items-center">
             <div class="w-full text-center mt-8">
                 <!-- Title Logo -->
-                <div class="inline-flex w-16 h-16 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-2xl items-center justify-center text-white shadow-lg transform -rotate-6 mb-4">
+                <div class="inline-flex w-16 h-16 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-2xl items-center justify-center text-white shadow-lg transform -rotate-6 mb-3">
                     <i data-lucide="speech" class="w-10 h-10"></i>
                 </div>
                 <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
-                <p class="text-xs text-purple-300 font-bold tracking-widest uppercase mt-1">Pronunciation Runner 3D</p>
+                
+                <!-- バージョン表記を追加 (v1.00) -->
+                <div class="flex justify-center items-center gap-2 mt-1">
+                    <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.00</span>
+                </div>
                 
                 <p class="text-sm text-slate-400 mt-6 px-4 leading-relaxed">
                     奥から流れてくるゲートの単語を発音して、正しい姿に変身しよう！一致しないとぶつかっちゃうぞ！
@@ -73,7 +78,7 @@
                 
                 <button onclick="startGame('animals')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-4 px-6 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-2xl">🦁</span>
+                        <span class="text-4xl">🦁</span> <!-- アイコンサイズを 4xl に拡大 -->
                         <span class="text-left text-base">どうぶつコース <span class="block text-xs font-normal text-purple-200">Animals (Panda, Cat, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-5 h-5 fill-white"></i>
@@ -81,7 +86,7 @@
 
                 <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-4 px-6 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-2xl">🍌</span>
+                        <span class="text-4xl">🍌</span> <!-- アイコンサイズを 4xl に拡大 -->
                         <span class="text-left text-base">くだものコース <span class="block text-xs font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-5 h-5 fill-white"></i>
@@ -122,7 +127,8 @@
             <!-- Current Target Cue & Assistant -->
             <div class="flex items-center justify-between bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-2xl" id="next-gate-emoji">
+                    <!-- 下部HUDのターゲット絵文字サイズを面積比4倍（w-16 h-16, text-4xl）に拡大 -->
+                    <div class="w-16 h-16 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-4xl" id="next-gate-emoji">
                         ❓
                     </div>
                     <div>
@@ -466,7 +472,8 @@
 
             draw() {
                 const pos = project(this.xOffset, this.z);
-                const size = 64 * pos.scale;
+                // 面積比4倍にするため、ベースの描画サイズを 64 から 128 に拡大
+                const size = 128 * pos.scale;
 
                 ctx.save();
                 ctx.translate(pos.x, pos.y);
@@ -634,8 +641,8 @@
 
                 // 4. ゲート内のドアの中にヒントとして「変身すべき動物の絵」を点滅
                 if (this.state !== 'passed') {
-                    // 遠くからでも何のアイテムかわかるよう、最低22pxの絵文字サイズを確保
-                    const emojiSize = 22 + 30 * pos.scale; 
+                    // 面積比4倍（サイズ2倍）にするため、ベースサイズを 44 + 60 に拡大 (元は 22 + 30)
+                    const emojiSize = 44 + 60 * pos.scale; 
                     ctx.font = `${emojiSize}px sans-serif`;
                     // ゆらゆら点滅アニメーション
                     ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() / 150);
@@ -672,7 +679,8 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
                 ctx.globalAlpha = this.alpha;
-                ctx.font = `${32 * this.scale}px sans-serif`;
+                // 散らばるパーティクルのサイズも面積比4倍（サイズ2倍）にするため、32 から 64 に変更
+                ctx.font = `${64 * this.scale}px sans-serif`;
                 ctx.fillText(this.emoji, 0, 0);
                 ctx.restore();
             }
