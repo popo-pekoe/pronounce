@@ -61,10 +61,10 @@
                 </div>
                 <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.02 にカウントアップ -->
+                <!-- バージョン表記を v1.03 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.02</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.03</span>
                 </div>
                 
                 <p class="text-xs text-slate-400 mt-4 px-4 leading-relaxed">
@@ -94,7 +94,7 @@
                     <i data-lucide="play" class="w-5 h-5 fill-white"></i>
                 </button>
 
-                <!-- 3. キャラクターコース (NEW!) -->
+                <!-- 3. キャラクターコース -->
                 <button onclick="startGame('characters')" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-350 hover:to-orange-450 text-slate-950 font-black py-3 px-5 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-4xl">🐭</span>
@@ -220,7 +220,7 @@
                 { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
                 { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
-            // 新設キャラクターコース (v1.02)
+            // キャラクターコース
             characters: [
                 { word: "Mickey", emoji: "🐭", prompt: "ミッキー" },
                 { word: "Donald", emoji: "🦆", prompt: "ドナルド" },
@@ -315,8 +315,9 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.continuous = false; // 一語ずつ確実にとるためにfalse
-            recognition.interimResults = false;
+            recognition.continuous = false; 
+            // 【判定速度改善】中間結果（話し途中）をリアルタイムで受け取る設定に変更
+            recognition.interimResults = true; 
             recognition.lang = 'en-US'; // 英語判定
 
             recognition.onstart = () => {
@@ -327,8 +328,22 @@
             };
 
             recognition.onresult = (event) => {
-                const speechResult = event.results[0][0].transcript;
-                handleSpeechInput(speechResult);
+                // 【判定速度改善】中間判定テキストをリアルタイムに取り出し結合
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                const speechResult = finalTranscript || interimTranscript;
+                if (speechResult.trim() !== '') {
+                    handleSpeechInput(speechResult);
+                }
             };
 
             recognition.onerror = (event) => {
@@ -361,22 +376,37 @@
 
         // --- 音声認識結果の処理（変身トリガー） ---
         function handleSpeechInput(rawText) {
-            const clean = (str) => str.toLowerCase().replace(/[^a-z]/g, "").trim();
+            const clean = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
             const speechText = clean(rawText);
             
             // 認識結果を画面中央にポップアップ表示
             showSpeechBubble(rawText);
 
-            // 現在のコースのアイテム群からマッチするものを検索
+            // 認識されたテキストをスペースで単語（ワード）ごとに切り分ける
+            const spokenWords = speechText.split(/\s+/);
+
             const list = courses[currentCourse];
-            const matched = list.find(item => {
-                const itemWord = clean(item.word);
-                // 完璧な完全一致、または認識テキストが単語を含んでいる、あるいは単語が認識テキストを含んでいる場合に判定をパス
-                return speechText === itemWord || speechText.includes(itemWord) || itemWord.includes(speechText);
-            });
+            let matched = null;
+
+            // 優先判定①：現在ターゲットに指定されている正解ワードが、言ったこと（全体、または分割された単語）の中に含まれているか
+            const activeTargetItem = list[selectedItemIndex];
+            const activeTargetClean = clean(activeTargetItem.word);
+            
+            const isTargetSpoken = spokenWords.some(w => w === activeTargetClean || activeTargetClean.includes(w)) || speechText.includes(activeTargetClean);
+            
+            if (isTargetSpoken) {
+                // ターゲット単語が含まれていたら最優先でそちらを適用！
+                matched = activeTargetItem;
+            } else {
+                // 優先判定②：言ったことの中に、コース内のいずれかのワードが片方でも含まれているか
+                matched = list.find(item => {
+                    const itemWord = clean(item.word);
+                    return spokenWords.some(w => w === itemWord || itemWord.includes(w)) || speechText.includes(itemWord);
+                });
+            }
 
             if (matched) {
-                // 変身成功！
+                // 適合した正しい姿に変身！
                 player.transformTo(matched.word, matched.emoji);
             }
         }
@@ -582,7 +612,7 @@
                     
                     // 【引き戻し加速度の調整 - v1.02 (さらに倍、当初比6倍に引き伸ばし)】
                     // 前回の引き戻し力 (0.0008) からさらに半分以下 (0.0003) に落とすことで、
-                    // ゲートが奥に浮遊したあとの戻り時間がさらに倍になり、じっくりと言い直すことが可能です。
+                    // ゲートが奥に浮遊したあ後の戻り時間がさらに倍になり、じっくりと言い直すことが可能です。
                     this.velocity += 0.0003; 
                     
                     // 復帰速度のしきい値も、新しい減速率に合わせて調整します
@@ -737,14 +767,6 @@
             document.getElementById('clash-warning').classList.add('hidden');
         }
 
-        // 通過時のご褒美エフェクト（星をたくさん散らす）
-        function createSparkles(emoji) {
-            const pos = project(0, 0.85);
-            for (let i = 0; i < 15; i++) {
-                particles.push(new Particle(pos.x, pos.y - 50, emoji));
-            }
-        }
-
         // --- HUD表示更新 ---
         function updateHUD() {
             const sc = document.getElementById('score-val');
@@ -857,6 +879,14 @@
 
             ctx.restore();
             requestAnimationFrame(gameLoop);
+        }
+
+        // 通過時のご褒美エフェクト（星をたくさん散らす）
+        function createSparkles(emoji) {
+            const pos = project(0, 0.85);
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(pos.x, pos.y - 50, emoji));
+            }
         }
 
         // --- ゲーム開始のトリガー ---
