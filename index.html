@@ -61,10 +61,10 @@
                 </div>
                 <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を追加 (v1.00) -->
+                <!-- バージョン表記を v1.01 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.00</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.01</span>
                 </div>
                 
                 <p class="text-sm text-slate-400 mt-6 px-4 leading-relaxed">
@@ -78,7 +78,7 @@
                 
                 <button onclick="startGame('animals')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-4 px-6 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-4xl">🦁</span> <!-- アイコンサイズを 4xl に拡大 -->
+                        <span class="text-4xl">🦁</span>
                         <span class="text-left text-base">どうぶつコース <span class="block text-xs font-normal text-purple-200">Animals (Panda, Cat, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-5 h-5 fill-white"></i>
@@ -86,7 +86,7 @@
 
                 <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-4 px-6 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-4xl">🍌</span> <!-- アイコンサイズを 4xl に拡大 -->
+                        <span class="text-4xl">🍌</span>
                         <span class="text-left text-base">くだものコース <span class="block text-xs font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-5 h-5 fill-white"></i>
@@ -127,7 +127,6 @@
             <!-- Current Target Cue & Assistant -->
             <div class="flex items-center justify-between bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
                 <div class="flex items-center gap-3">
-                    <!-- 下部HUDのターゲット絵文字サイズを面積比4倍（w-16 h-16, text-4xl）に拡大 -->
                     <div class="w-16 h-16 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-4xl" id="next-gate-emoji">
                         ❓
                     </div>
@@ -541,7 +540,10 @@
                             combo = 0; // コンボはリセット
                             updateHUD();
                             screenShake = 12; // 画面を揺らす
-                            this.velocity = -0.011; // 逆方向に弾き飛ばされる速度 (元の -0.055 から 20% に減速)
+                            
+                            // 【跳ね返り距離＆時間の調整】
+                            // 弾き飛ばされる初速を -0.011 から -0.0147 に引き上げ、より遠くへ跳ね飛ばします
+                            this.velocity = -0.0147; 
                             
                             // プレイヤーを一瞬ペシャンコに潰す
                             player.scaleY = 0.4;
@@ -556,10 +558,13 @@
                 } else if (this.state === 'bouncing') {
                     // 弾き飛ばされる物理挙動
                     this.z += this.velocity;
-                    // バネと摩擦のような効果で、再び手前に向かって引き寄せられる
-                    this.velocity += 0.0018; // 手前方向の加速度 (元の 0.009 から 20% に減速)
                     
-                    if (this.velocity > 0.003) { // 復帰しきい値 (元の 0.015 から 20% に減速)
+                    // 【引き戻し加速度の調整】
+                    // 次の判定までの時間を3倍にするため、引き戻す加速度を 0.0018 から 0.0008 に落とし、ゆったり往復させます
+                    this.velocity += 0.0008; 
+                    
+                    // 復帰速度のしきい値も、新しい加速度に合わせて 0.001 に緩めます (元の 0.003 から調整)
+                    if (this.velocity > 0.001) { 
                         this.state = 'moving'; // 戻ってきて再度衝突へ向かう
                     }
                 } else if (this.state === 'passed') {
@@ -639,7 +644,7 @@
                 ctx.fillText(this.target, 0, -height + signH * 0.55);
                 ctx.shadowBlur = 0;
 
-                // 4. ゲート内のドアの中にヒントとして「変身すべき動物の絵」を点滅
+                // 4. ゲート内のドアの中にヒントとして「変身すべき動物의 絵」を点滅
                 if (this.state !== 'passed') {
                     // 面積比4倍（サイズ2倍）にするため、ベースサイズを 44 + 60 に拡大 (元は 22 + 30)
                     const emojiSize = 44 + 60 * pos.scale; 
