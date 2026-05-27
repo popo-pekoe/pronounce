@@ -505,7 +505,7 @@
                 this.target = word;
                 this.emoji = emoji;
                 this.z = 0.0; // 奥から出現
-                this.speed = 0.007; // 流れるスピード
+                this.speed = 0.0014; // 流れるスピード (元 0.007 から 約20% に減速)
                 this.velocity = 0; // 衝突したときの物理的なバウンド速度
                 this.state = 'moving'; // 'moving', 'bouncing', 'passed'
                 this.shakeOffset = 0; // 衝突時のブルブル用
@@ -534,7 +534,7 @@
                             combo = 0; // コンボはリセット
                             updateHUD();
                             screenShake = 12; // 画面を揺らす
-                            this.velocity = -0.055; // 逆方向に弾き飛ばされる速度
+                            this.velocity = -0.011; // 逆方向に弾き飛ばされる速度 (元の -0.055 から 20% に減速)
                             
                             // プレイヤーを一瞬ペシャンコに潰す
                             player.scaleY = 0.4;
@@ -550,14 +550,14 @@
                     // 弾き飛ばされる物理挙動
                     this.z += this.velocity;
                     // バネと摩擦のような効果で、再び手前に向かって引き寄せられる
-                    this.velocity += 0.009; // 手前方向の加速度
+                    this.velocity += 0.0018; // 手前方向の加速度 (元の 0.009 から 20% に減速)
                     
-                    if (this.velocity > 0.015) {
+                    if (this.velocity > 0.003) { // 復帰しきい値 (元の 0.015 から 20% に減速)
                         this.state = 'moving'; // 戻ってきて再度衝突へ向かう
                     }
                 } else if (this.state === 'passed') {
-                    // すり抜けた後は、カメラの横をすごい勢いで飛び去る
-                    this.z += 0.07;
+                    // すりぬけた後は、カメラの横を飛び去る
+                    this.z += 0.014; // 飛び去るスピード (元の 0.07 から 20% に減速)
                     if (this.z > 1.4) {
                         // 次のゲートを生成
                         spawnNext();
@@ -612,23 +612,31 @@
                 ctx.fillStyle = "#d97706"; // 木製のブラウン
                 ctx.strokeStyle = "#78350f";
                 ctx.lineWidth = 4 * pos.scale;
-                const signW = width * 0.8;
-                const signH = height * 0.28;
+                
+                // 遠くでも看板が小さくなりすぎないよう、最小サイズと最小高さを設定
+                const fontSize = 14 + 18 * pos.scale; // 最低14px、最高32px
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                ctx.textAlign = 'center';
+                
+                const textWidth = ctx.measureText(this.target).width;
+                const signW = Math.max(width * 0.8, textWidth + 16);
+                const signH = Math.max(height * 0.28, fontSize + 8);
+                
                 ctx.fillRect(-signW / 2, -height - signH * 0.1, signW, signH);
                 ctx.strokeRect(-signW / 2, -height - signH * 0.1, signW, signH);
 
-                // 3. 看板の上に英語単語テキスト
-                ctx.font = `bold ${32 * pos.scale}px sans-serif`;
-                ctx.textAlign = 'center';
+                // 3. 看板の上に英語単語テキストを描画
                 ctx.fillStyle = '#ffffff';
                 ctx.shadowColor = '#000000';
                 ctx.shadowBlur = 4;
-                ctx.fillText(this.target, 0, -height + signH * 0.6);
+                ctx.fillText(this.target, 0, -height + signH * 0.55);
                 ctx.shadowBlur = 0;
 
                 // 4. ゲート内のドアの中にヒントとして「変身すべき動物の絵」を点滅
                 if (this.state !== 'passed') {
-                    ctx.font = `${52 * pos.scale}px sans-serif`;
+                    // 遠くからでも何のアイテムかわかるよう、最低22pxの絵文字サイズを確保
+                    const emojiSize = 22 + 30 * pos.scale; 
+                    ctx.font = `${emojiSize}px sans-serif`;
                     // ゆらゆら点滅アニメーション
                     ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() / 150);
                     ctx.fillText(this.emoji, 0, -holeH * 0.3);
@@ -702,15 +710,6 @@
             }
         }
 
-        // 紙吹雪を軽く舞わせる
-        function triggerMiniConfetti() {
-            confetti({
-                particleCount: 50,
-                spread: 40,
-                origin: { y: 0.5 }
-            });
-        }
-
         // --- HUD表示更新 ---
         function updateHUD() {
             const sc = document.getElementById('score-val');
@@ -774,7 +773,7 @@
             ctx.fill();
 
             // 4. 動いている感を示す側面のチェッカーライン（赤白のガイドライン）の描画
-            roadOffset += 0.015; // スピード係数
+            roadOffset += 0.003; // スピード係数 (元の 0.015 から 20% に減速)
             if (roadOffset >= 1.0) roadOffset = 0;
 
             const segments = 12;
