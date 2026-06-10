@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.13 にカウントアップ -->
+                <!-- バージョン表記を v1.14 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.13</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.14</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -244,8 +244,7 @@
     </div>
 
     <script>
-        // --- STREAMING_CHUNK: Initializing course vocabulary databases... ---
-        // 各ターゲットワードに、漢字変換や頭文字からの連想語でパスできるように「aliases」マッピングを追加
+        // --- コース構成データ (v1.14: 個別エイリアス対応を完全排除したクリーンな設計に復元) ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -278,22 +277,20 @@
                 { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
                 { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
             ],
-            // 【v1.12進化】ひらがなコース
-            // あらかじめ漢字変換されたり、その文字から始まる連想単語をaliasesに組み込み、お助け辞書を廃止
+            // シンプルな一文字設計へ復元
             hiragana: [
-                { word: "あ", emoji: "あ", prompt: "あ", aliases: ["あ", "あか", "赤", "あお", "青", "あめ", "雨", "あさ", "朝", "あたま", "頭"] },
-                { word: "い", emoji: "い", prompt: "い", aliases: ["い", "いす", "椅子", "イス", "いぬ", "犬", "イヌ", "いちご", "苺", "イチゴ", "いと", "糸", "いき", "息", "いけ", "池"] },
-                { word: "う", emoji: "う", prompt: "う", aliases: ["う", "うみ", "海", "うた", "歌", "うし", "牛", "うま", "馬", "うち", "家", "うえ", "上", "うそ", "嘘"] },
-                { word: "え", emoji: "え", prompt: "え", aliases: ["え", "えき", "駅", "えのぐ", "絵の具", "えほん", "絵本", "えんぴつ", "鉛筆", "えがお", "笑顔", "えだ", "枝"] },
-                { word: "お", emoji: "お", prompt: "お", aliases: ["お", "おと", "音", "おにぎり", "おむすび", "おもちゃ", "玩具", "おちゃ", "お茶", "おかし", "お菓子"] }
+                { word: "あ", emoji: "あ", prompt: "あ" },
+                { word: "い", emoji: "い", prompt: "い" },
+                { word: "う", emoji: "う", prompt: "う" },
+                { word: "え", emoji: "え", prompt: "え" },
+                { word: "お", emoji: "お", prompt: "お" }
             ],
-            // 【v1.12進化】カタカナコース
             katakana: [
-                { word: "ア", emoji: "ア", prompt: "ア", aliases: ["ア", "アメリカ", "アイス", "アメ", "飴", "アオ", "青"] },
-                { word: "イ", emoji: "イ", prompt: "イ", aliases: ["イ", "イス", "椅子", "イヌ", "犬", "イチゴ", "苺", "イト", "糸"] },
-                { word: "ウ", emoji: "ウ", prompt: "ウ", aliases: ["ウ", "ウミ", "海", "ウタ", "歌", "ウシ", "牛", "ウマ", "馬"] },
-                { word: "エ", emoji: "エ", prompt: "エ", aliases: ["エ", "エキ", "駅", "エホン", "絵本", "エンピツ", "鉛筆"] },
-                { word: "オ", emoji: "オ", prompt: "オ", aliases: ["オ", "オト", "音", "オチャ", "お茶", "オモチャ", "玩具"] }
+                { word: "ア", emoji: "ア", prompt: "ア" },
+                { word: "イ", emoji: "イ", prompt: "イ" },
+                { word: "ウ", emoji: "ウ", prompt: "ウ" },
+                { word: "エ", emoji: "エ", prompt: "エ" },
+                { word: "オ", emoji: "オ", prompt: "オ" }
             ]
         };
 
@@ -432,15 +429,18 @@
             } catch (e) {}
         }
 
-        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion... ---
-        // 【v1.12進化】お助け辞書を廃止し、短文包含＋お題自体のaliasesを比較する完全コンテキスト判定
+        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion (v1.14: Japanese Initial Letter Isolation) ---
         function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+
+            // かな変換ヘルパー関数
+            const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
+            const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
 
             const clean = (str) => {
                 if (isJapaneseCourse) {
                     let cleaned = str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
-                    // 一文字重複の縮約補正
+                    // 一文字重複の縮約補正 (例: いい ➔ い)
                     if (cleaned.length > 1) {
                         const firstChar = cleaned.charAt(0);
                         if ([...cleaned].every(c => c === firstChar)) {
@@ -453,56 +453,71 @@
                 }
             };
 
+            // ブラウザで自動変換されやすい代表的な漢字一文字を動的に平仮名に復元する軽量マッパー
+            const kanjiToHeadKana = {
+                // あ
+                "赤": "あ", "青": "あ", "朝": "あ", "頭": "あ", "雨": "あ", "飴": "あ", "秋": "あ", "開": "あ", "姉": "あ", "兄": "あ", "遊": "あ", "洗": "あ", "味": "あ", "暑": "あ", "熱": "あ", "歩": "あ", "会": "あ", "合": "あ", "空": "あ", "浅": "あ", "新": "あ", "足": "あ", "集": "あ", "危": "あ", "怪": "あ", "謝": "あ",
+                // い
+                "椅": "い", "犬": "い", "苺": "い", "糸": "い", "息": "い", "池": "い", "石": "い", "医": "い", "板": "い", "痛": "い", "入": "い", "色": "い", "言": "い", "行": "い", "急": "い", "忙": "い", "要": "い", "居": "い", "一": "い", "命": "い", "今": "い", "妹": "い", "嫌": "い", "祈": "い", "泉": "い", "岩": "い",
+                // う
+                "海": "う", "歌": "う", "牛": "う", "馬": "う", "家": "う", "上": "う", "嘘": "う", "魚": "う", "動": "う", "売": "う", "美": "う", "嬉": "う", "写": "う", "噂": "う", "産": "う", "打": "う", "生": "う", "薄": "う", "内": "う", "腕": "う", "羽": "う", "裏": "う", "運": "う",
+                // え
+                "駅": "え", "絵": "え", "鉛": "え", "笑": "え", "選": "え", "枝": "え", "得": "え", "会": "え", "重": "え", "襟": "え", "餌": "え", "円": "え", "園": "え", "演": "え", "遠": "え", "塩": "え",
+                // お
+                "音": "お", "尾": "お", "男": "お", "女": "お", "落": "お", "押": "お", "折": "お", "終": "お", "大": "お", "多": "お", "起": "お", "置": "お", "教": "お", "重": "お", "遅": "お", "店": "お", "茶": "お", "菓": "お", "鬼": "お", "親": "お", "話": "お", "香": "お", "送": "お", "怒": "お", "踊": "お"
+            };
+
             const speechText = clean(rawText);
             showSpeechBubble(rawText);
 
             const list = courses[currentCourse];
             let matched = null;
 
-            // 現在のターゲットお題アイテム
+            // 現在ターゲットに指定されているお題アイテム
             const activeTargetItem = list[selectedItemIndex];
 
-            // 1文字判定に強いひらがな・カタカナ相互補正関数
-            const isKanaMatch = (s, t) => {
-                const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
-                const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
-                return toHiragana(s) === toHiragana(t) || toKatakana(s) === toKatakana(t);
-            };
-
-            // 【v1.12理想型コア】文章にターゲット単語、またはaliases(変換候補)が含まれているか検証
-            const isMatch = (spoken, item) => {
-                const s = clean(spoken);
-                const targetClean = clean(item.word);
+            if (isJapaneseCourse) {
+                // 【ひらがな・カタカナコース：頭文字（最初の1文字）ベースで判定】
+                // 1. スペースや記号を完全に除外した文字列を抽出
+                const cleanedRaw = rawText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
                 
-                // 1. 完全一致、または短文の中にターゲット単語がそっくり含まれているか
-                // （例："He read a book of lion king" から "lion" を完全検出）
-                if (s === targetClean || s.includes(targetClean)) {
-                    return true;
-                }
+                if (cleanedRaw.length > 0) {
+                    const firstChar = cleanedRaw.charAt(0);
+                    let firstCharKana = toHiragana(firstChar); // 一旦ひらがなに変換
 
-                // かな文字補正
-                if (isJapaneseCourse && isKanaMatch(s, targetClean)) {
-                    return true;
-                }
+                    // 漢字だった場合はマッパーで発音へ動的デコード
+                    if (kanjiToHeadKana[firstChar]) {
+                        firstCharKana = kanjiToHeadKana[firstChar];
+                    }
 
-                // 2. 漢字変換エイリアスの検証
-                // （例：「椅子」「犬」などの漢字がお喋りテキストに含まれているか）
-                if (item.aliases && item.aliases.length > 0) {
-                    return item.aliases.some(alias => {
-                        const aliasClean = clean(alias);
-                        return s === aliasClean || s.includes(aliasClean) || (isJapaneseCourse && isKanaMatch(s, aliasClean));
+                    const targetClean = toHiragana(activeTargetItem.word);
+
+                    // ユーザー発声の頭文字の読みがなとお題の文字が一致しているか比較
+                    if (firstCharKana === targetClean) {
+                        matched = activeTargetItem;
+                    } else {
+                        // コース内の別のお題文字の頭文字と一致しているか確認
+                        matched = list.find(item => {
+                            const itemClean = toHiragana(item.word);
+                            return firstCharKana === itemClean;
+                        });
+                    }
+                }
+            } else {
+                // 【他コース（英語など）：これまで通りの部分一致・コンテキスト包含判定】
+                const spokenWords = speechText.split(/\s+/);
+                const activeTargetClean = clean(activeTargetItem.word);
+                
+                const isTargetSpoken = spokenWords.some(w => w === activeTargetClean || activeTargetClean.includes(w)) || speechText.includes(activeTargetClean);
+                
+                if (isTargetSpoken) {
+                    matched = activeTargetItem;
+                } else {
+                    matched = list.find(item => {
+                        const itemWord = clean(item.word);
+                        return spokenWords.some(w => w === itemWord || itemWord.includes(w)) || speechText.includes(itemWord);
                     });
                 }
-
-                return false;
-            };
-
-            // 優先判定①：現在ターゲットに指定されているお題にマッチしているか
-            if (isMatch(speechText, activeTargetItem)) {
-                matched = activeTargetItem;
-            } else {
-                // 優先判定②：コース内の他のいずれかのお題にマッチしているか
-                matched = list.find(item => isMatch(speechText, item));
             }
 
             if (matched) {
@@ -553,7 +568,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Rendering vector graphics for characters... ---
+        // --- 自作ベクターイラスト描画エンジン (v1.06 細部調整入り) ---
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); 
@@ -1126,7 +1141,7 @@
         // 3Dパースペクティブ射影の変換計算
         // z: 0.0 (奥) 〜 1.0 (手前判定線) 〜 1.5 (画面外に飛び去る)
         function project(xOffset, z) {
-            const horizonY = canvas.height * 0.35; 
+            const horizonY = canvas.height * 0.35; // 遠くの地平線
             const roadHeight = canvas.height * 0.65;
             
             const scale = 0.04 + 0.96 * Math.pow(z, 2.5);
