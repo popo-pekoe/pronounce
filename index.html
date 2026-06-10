@@ -69,18 +69,18 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.07 にカウントアップ -->
+                <!-- バージョン表記を v1.08 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.07</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.08</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
-                    おくから流れてくるゲートの単語を発音して、正しいすがたに変身しよう！
+                    おくから流れてくるゲートの文字や単語を発音して、正しいすがたに変身しよう！
                 </p>
             </div>
 
-            <!-- Course Selection Scroll Container (v1.07からは4コースのためスクロール対応) -->
+            <!-- Course Selection Scroll Container (スクロールで全6コースを選択可能) -->
             <div class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
@@ -111,11 +111,29 @@
                     <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
                 </button>
 
-                <!-- 4. はたらくくるまコース (NEW v1.07!) -->
+                <!-- 4. はたらくくるまコース -->
                 <button onclick="startGame('vehicles')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">🚒</span>
                         <span class="text-left text-sm">はたらくくるま <span class="block text-[10px] font-normal text-teal-100">Working Vehicles (Police, Fire, etc.)</span></span>
+                    </div>
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                </button>
+
+                <!-- 5. 【NEW v1.08】ひらがなコース -->
+                <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">あ</span>
+                        <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あ, い, う, え, お)</span></span>
+                    </div>
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                </button>
+
+                <!-- 6. 【NEW v1.08】カタカナコース -->
+                <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">ア</span>
+                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-violet-100">Katakana (ア, イ, ウ, エ, オ)</span></span>
                     </div>
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
@@ -203,7 +221,7 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
                 </div>
-                <p class="text-xs font-bold text-pink-400">マイクはONです！いつでも自由に喋ね</p>
+                <p class="text-xs font-bold text-pink-400">マイクはONです！いつでも自由に喋ってね</p>
             </div>
         </div>
 
@@ -217,7 +235,7 @@
             </div>
             <h3 class="text-xl font-bold text-slate-100 mb-2">マイクの許可が必要です</h3>
             <p class="text-sm text-slate-400 mb-6 leading-relaxed">
-                このゲームは、あなたの発声（英語）を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
+                このゲームは、あなたの発声を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
             </p>
             <button onclick="requestMicAccess()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all">
                 マイクを使う！
@@ -226,7 +244,7 @@
     </div>
 
     <script>
-        // --- コース構成データ (v1.07 働く車を追加) ---
+        // --- コース構成データ (v1.08 ひらがな・カタカナを追加) ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -252,13 +270,28 @@
                 { word: "Simba", emoji: "🦁", prompt: "シンバ" },
                 { word: "Stitch", emoji: "👽", prompt: "スティッチ" }
             ],
-            // 【v1.07新設】はたらくくるまコース
             vehicles: [
                 { word: "Ambulance", emoji: "🚑", prompt: "救急車" },
                 { word: "Firetruck", emoji: "🚒", prompt: "消防車" },
                 { word: "Policecar", emoji: "🚓", prompt: "パトカー" },
                 { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
                 { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
+            ],
+            // 【v1.08新設】ひらがなコース
+            hiragana: [
+                { word: "あ", emoji: "あ", prompt: "あ" },
+                { word: "い", emoji: "い", prompt: "い" },
+                { word: "う", emoji: "う", prompt: "う" },
+                { word: "え", emoji: "え", prompt: "え" },
+                { word: "お", emoji: "お", prompt: "お" }
+            ],
+            // 【v1.08新設】カタカナコース
+            katakana: [
+                { word: "ア", emoji: "ア", prompt: "ア" },
+                { word: "イ", emoji: "イ", prompt: "イ" },
+                { word: "ウ", emoji: "ウ", prompt: "ウ" },
+                { word: "エ", emoji: "エ", prompt: "エ" },
+                { word: "オ", emoji: "オ", prompt: "オ" }
             ]
         };
 
@@ -348,7 +381,10 @@
             recognition = new SpeechRecognition();
             recognition.continuous = false; 
             recognition.interimResults = true; 
-            recognition.lang = 'en-US'; // 英語判定
+
+            // 【v1.08 言語自動切り替え】日本語コースなら日本語、それ以外は英語
+            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+            recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
 
             recognition.onstart = () => {
                 isSpeechActive = true;
@@ -404,27 +440,44 @@
 
         // --- 音声認識結果の処理（変身トリガー） ---
         function handleSpeechInput(rawText) {
-            const clean = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+
+            // クレンジング処理（日本語なら空白や句読点のみ除外し、英語なら英数字に絞る）
+            const clean = (str) => {
+                if (isJapaneseCourse) {
+                    return str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
+                } else {
+                    return str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+                }
+            };
+
             const speechText = clean(rawText);
-            
             showSpeechBubble(rawText);
 
-            const spokenWords = speechText.split(/\s+/);
             const list = courses[currentCourse];
             let matched = null;
 
             const activeTargetItem = list[selectedItemIndex];
             const activeTargetClean = clean(activeTargetItem.word);
             
-            const isTargetSpoken = spokenWords.some(w => w === activeTargetClean || activeTargetClean.includes(w)) || speechText.includes(activeTargetClean);
-            
-            if (isTargetSpoken) {
+            // 日本語(ひらがな・カタカナ)用の一致判定
+            const isMatch = (spoken, target) => {
+                const s = clean(spoken);
+                const t = clean(target);
+                if (s === t || s.includes(t) || t.includes(s)) return true;
+                
+                // ひらがな・カタカナ相互変換による補正一致
+                const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
+                const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
+                return toHiragana(s) === toHiragana(t) || toKatakana(s) === toKatakana(t);
+            };
+
+            // 優先判定①：現在ターゲットの単語と一致しているか
+            if (isMatch(speechText, activeTargetClean)) {
                 matched = activeTargetItem;
             } else {
-                matched = list.find(item => {
-                    const itemWord = clean(item.word);
-                    return spokenWords.some(w => w === itemWord || itemWord.includes(w)) || speechText.includes(itemWord);
-                });
+                // 優先判定②：コース内の他の単語と一致しているか
+                matched = list.find(item => isMatch(speechText, item.word));
             }
 
             if (matched) {
@@ -456,7 +509,10 @@
             const list = courses[currentCourse];
             const currentItem = list[selectedItemIndex];
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
-            utterance.lang = 'en-US';
+            
+            // 【v1.08 お手本自動言語切り替え】
+            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+            utterance.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
             utterance.rate = 0.85; 
             synth.speak(utterance);
         }
@@ -471,7 +527,7 @@
             }
         }
 
-        // --- 自作ベクターイラスト描画エンジン (v1.07 働く車を追加) ---
+        // --- 自作ベクターイラスト描画エンジン (v1.08 ひらがな・カタカナ用マズル拡張) ---
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); // 描画の基準位置をキャラクター中央へ調整
@@ -483,7 +539,6 @@
             switch (name) {
                 // ==================== キャラクター ====================
                 case "Mickey":
-                    // ミッキーマウス風
                     ctx.fillStyle = "#0a0a0a";
                     ctx.beginPath();
                     ctx.arc(-size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
@@ -510,7 +565,6 @@
                     break;
 
                 case "Donald":
-                    // ドナルドダック風
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
@@ -548,7 +602,6 @@
                     break;
 
                 case "Pooh":
-                    // プーさん風
                     ctx.fillStyle = "#fbbf24"; // イエロー
                     ctx.beginPath();
                     ctx.arc(-size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
@@ -636,6 +689,9 @@
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+
+                    ctx.beginPath();
                     ctx.arc(size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
                     ctx.fill(); ctx.stroke();
 
@@ -804,10 +860,8 @@
                     ctx.fill();
                     break;
 
-                // ==================== 【v1.07新設】はたらくくるま ====================
+                // ==================== はたらくくるま ====================
                 case "Ambulance":
-                    // 救急車 🚑 (白いボディ + 赤いライン + 赤十字マーク + 赤パトランプ)
-                    // タイヤ
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
@@ -819,36 +873,29 @@
                     ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 車体 (白い大きなボックス)
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.rect(-size * 0.38, -size * 0.24, size * 0.76, size * 0.34);
                     ctx.fill(); ctx.stroke();
 
-                    // 窓 (フロントガラス、青い水色)
                     ctx.fillStyle = "#38bdf8";
                     ctx.beginPath();
                     ctx.rect(size * 0.16, -size * 0.2, size * 0.16, size * 0.12);
                     ctx.fill(); ctx.stroke();
 
-                    // 赤いライン帯
                     ctx.fillStyle = "#ef4444";
                     ctx.beginPath();
                     ctx.rect(-size * 0.38, -size * 0.06, size * 0.76, size * 0.06);
                     ctx.fill();
 
-                    // 赤十字マーク
                     ctx.fillStyle = "#ef4444";
-                    // 縦ライン
                     ctx.beginPath();
                     ctx.rect(-size * 0.15, -size * 0.18, size * 0.05, size * 0.15);
                     ctx.fill();
-                    // 横ライン
                     ctx.beginPath();
                     ctx.rect(-size * 0.2, -size * 0.13, size * 0.15, size * 0.05);
                     ctx.fill();
 
-                    // 赤いパトランプ
                     ctx.fillStyle = "#ef4444";
                     ctx.beginPath();
                     ctx.arc(-size * 0.2, -size * 0.28, size * 0.06, Math.PI, 0);
@@ -857,8 +904,6 @@
                     break;
 
                 case "Firetruck":
-                    // 消防車 🚒 (赤い車体 + グレーのはしご + 黄色ノズル + 青パトランプ)
-                    // タイヤ
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
@@ -870,19 +915,16 @@
                     ctx.arc(size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 赤いボディ
-                    ctx.fillStyle = "#dc2626"; // 真っ赤
+                    ctx.fillStyle = "#dc2626";
                     ctx.beginPath();
                     ctx.rect(-size * 0.42, -size * 0.24, size * 0.84, size * 0.34);
                     ctx.fill(); ctx.stroke();
 
-                    // フロントガラス (青)
                     ctx.fillStyle = "#38bdf8";
                     ctx.beginPath();
                     ctx.rect(size * 0.2, -size * 0.18, size * 0.18, size * 0.14);
                     ctx.fill(); ctx.stroke();
 
-                    // 天井のはしご (グレー)
                     ctx.strokeStyle = "#94a3b8";
                     ctx.lineWidth = 4;
                     ctx.beginPath();
@@ -890,20 +932,17 @@
                     ctx.lineTo(size * 0.05, -size * 0.32);
                     ctx.moveTo(-size * 0.35, -size * 0.27);
                     ctx.lineTo(size * 0.05, -size * 0.27);
-                    // 格子
                     for (let x = -size * 0.3; x <= size * 0.01; x += size * 0.1) {
                         ctx.moveTo(x, -size * 0.33);
                         ctx.lineTo(x, -size * 0.26);
                     }
                     ctx.stroke();
 
-                    // 黄色の放水銃
                     ctx.fillStyle = "#fbbf24";
                     ctx.beginPath();
                     ctx.rect(size * 0.1, -size * 0.32, size * 0.12, size * 0.06);
                     ctx.fill(); ctx.stroke();
 
-                    // パトランプ（赤）
                     ctx.fillStyle = "#ef4444";
                     ctx.beginPath();
                     ctx.arc(size * 0.25, -size * 0.28, size * 0.06, Math.PI, 0);
@@ -911,8 +950,6 @@
                     break;
 
                 case "Policecar":
-                    // パトカー 🚓 (白黒ツートン + 赤いパトランプ)
-                    // タイヤ
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
@@ -924,45 +961,38 @@
                     ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 下部黒ボディ
                     ctx.fillStyle = "#090d16";
                     ctx.beginPath();
                     ctx.rect(-size * 0.4, -size * 0.08, size * 0.8, size * 0.18);
                     ctx.fill(); ctx.stroke();
 
-                    // 上部白キャビン
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.rect(-size * 0.3, -size * 0.24, size * 0.58, size * 0.16);
                     ctx.fill(); ctx.stroke();
 
-                    // 窓ガラス
                     ctx.fillStyle = "#475569";
                     ctx.beginPath();
                     ctx.rect(-size * 0.2, -size * 0.21, size * 0.18, size * 0.11);
                     ctx.rect(size * 0.02, -size * 0.21, size * 0.18, size * 0.11);
                     ctx.fill(); ctx.stroke();
 
-                    // 赤いパトランプ (サイレンベース + 赤い半円)
-                    ctx.fillStyle = "#e2e8f0"; // 台座
+                    ctx.fillStyle = "#e2e8f0";
                     ctx.beginPath();
                     ctx.rect(-size * 0.08, -size * 0.28, size * 0.16, size * 0.04);
                     ctx.fill(); ctx.stroke();
                     
-                    ctx.fillStyle = "#ef4444"; // サイレン
+                    ctx.fillStyle = "#ef4444";
                     ctx.beginPath();
                     ctx.arc(0, -size * 0.28, size * 0.07, Math.PI, 0);
                     ctx.fill(); ctx.stroke();
                     break;
 
                 case "Excavator":
-                    // ショベルカー 🚜 (黄色の車体 + 黒いキャタピラ + ショベルアーム)
-                    // クローラー（黒キャタピラ）
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.ellipse(0, size * 0.12, size * 0.36, size * 0.08, 0, 0, Math.PI * 2);
                     ctx.fill(); ctx.stroke();
-                    // キャタピラの中のホイール
                     ctx.fillStyle = "#94a3b8";
                     ctx.beginPath();
                     ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
@@ -970,29 +1000,25 @@
                     ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 黄色いボディ
-                    ctx.fillStyle = "#eab308"; // 黄
+                    ctx.fillStyle = "#eab308";
                     ctx.beginPath();
                     ctx.rect(-size * 0.28, -size * 0.18, size * 0.54, size * 0.22);
                     ctx.fill(); ctx.stroke();
 
-                    // 運転室 (黒い窓)
                     ctx.fillStyle = "#0f172a";
                     ctx.beginPath();
                     ctx.rect(-size * 0.2, -size * 0.14, size * 0.16, size * 0.13);
                     ctx.fill(); ctx.stroke();
 
-                    // ショベルアーム (黄色、2段関節)
                     ctx.strokeStyle = "#eab308";
                     ctx.lineWidth = size * 0.08;
                     ctx.lineCap = "round";
                     ctx.beginPath();
-                    ctx.moveTo(size * 0.15, -size * 0.05); // 付根
-                    ctx.lineTo(size * 0.35, -size * 0.32); // 第1関節
-                    ctx.lineTo(size * 0.5, -size * 0.12);  // 先端
+                    ctx.moveTo(size * 0.15, -size * 0.05);
+                    ctx.lineTo(size * 0.35, -size * 0.32);
+                    ctx.lineTo(size * 0.5, -size * 0.12);
                     ctx.stroke();
 
-                    // ショベルバケット (焦げ茶)
                     ctx.fillStyle = "#334155";
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 2;
@@ -1003,8 +1029,6 @@
                     break;
 
                 case "Garbagetruck":
-                    // ゴミ収集車 🚚 (緑キャビン + 青い積載ゴミ箱 + タイヤ)
-                    // タイヤ
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
@@ -1016,30 +1040,26 @@
                     ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 前方キャビン (黄緑)
                     ctx.fillStyle = "#22c55e"; 
                     ctx.beginPath();
                     ctx.rect(size * 0.12, -size * 0.18, size * 0.28, size * 0.28);
                     ctx.fill(); ctx.stroke();
 
-                    // キャビン窓 (黒)
                     ctx.fillStyle = "#1e293b";
                     ctx.beginPath();
                     ctx.rect(size * 0.22, -size * 0.14, size * 0.14, size * 0.11);
                     ctx.fill(); ctx.stroke();
 
-                    // 後方ゴミ箱部分 (青い大きな斜めボックス)
-                    ctx.fillStyle = "#2563eb"; // 青
+                    ctx.fillStyle = "#2563eb";
                     ctx.beginPath();
                     ctx.moveTo(-size * 0.42, -size * 0.24);
                     ctx.lineTo(size * 0.12, -size * 0.24);
                     ctx.lineTo(size * 0.12, size * 0.1);
                     ctx.lineTo(-size * 0.3, size * 0.1);
-                    ctx.lineTo(-size * 0.42, -size * 0.05); // 後部傾斜
+                    ctx.lineTo(-size * 0.42, -size * 0.05);
                     ctx.closePath();
                     ctx.fill(); ctx.stroke();
 
-                    // 白い回収枠デザイン
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 3;
                     ctx.beginPath();
@@ -1049,12 +1069,19 @@
                     ctx.stroke();
                     break;
 
+                // ==================== 【NEW v1.08】ひらがな・カタカナ ====================
                 default:
-                    // フォールバック
-                    ctx.fillStyle = "#6366f1";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
+                    // 文字をそのまま美しく立体・輪郭付きテキストとしてレンダリング
+                    ctx.fillStyle = "#38bdf8"; // 美しいネオンシアン
+                    ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    
+                    // くっきりとした白い縁取りを追加
+                    ctx.lineWidth = size * 0.09;
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.strokeText(name, 0, 0);
+                    ctx.fillText(name, 0, 0);
                     break;
             }
             ctx.restore();
@@ -1193,7 +1220,14 @@
                 this.velocity = 0; // 衝突したときの物理的なバウンド速度
                 this.state = 'moving'; // 'moving', 'bouncing', 'passed'
                 this.shakeOffset = 0; // 衝突時のブルブル用
-                this.color = currentCourse === 'animals' ? '#8b5cf6' : (currentCourse === 'fruits' ? '#ec4899' : (currentCourse === 'characters' ? '#f59e0b' : '#0d9488')); // コースごとのテーマカラー
+                
+                // コース別のテーマカラー配色設計
+                this.color = '#8b5cf6'; // デフォルト紫
+                if (currentCourse === 'fruits') this.color = '#ec4899'; // ピンク
+                else if (currentCourse === 'characters') this.color = '#f59e0b'; // オレンジ
+                else if (currentCourse === 'vehicles') this.color = '#0d9488'; // ティール
+                else if (currentCourse === 'hiragana') this.color = '#06b6d4'; // シアン
+                else if (currentCourse === 'katakana') this.color = '#d946ef'; // マゼンタ
             }
 
             update() {
