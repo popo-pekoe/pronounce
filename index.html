@@ -10,6 +10,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Kuroshiro & Kuromoji Morphological Analyzer (Dynamic Kanji to Hiragana) -->
+    <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,10 +72,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.14 にカウントアップ -->
+                <!-- バージョン表記を v1.16 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.14</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.16</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -80,8 +83,20 @@
                 </p>
             </div>
 
-            <!-- Course Selection Scroll Container (スクロールで全6コースを選択可能) -->
-            <div class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
+            <!-- AI日本語形態素解析エンジンの準備ローディング画面 -->
+            <div id="loading-engine" class="w-full max-w-xs bg-slate-900/80 border border-purple-500/20 rounded-2xl p-5 my-auto flex flex-col items-center gap-3">
+                <div class="w-10 h-10 border-4 border-t-pink-500 border-purple-900 rounded-full animate-spin"></div>
+                <p id="loading-engine-text" class="text-xs font-bold text-purple-300 tracking-wider text-center leading-relaxed">
+                    AI日本語解析エンジンを起動中...<br>
+                    <span class="text-[10px] text-slate-500 font-normal">(初回のみ約15MBの辞書データをロードします)</span>
+                </p>
+                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                    <div class="bg-gradient-to-r from-pink-500 to-purple-600 h-full w-full rounded-full animate-[pulse_1.5s_infinite]"></div>
+                </div>
+            </div>
+
+            <!-- Course Selection Scroll Container (ロード完了後に hidden が解除される) -->
+            <div id="course-selector-area" class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs hidden">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
                 <!-- 1. どうぶつコース -->
@@ -244,7 +259,7 @@
     </div>
 
     <script>
-        // --- コース構成データ (v1.14: 個別エイリアス対応を完全排除したクリーンな設計に復元) ---
+        // --- コース構成データ ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -277,7 +292,6 @@
                 { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
                 { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
             ],
-            // シンプルな一文字設計へ復元
             hiragana: [
                 { word: "あ", emoji: "あ", prompt: "あ" },
                 { word: "い", emoji: "い", prompt: "い" },
@@ -367,6 +381,43 @@
         let isSpeechActive = false;
         let lastProcessedResultIndex = -1; 
 
+        // Kuroshiro & Kuromoji 日本語デコーダーの初期化
+        let kuroshiro = null;
+        let isKuroshiroReady = false;
+
+        async function initKuroshiro() {
+            try {
+                // CDN経由の読み込みでは、Kuroshiro や KuromojiAnalyzer が直接グローバルな関数にならず、
+                // .default 内にビルドエクスポートされる場合があるため、互換性のためのフォールバック処理を行います。
+                const KuroshiroClass = (typeof Kuroshiro !== 'undefined' && Kuroshiro.default) ? Kuroshiro.default : Kuroshiro;
+                const KuromojiAnalyzerClass = (typeof KuromojiAnalyzer !== 'undefined' && KuromojiAnalyzer.default) ? KuromojiAnalyzer.default : KuromojiAnalyzer;
+
+                if (typeof KuroshiroClass !== 'function') {
+                    throw new Error("Kuroshiro class is not resolved correctly from CDN.");
+                }
+
+                kuroshiro = new KuroshiroClass();
+                const analyzer = new KuromojiAnalyzerClass({
+                    dictPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/"
+                });
+                await kuroshiro.init(analyzer);
+                isKuroshiroReady = true;
+
+                // ロード完了時にUIを切り替えてボタンを表示
+                document.getElementById('loading-engine').classList.add('hidden');
+                document.getElementById('course-selector-area').classList.remove('hidden');
+                console.log("Kuroshiro + Kuromoji Morphological Analyzer initialized!");
+            } catch (err) {
+                console.error("Kuroshiro initialization error, falling back:", err);
+                // 通信エラー時などのフォールバック。お題がひらがなのみならそのまま動作できるようにボタンを開放する
+                document.getElementById('loading-engine-text').innerHTML = "⚠️ オフラインまたは起動エラー<br><span class='text-[10px] text-red-400'>ひらがな判定が制限される場合があります</span>";
+                setTimeout(() => {
+                    document.getElementById('loading-engine').classList.add('hidden');
+                    document.getElementById('course-selector-area').classList.remove('hidden');
+                }, 2000);
+            }
+        }
+
         function initSpeech() {
             if (!SpeechRecognition) {
                 document.getElementById('mic-text').innerText = "音声認識未対応";
@@ -389,14 +440,14 @@
                 lastProcessedResultIndex = -1; 
             };
 
-            recognition.onresult = (event) => {
+            recognition.onresult = async (event) => {
                 const lastResultIndex = event.results.length - 1;
                 const res = event.results[lastResultIndex];
                 
                 if (lastResultIndex > lastProcessedResultIndex || !res.isFinal) {
                     const speechResult = res[0].transcript;
                     if (speechResult.trim() !== '') {
-                        const success = handleSpeechInput(speechResult);
+                        const success = await handleSpeechInput(speechResult);
                         if (success && res.isFinal) {
                             lastProcessedResultIndex = lastResultIndex;
                         }
@@ -429,13 +480,24 @@
             } catch (e) {}
         }
 
-        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion (v1.14: Japanese Initial Letter Isolation) ---
-        function handleSpeechInput(rawText) {
+        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
+        async function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
 
             // かな変換ヘルパー関数
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
             const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
+
+            // 日本語お題コースかつ、形態素解析エンジンが起動していれば、読み上げた文章を100%完璧にひらがな化する
+            let processedText = rawText;
+            if (isJapaneseCourse && isKuroshiroReady && kuroshiro) {
+                try {
+                    // 例: "私は椅子が好きです" ➔ "わたしはいすがすきです"
+                    processedText = await kuroshiro.convert(rawText, { to: "hiragana" });
+                } catch (err) {
+                    console.error("Kuroshiro conversion error:", err);
+                }
+            }
 
             const clean = (str) => {
                 if (isJapaneseCourse) {
@@ -453,46 +515,24 @@
                 }
             };
 
-            // ブラウザで自動変換されやすい代表的な漢字一文字を動的に平仮名に復元する軽量マッパー
-            const kanjiToHeadKana = {
-                // あ
-                "赤": "あ", "青": "あ", "朝": "あ", "頭": "あ", "雨": "あ", "飴": "あ", "秋": "あ", "開": "あ", "姉": "あ", "兄": "あ", "遊": "あ", "洗": "あ", "味": "あ", "暑": "あ", "熱": "あ", "歩": "あ", "会": "あ", "合": "あ", "空": "あ", "浅": "あ", "新": "あ", "足": "あ", "集": "あ", "危": "あ", "怪": "あ", "謝": "あ",
-                // い
-                "椅": "い", "犬": "い", "苺": "い", "糸": "い", "息": "い", "池": "い", "石": "い", "医": "い", "板": "い", "痛": "い", "入": "い", "色": "い", "言": "い", "行": "い", "急": "い", "忙": "い", "要": "い", "居": "い", "一": "い", "命": "い", "今": "い", "妹": "い", "嫌": "い", "祈": "い", "泉": "い", "岩": "い",
-                // う
-                "海": "う", "歌": "う", "牛": "う", "馬": "う", "家": "う", "上": "う", "嘘": "う", "魚": "う", "動": "う", "売": "う", "美": "う", "嬉": "う", "写": "う", "噂": "う", "産": "う", "打": "う", "生": "う", "薄": "う", "内": "う", "腕": "う", "羽": "う", "裏": "う", "運": "う",
-                // え
-                "駅": "え", "絵": "え", "鉛": "え", "笑": "え", "選": "え", "枝": "え", "得": "え", "会": "え", "重": "え", "襟": "え", "餌": "え", "円": "え", "園": "え", "演": "え", "遠": "え", "塩": "え",
-                // お
-                "音": "お", "尾": "お", "男": "お", "女": "お", "落": "お", "押": "お", "折": "お", "終": "お", "大": "お", "多": "お", "起": "お", "置": "お", "教": "お", "重": "お", "遅": "お", "店": "お", "茶": "お", "菓": "お", "鬼": "お", "親": "お", "話": "お", "香": "お", "送": "お", "怒": "お", "踊": "お"
-            };
-
-            const speechText = clean(rawText);
-            showSpeechBubble(rawText);
+            const speechText = clean(processedText);
+            showSpeechBubble(processedText); // デコードしたひらがな/文字の形で吹き出しを表示
 
             const list = courses[currentCourse];
             let matched = null;
 
-            // 現在ターゲットに指定されているお題アイテム
             const activeTargetItem = list[selectedItemIndex];
 
             if (isJapaneseCourse) {
                 // 【ひらがな・カタカナコース：頭文字（最初の1文字）ベースで判定】
-                // 1. スペースや記号を完全に除外した文字列を抽出
-                const cleanedRaw = rawText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
+                const cleanedRaw = processedText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
                 
                 if (cleanedRaw.length > 0) {
                     const firstChar = cleanedRaw.charAt(0);
-                    let firstCharKana = toHiragana(firstChar); // 一旦ひらがなに変換
-
-                    // 漢字だった場合はマッパーで発音へ動的デコード
-                    if (kanjiToHeadKana[firstChar]) {
-                        firstCharKana = kanjiToHeadKana[firstChar];
-                    }
+                    let firstCharKana = toHiragana(firstChar); // 判定用にひらがなに統一
 
                     const targetClean = toHiragana(activeTargetItem.word);
 
-                    // ユーザー発声の頭文字の読みがなとお題の文字が一致しているか比較
                     if (firstCharKana === targetClean) {
                         matched = activeTargetItem;
                     } else {
@@ -504,7 +544,7 @@
                     }
                 }
             } else {
-                // 【他コース（英語など）：これまで通りの部分一致・コンテキスト包含判定】
+                // 【他コース（英語など）：文章の中に単語が含まれているかの包含判定】
                 const spokenWords = speechText.split(/\s+/);
                 const activeTargetClean = clean(activeTargetItem.word);
                 
@@ -568,7 +608,7 @@
             }
         }
 
-        // --- 自作ベクターイラスト描画エンジン (v1.06 細部調整入り) ---
+        // --- 自作ベクターイラスト描画エンジン ---
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); 
@@ -719,7 +759,7 @@
 
                     ctx.fillStyle = "#78350f";
                     ctx.beginPath();
-                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.04, 0, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.04, size * 0.05, 0, 0, Math.PI * 2);
                     ctx.fill(); ctx.stroke();
                     ctx.restore();
                     break;
@@ -1138,8 +1178,7 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 3Dパースペクティブ射影の変換計算
-        // z: 0.0 (奥) 〜 1.0 (手前判定線) 〜 1.5 (画面外に飛び去る)
+        // 3Dパースペクティブ射影 of 変換計算
         function project(xOffset, z) {
             const horizonY = canvas.height * 0.35; // 遠くの地平線
             const roadHeight = canvas.height * 0.65;
@@ -1157,7 +1196,7 @@
 
         // --- ゲームクラス ---
 
-        // プレイヤー（変身する本体）
+        // プレイヤー
         class Player {
             constructor() {
                 this.xOffset = 0; 
@@ -1238,7 +1277,7 @@
             }
         }
 
-        // ゲート（流れてくる障害物）
+        // ゲート
         class Gate {
             constructor(word, emoji) {
                 this.target = word;
@@ -1377,7 +1416,7 @@
             }
         }
 
-        // 星屑パーティクル（エフェクト）
+        // 星屑パーティクル
         class Particle {
             constructor(x, y, emoji, targetWord) {
                 this.x = x;
@@ -1589,6 +1628,13 @@
                     alert("マイクが使えません。設定からマイクの許可をお願いします。");
                 });
         }
+
+        // ページロード時初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initSpeech();
+            initKuroshiro(); // 日本語AI解析エンジンの初期化開始
+        });
     </script>
 </body>
 </html>
