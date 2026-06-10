@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.08 にカウントアップ -->
+                <!-- バージョン表記を v1.09 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.08</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.09</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -120,7 +120,7 @@
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
-                <!-- 5. 【NEW v1.08】ひらがなコース -->
+                <!-- 5. ひらがなコース -->
                 <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">あ</span>
@@ -129,7 +129,7 @@
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
-                <!-- 6. 【NEW v1.08】カタカナコース -->
+                <!-- 6. カタカナコース -->
                 <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">ア</span>
@@ -277,7 +277,7 @@
                 { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
                 { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
             ],
-            // 【v1.08新設】ひらがなコース
+            // ひらがなコース
             hiragana: [
                 { word: "あ", emoji: "あ", prompt: "あ" },
                 { word: "い", emoji: "い", prompt: "い" },
@@ -285,7 +285,7 @@
                 { word: "え", emoji: "え", prompt: "え" },
                 { word: "お", emoji: "お", prompt: "お" }
             ],
-            // 【v1.08新設】カタカナコース
+            // カタカナコース
             katakana: [
                 { word: "ア", emoji: "ア", prompt: "ア" },
                 { word: "イ", emoji: "イ", prompt: "イ" },
@@ -311,7 +311,8 @@
             }
         }
 
-        // --- 効果音の作成（Web Audio APIシンセ） ---
+        // --- STREAMING_CHUNK: Initializing Web Audio API Sound Synthesizer... ---
+        // 効果音の作成（Web Audio APIシンセ）
         function playSound(type) {
             initAudio();
             if (!audioCtx) return;
@@ -366,7 +367,8 @@
             }
         }
 
-        // --- 音声認識の統合（Web Speech API） ---
+        // --- STREAMING_CHUNK: Integrating Web Speech API (with zero-latency continuous detection)... ---
+        // 音声認識の統合（Web Speech API）
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
@@ -379,7 +381,8 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.continuous = false; 
+            // 【超高速判定の核心】continuous = true にすることでマイク接続を常にキープ
+            recognition.continuous = true; 
             recognition.interimResults = true; 
 
             // 【v1.08 言語自動切り替え】日本語コースなら日本語、それ以外は英語
@@ -394,18 +397,20 @@
             };
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
+                // 【ゼロ遅延】最新の発音（未確定/確定セグメント）だけを即時切り出して超高速解析
+                let latestInterim = '';
+                let latestFinal = '';
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
+                    const res = event.results[i];
+                    if (res.isFinal) {
+                        latestFinal += res[0].transcript;
                     } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        latestInterim += res[0].transcript;
                     }
                 }
 
-                const speechResult = finalTranscript || interimTranscript;
+                const speechResult = latestFinal || latestInterim;
                 if (speechResult.trim() !== '') {
                     handleSpeechInput(speechResult);
                 }
@@ -420,6 +425,7 @@
 
             recognition.onend = () => {
                 isSpeechActive = false;
+                // ブラウザ側の自動切断に備えた安全装置
                 if (isPlaying) {
                     try {
                         recognition.start();
@@ -438,11 +444,12 @@
             } catch (e) {}
         }
 
-        // --- 音声認識結果の処理（変身トリガー） ---
+        // --- STREAMING_CHUNK: Formatting speech input analysis and normalization... ---
+        // 音声認識結果の処理（変身トリガー）
         function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
 
-            // クレンジング処理（日本語なら空白や句読点のみ除外し、英語なら英数字に絞る）
+            // クレンジング処理（日本語なら余分な記号排除のみ、英語なら英数字に絞る）
             const clean = (str) => {
                 if (isJapaneseCourse) {
                     return str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
@@ -460,23 +467,23 @@
             const activeTargetItem = list[selectedItemIndex];
             const activeTargetClean = clean(activeTargetItem.word);
             
-            // 日本語(ひらがな・カタカナ)用の一致判定
+            // 日本語（ひらがな・カタカナ）相互変換を含めた高度な一致判定
             const isMatch = (spoken, target) => {
                 const s = clean(spoken);
                 const t = clean(target);
                 if (s === t || s.includes(t) || t.includes(s)) return true;
                 
-                // ひらがな・カタカナ相互変換による補正一致
+                // ひらがな・カタカナ相互補正
                 const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
                 const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
                 return toHiragana(s) === toHiragana(t) || toKatakana(s) === toKatakana(t);
             };
 
-            // 優先判定①：現在ターゲットの単語と一致しているか
+            // 優先判定①：現在ターゲットの単語と部分一致・または完全一致しているか（遅延なし判定）
             if (isMatch(speechText, activeTargetClean)) {
                 matched = activeTargetItem;
             } else {
-                // 優先判定②：コース内の他の単語と一致しているか
+                // 優先判定②：コース内の他の単語と言い間違えた、または口走ったか
                 matched = list.find(item => isMatch(speechText, item.word));
             }
 
@@ -510,7 +517,7 @@
             const currentItem = list[selectedItemIndex];
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
             
-            // 【v1.08 お手本自動言語切り替え】
+            // 日本語か英語かによってお手本読み上げ音声も完全自動対応
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
             utterance.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
             utterance.rate = 0.85; 
@@ -527,7 +534,8 @@
             }
         }
 
-        // --- 自作ベクターイラスト描画エンジン (v1.08 ひらがな・カタカナ用マズル拡張) ---
+        // --- STREAMING_CHUNK: Designing 2.5D graphics vectors on Canvas context... ---
+        // 自作ベクターイラスト描画エンジン
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); // 描画の基準位置をキャラクター中央へ調整
@@ -684,6 +692,7 @@
                     ctx.restore();
                     break;
 
+                // ==================== STREAMING_CHUNK: Rendering animal models (Panda, Lion, Cat, Dog)... ====================
                 // ==================== どうぶつ ====================
                 case "Panda":
                     ctx.fillStyle = "#1e293b";
@@ -860,6 +869,7 @@
                     ctx.fill();
                     break;
 
+                // ==================== STREAMING_CHUNK: Rendering vehicles (Ambulance, Firetruck, etc.)... ====================
                 // ==================== はたらくくるま ====================
                 case "Ambulance":
                     ctx.fillStyle = "#1e293b";
@@ -1087,7 +1097,8 @@
             ctx.restore();
         }
 
-        // --- Canvas 描画エンジン（擬似3D道路） ---
+        // --- STREAMING_CHUNK: Setting up HTML5 Canvas dimension helper functions... ---
+        // Canvas 描画エンジン（擬似3D道路）
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -1118,8 +1129,7 @@
         // 道路移動用のアニメーションタイマー
         let roadOffset = 0;
 
-        // --- ゲームクラス ---
-
+        // --- STREAMING_CHUNK: Defining Player and Obstacle Gate classes... ---
         // プレイヤー（変身する本体）
         class Player {
             constructor() {
@@ -1454,6 +1464,7 @@
             setTimeout(() => { cm.className = "text-xl font-black text-pink-400"; }, 150);
         }
 
+        // --- STREAMING_CHUNK: Running real-time game loop animation on 60FPS... ---
         // --- ゲームメインループ (60FPS) ---
         function gameLoop() {
             if (!isPlaying) return;
@@ -1555,6 +1566,7 @@
             requestAnimationFrame(gameLoop);
         }
 
+        // --- STREAMING_CHUNK: Initializing game start and exit functions... ---
         // --- ゲーム開始のトリガー ---
         function startGame(courseType) {
             currentCourse = courseType;
