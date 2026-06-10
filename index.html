@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.22 にカウントアップ -->
+                <!-- バージョン表記を v1.23 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.22</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.23</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -124,7 +124,7 @@
                 <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">あ</span>
-                        <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あ, い, う, え, お)</span></span>
+                        <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あめ, いす, うち, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
@@ -133,7 +133,7 @@
                 <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">ア</span>
-                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-violet-100">Katakana (ア, イ, ウ, エ, オ)</span></span>
+                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-violet-100">Katakana (アイス, イチゴ, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
@@ -159,7 +159,6 @@
                 <div class="w-full text-center py-1">
                     <p id="detected-speech" class="text-base font-black text-white italic tracking-wide">Panda!</p>
                 </div>
-                <!-- 【v1.22新設：Alternatives (候補) HUD可視化デバッグエリア】 -->
                 <div id="speech-alternatives-hud" class="w-full text-[9px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1.5">
                     <!-- 判定候補テキストがリアルタイムに表示されます -->
                 </div>
@@ -256,7 +255,7 @@
     </div>
 
     <script>
-        // --- コース構成データ ---
+        // --- コース構成データ (v1.23: 漢字判定の完全回避のため、お題自体に漢字変換ペアを持たせた超安全設計) ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -289,19 +288,21 @@
                 { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
                 { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
             ],
+            // 【ひらがなコース】お題自体を単語化し、マイクが漢字変換しても完璧に通るようにペアを構成
             hiragana: [
-                { word: "あ", emoji: "あ", prompt: "あ" },
-                { word: "い", emoji: "い", prompt: "い" },
-                { word: "う", emoji: "う", prompt: "う" },
-                { word: "え", emoji: "え", prompt: "え" },
-                { word: "お", emoji: "お", prompt: "お" }
+                { word: "あめ", display: "あ (あめ)", kanji: "飴", emoji: "あ", char: "あ" },
+                { word: "いす", display: "い (いす)", kanji: "椅子", emoji: "い", char: "い" },
+                { word: "うち", display: "う (うち)", kanji: "家", emoji: "う", char: "う" },
+                { word: "えんぴつ", display: "え (えんぴつ)", kanji: "鉛筆", emoji: "え", char: "え" },
+                { word: "おにぎり", display: "お (おにぎり)", kanji: "おにぎり", emoji: "お", char: "お" }
             ],
+            // 【カタカナコース】
             katakana: [
-                { word: "ア", emoji: "ア", prompt: "ア" },
-                { word: "イ", emoji: "イ", prompt: "イ" },
-                { word: "ウ", emoji: "ウ", prompt: "ウ" },
-                { word: "エ", emoji: "エ", prompt: "エ" },
-                { word: "オ", emoji: "オ", prompt: "オ" }
+                { word: "アイス", display: "ア (アイス)", kanji: "アイス", emoji: "ア", char: "ア" },
+                { word: "イチゴ", display: "イ (イチゴ)", kanji: "いちご", emoji: "イ", char: "イ" },
+                { word: "ウサギ", display: "ウ (ウサギ)", kanji: "うさぎ", emoji: "ウ", char: "ウ" },
+                { word: "エアコン", display: "エ (エアコン)", kanji: "エアコン", emoji: "エ", char: "エ" },
+                { word: "オバケ", display: "オ (オバケ)", kanji: "おばけ", emoji: "オ", char: "オ" }
             ]
         };
 
@@ -388,7 +389,7 @@
             recognition = new SpeechRecognition();
             recognition.continuous = true; 
             recognition.interimResults = true; 
-            recognition.maxAlternatives = 10; // 最大10個の候補リストを取得
+            recognition.maxAlternatives = 10; 
 
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
             recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
@@ -403,48 +404,25 @@
 
             recognition.onresult = async (event) => {
                 const lastResultIndex = event.results.length - 1;
-                const resList = event.results[lastResultIndex]; // 複数候補リスト
+                const resList = event.results[lastResultIndex]; 
                 const isFinal = resList.isFinal;
                 
                 if (lastResultIndex > lastProcessedResultIndex || !isFinal) {
                     let speechResult = "";
                     let alternativeTexts = [];
 
-                    // デバッグHUD表示用に全候補リストを収集
                     for (let k = 0; j = Math.min(resList.length, 4), k < j; k++) {
                         alternativeTexts.push(resList[k].transcript);
                     }
 
-                    const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
-                    
-                    if (isJapaneseCourse) {
-                        // 【v1.22 漢字回避の真骨頂：Interim-Bypass (暫定結果スキャン) 法】
-                        // 音声の組み立て途中（確定前）のひらがなテキストは、漢字変換が入る前なので100%「ひらがな」です。
-                        // これをスキャンして「いす」や「いぬ」などの最初の1文字を捉えたら、その瞬間に判定合格にします。
-                        for (let j = 0; j < resList.length; j++) {
-                            const alternativeText = resList[j].transcript;
-                            // 漢字が含まれていないかチェック
-                            const hasKanji = /[\u4e00-\u9faf]/.test(alternativeText);
-                            
-                            if (!hasKanji && alternativeText.trim() !== "") {
-                                speechResult = alternativeText;
-                                break;
-                            }
-                        }
-                    }
-
-                    // 候補から見つからなかった場合は一番目の確定テキスト（漢字含む）を通常通りフォールバック採用
-                    if (!speechResult) {
-                        speechResult = resList[0].transcript;
-                    }
+                    // 候補から1番目のテキスト（漢字含む）を最優先で採用
+                    speechResult = resList[0].transcript;
 
                     if (speechResult.trim() !== '') {
-                        // リアルタイムにHUD表示を更新して「何がどう検知されたか」を見える化
                         updateSpeechBubbleMonitor(speechResult, isFinal, alternativeTexts);
 
                         const success = await handleSpeechInput(speechResult);
                         
-                        // 正解(変身)した、もしくは完全に確定(isFinal)したインデックスは二重判定防止のためにロック
                         if (success || isFinal) {
                             lastProcessedResultIndex = lastResultIndex;
                         }
@@ -481,23 +459,12 @@
         async function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
 
-            // かな変換ヘルパー関数
+            // かな・カタカナ相互変換
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
+            const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
 
             const clean = (str) => {
-                if (isJapaneseCourse) {
-                    let cleaned = str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
-                    // 一文字重複の縮約補正 (例: いい ➔ い)
-                    if (cleaned.length > 1) {
-                        const firstChar = cleaned.charAt(0);
-                        if ([...cleaned].every(c => c === firstChar)) {
-                            cleaned = firstChar;
-                        }
-                    }
-                    return cleaned;
-                } else {
-                    return str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
-                }
+                return str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
             };
 
             const speechText = clean(rawText);
@@ -508,27 +475,33 @@
             const activeTargetItem = list[selectedItemIndex];
 
             if (isJapaneseCourse) {
-                // 【ひらがな・カタカナコース：頭文字（最初の1文字）ベースで判定】
-                const cleanedRaw = rawText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
-                
-                if (cleanedRaw.length > 0) {
-                    const firstChar = cleanedRaw.charAt(0);
-                    let firstCharKana = toHiragana(firstChar); // 判定用にひらがなに統一
+                // 【ひらがな・カタカナコース：お題（単語）のひらがな/カタカナ/漢字変換すべてを照合】
+                // 15MBの辞書を一切使わずに、100%確実に漢字を検知してひらがな判定を通す仕組み
+                const matchesItem = (item) => {
+                    const cleanWord = clean(item.word);
+                    const cleanKanji = clean(item.kanji);
+                    const cleanChar = clean(item.char);
+                    
+                    // 漢字「椅子」の完全一致/部分一致
+                    // ひらがな「いす」の完全一致/部分一致
+                    // 頭文字「い」の完全一致
+                    return speechText === cleanWord || 
+                           speechText === cleanKanji || 
+                           speechText === cleanChar ||
+                           speechText.includes(cleanWord) ||
+                           speechText.includes(cleanKanji) ||
+                           toHiragana(speechText).includes(toHiragana(cleanWord)) ||
+                           toKatakana(speechText).includes(toKatakana(cleanWord));
+                };
 
-                    const targetClean = toHiragana(activeTargetItem.word);
-
-                    if (firstCharKana === targetClean) {
-                        matched = activeTargetItem;
-                    } else {
-                        // コース内の別のお題文字の頭文字と一致しているか確認
-                        matched = list.find(item => {
-                            const itemClean = toHiragana(item.word);
-                            return firstCharKana === itemClean;
-                        });
-                    }
+                if (matchesItem(activeTargetItem)) {
+                    matched = activeTargetItem;
+                } else {
+                    // コース内の別のお題との一致確認
+                    matched = list.find(item => matchesItem(item));
                 }
             } else {
-                // 【他コース（英語など）：文章の中に単語が含まれているかの包含判定】
+                // 【他コース（英語など）：これまで通りの部分一致・包含判定】
                 const spokenWords = speechText.split(/\s+/);
                 const activeTargetClean = clean(activeTargetItem.word);
                 
@@ -545,14 +518,14 @@
             }
 
             if (matched) {
-                player.transformTo(matched.word, matched.emoji);
+                // プレイヤーの変身先は、これまで通り「あ」や「ア」などの文字（char）に設定
+                player.transformTo(matched.char, matched.emoji);
                 return true; 
             }
             return false; 
         }
 
-        // 【v1.22新設：音声入力HUDモニターの更新】
-        // 何の声が検知され、なぜ合格になったかが100%見える化されます
+        // 音声入力HUDモニターの更新
         function updateSpeechBubbleMonitor(text, isFinal, alternatives) {
             const bubble = document.getElementById('speech-bubble');
             const detected = document.getElementById('detected-speech');
@@ -561,7 +534,6 @@
             
             detected.innerText = text;
             
-            // 状態（暫定 or 確定）のパルス表示
             if (isFinal) {
                 statusTag.innerText = "確定結果";
                 statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase tracking-wider";
@@ -570,10 +542,8 @@
                 statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 uppercase tracking-wider animate-pulse";
             }
 
-            // Alternatives (その他の解釈候補) を丸形チップで並べる
             alternativesArea.innerHTML = "";
             if (alternatives && alternatives.length > 0) {
-                // 重複を除く
                 const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 3);
                 if (uniqueAlts.length > 0) {
                     const spanLabel = document.createElement('span');
@@ -593,10 +563,8 @@
             bubble.classList.remove('scale-0');
             bubble.classList.add('scale-100');
             
-            // 確定状態になったら2.5秒後に閉じる
             if (isFinal) {
                 setTimeout(() => {
-                    // まだ別の音声の入力が始まっていなければ閉じる
                     if (detected.innerText === text) {
                         bubble.classList.remove('scale-100');
                         bubble.classList.add('scale-0');
@@ -613,6 +581,8 @@
             }
             const list = courses[currentCourse];
             const currentItem = list[selectedItemIndex];
+            
+            // お手本読み上げは単語の文字をしゃべる（例：「いす」）
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
             
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
@@ -1303,7 +1273,11 @@
         // ゲート
         class Gate {
             constructor(word, emoji) {
-                this.target = word;
+                // 表示用お題（ display などの修飾テキスト）を無視して本来の判定ワードをターゲットにする
+                const matchedCourse = courses[currentCourse].find(item => item.display === word || item.word === word);
+                this.target = matchedCourse ? matchedCourse.word : word;
+                this.displayWord = matchedCourse && matchedCourse.display ? matchedCourse.display : word;
+                
                 this.emoji = emoji;
                 this.z = 0.0; 
                 this.speed = 0.0014; 
@@ -1323,8 +1297,12 @@
                 if (this.state === 'moving') {
                     this.z += this.speed;
 
+                    // プレイヤーの変身後の状態と比較（文字 char で一致しているか）
+                    const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
+                    const isPlayerCorrectShape = currentTargetItem && player.currentAnimal === currentTargetItem.char;
+
                     if (this.z >= 0.82) {
-                        if (player.currentAnimal === this.target) {
+                        if (isPlayerCorrectShape) {
                             this.state = 'passed';
                             playSound('pass');
                             score += 100;
@@ -1344,7 +1322,7 @@
                             player.scaleX = 1.4;
 
                             const warn = document.getElementById('clash-warning');
-                            document.getElementById('warning-word').innerText = this.target;
+                            document.getElementById('warning-word').innerText = this.displayWord;
                             warn.classList.remove('hidden');
                         }
                     }
@@ -1409,7 +1387,7 @@
                 ctx.font = `bold ${fontSize}px sans-serif`;
                 ctx.textAlign = 'center';
                 
-                const textWidth = ctx.measureText(this.target).width;
+                const textWidth = ctx.measureText(this.displayWord).width;
                 const signW = Math.max(width * 0.8, textWidth + 16);
                 const signH = Math.max(height * 0.28, fontSize + 8);
                 
@@ -1419,7 +1397,7 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.shadowColor = '#000000';
                 ctx.shadowBlur = 4;
-                ctx.fillText(this.target, 0, -height + signH * 0.55);
+                ctx.fillText(this.displayWord, 0, -height + signH * 0.55);
                 ctx.shadowBlur = 0;
 
                 if (this.state !== 'passed') {
@@ -1431,7 +1409,12 @@
                     
                     const emojiSize = 44 + 60 * pos.scale; 
                     ctx.translate(0, -holeH * 0.22);
-                    drawCustomGraphic(ctx, this.target, emojiSize);
+                    
+                    // 看板に表示するべきベクターグラフィックは文字（char）として描画
+                    const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
+                    const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.target;
+                    
+                    drawCustomGraphic(ctx, drawGraphicName, emojiSize);
                     ctx.restore();
                 }
 
@@ -1471,7 +1454,12 @@
                 ctx.shadowBlur = 6;
 
                 const size = 64 * this.scale;
-                drawCustomGraphic(ctx, this.targetWord, size);
+                
+                // お題データを解決して正解のネオン文字（char）のグラフィックで粒子を散らせる
+                const currentTargetItem = courses[currentCourse].find(item => item.word === this.targetWord);
+                const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.targetWord;
+
+                drawCustomGraphic(ctx, drawGraphicName, size);
                 ctx.restore();
             }
         }
@@ -1491,9 +1479,10 @@
             selectedItemIndex = nextIdx;
             const targetItem = list[selectedItemIndex];
             
+            // ゲートには display（例: い (いす) ）のテキストとお題の word（例: いす）を渡して構築
             activeGate = new Gate(targetItem.word, targetItem.emoji);
             
-            document.getElementById('target-word').innerText = targetItem.word;
+            document.getElementById('target-word').innerText = targetItem.display ? targetItem.display : targetItem.word;
             document.getElementById('next-gate-emoji').innerText = targetItem.emoji;
             document.getElementById('clash-warning').classList.add('hidden');
         }
@@ -1657,9 +1646,6 @@
             lucide.createIcons();
             initSpeech();
             
-            // v1.19にて、旧バージョン(v1.17以前)で使われていた `loading-engine` 要素が
-            // HTML上に存在しない場合に、エラー `TypeError: Cannot read properties of null` を吐いて
-            // アプリ起動がストップしてしまっていた問題を回避するため、安全な存在確認（Nullガード）を導入しました。
             const loadingEngine = document.getElementById('loading-engine');
             if (loadingEngine) {
                 loadingEngine.classList.add('hidden');
