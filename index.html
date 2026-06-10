@@ -10,9 +10,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Kuroshiro & Kuromoji Morphological Analyzer (Dynamic Kanji to Hiragana) -->
-    <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.17 にカウントアップ -->
+                <!-- バージョン表記を v1.21 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.17</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.21</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -83,31 +80,8 @@
                 </p>
             </div>
 
-            <!-- AI日本語形態素解析エンジンの準備ローディング画面 (v1.17でデバッグログコンソールを追加) -->
-            <div id="loading-engine" class="w-full max-w-xs bg-slate-900/80 border border-purple-500/20 rounded-2xl p-4 my-auto flex flex-col items-center gap-3">
-                <div class="w-8 h-8 border-4 border-t-pink-500 border-purple-900 rounded-full animate-spin"></div>
-                <p id="loading-engine-text" class="text-xs font-bold text-purple-300 tracking-wider text-center leading-relaxed">
-                    AI日本語解析エンジンを起動中...<br>
-                    <span class="text-[10px] text-slate-500 font-normal">(初回のみ約15MBの辞書データをロードします)</span>
-                </p>
-                <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                    <div class="bg-gradient-to-r from-pink-500 to-purple-600 h-full w-full rounded-full animate-[pulse_1.5s_infinite]"></div>
-                </div>
-
-                <!-- 【v1.17新設】リアルタイム・デバッグログコンソール領域 -->
-                <div id="debug-log-container" class="w-full mt-2 bg-slate-950/90 rounded-lg p-2 border border-slate-800 text-left font-mono text-[9px] text-slate-400">
-                    <p class="text-slate-500 font-bold border-b border-slate-800 pb-1 mb-1 flex items-center justify-between">
-                        <span>🔍 起動・デバッグログ</span>
-                        <span class="text-[8px] font-normal text-slate-600">Console</span>
-                    </p>
-                    <div id="debug-log-area" class="h-28 overflow-y-auto space-y-1 scrollbar-none select-text">
-                        <!-- ログがここにリアルタイムに出力されます -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course Selection Scroll Container (ロード完了後に hidden が解除される) -->
-            <div id="course-selector-area" class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs hidden">
+            <!-- Course Selection Scroll Container (v1.21からはローディング待機なく、オフラインでも最初から表示されます) -->
+            <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
                 <!-- 1. どうぶつコース -->
@@ -261,7 +235,7 @@
             </div>
             <h3 class="text-xl font-bold text-slate-100 mb-2">マイクの許可が必要です</h3>
             <p class="text-sm text-slate-400 mb-6 leading-relaxed">
-                このゲームは、あなたの発声を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
+                このゲームは、あなたの発音を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
             </p>
             <button onclick="requestMicAccess()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all">
                 マイクを使う！
@@ -335,26 +309,6 @@
             }
         }
 
-        // --- 【v1.17新設】アプリ内デバッグログ出力システム ---
-        function logDebug(message, type = 'info') {
-            const logArea = document.getElementById('debug-log-area');
-            if (!logArea) return;
-            const time = new Date().toTimeString().split(' ')[0];
-            const logItem = document.createElement('p');
-            
-            let color = 'text-slate-400';
-            let prefix = 'ℹ️';
-            
-            if (type === 'success') { color = 'text-emerald-400'; prefix = '✅'; }
-            if (type === 'warning') { color = 'text-amber-400'; prefix = '⚠️'; }
-            if (type === 'error') { color = 'text-rose-400'; prefix = '❌'; }
-            
-            logItem.className = `${color} leading-normal break-all font-mono text-[9px]`;
-            logItem.innerHTML = `<span class="text-slate-600">[${time}]</span> ${prefix} ${message}`;
-            logArea.appendChild(logItem);
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-
         // --- STREAMING_CHUNK: Initializing Sound Synthesizer... ---
         function playSound(type) {
             initAudio();
@@ -412,91 +366,19 @@
         let isSpeechActive = false;
         let lastProcessedResultIndex = -1; 
 
-        // Kuroshiro & Kuromoji 日本語デコーダーの初期化
-        let kuroshiro = null;
-        let isKuroshiroReady = false;
-
-        async function initKuroshiro() {
-            logDebug("Kuroshiro日本語解析の初期化を開始...");
-            try {
-                // 読み込みチェック
-                logDebug("CDNライブラリの読み込み状況を確認中...");
-                if (typeof Kuroshiro === 'undefined') {
-                    logDebug("Kuroshiroライブラリが見つかりません。通信エラーの可能性があります。", 'error');
-                } else {
-                    logDebug("Kuroshiroライブラリの読み込みを検知しました。", 'success');
-                }
-
-                if (typeof KuromojiAnalyzer === 'undefined') {
-                    logDebug("KuromojiAnalyzerライブラリが見つかりません。", 'error');
-                } else {
-                    logDebug("KuromojiAnalyzerライブラリの読み込みを検知しました。", 'success');
-                }
-
-                const KuroshiroClass = (typeof Kuroshiro !== 'undefined' && Kuroshiro.default) ? Kuroshiro.default : Kuroshiro;
-                const KuromojiAnalyzerClass = (typeof KuromojiAnalyzer !== 'undefined' && KuromojiAnalyzer.default) ? KuromojiAnalyzer.default : KuromojiAnalyzer;
-
-                if (typeof KuroshiroClass !== 'function') {
-                    throw new Error("Kuroshiroコンストラクタの解決に失敗しました。");
-                }
-
-                kuroshiro = new KuroshiroClass();
-                logDebug("Kuroshiroインスタンスの生成に成功。", 'success');
-
-                logDebug("KuromojiAnalyzer辞書ファイル(約15MB)をリクエスト中...");
-                logDebug("通信環境やブラウザのCORS制限によっては数十秒かかる場合があります...", 'warning');
-
-                const analyzer = new KuromojiAnalyzerClass({
-                    dictPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/"
-                });
-
-                // 【v1.17機能】15秒の接続タイムアウトを明示的に設定
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("辞書データのロードがタイムアウト(15秒)しました。CORS制限または接続遅延の可能性があります。")), 15000)
-                );
-
-                logDebug("Kuromoji辞書のロードとKuroshiroへの登録を開始...");
-                // 辞書のロードとタイムアウトの競合
-                await Promise.race([kuroshiro.init(analyzer), timeoutPromise]);
-                
-                isKuroshiroReady = true;
-                logDebug("日本語形態素解析エンジンのセットアップが全て完了しました！", 'success');
-
-                // 正常ロード完了時は0.8秒後にコースセクターを開放
-                setTimeout(() => {
-                    document.getElementById('loading-engine').classList.add('hidden');
-                    document.getElementById('course-selector-area').classList.remove('hidden');
-                }, 800);
-
-            } catch (err) {
-                logDebug(`解析エンジンの初期化中にエラーが発生: ${err.message}`, 'error');
-                console.error("Kuroshiro initialization error, falling back:", err);
-                
-                // エラー時のフォールバック画面更新
-                document.getElementById('loading-engine-text').innerHTML = "⚠️ 起動エラーが発生しました<br><span class='text-[10px] text-red-400'>デバッグログを確認し、コースを選択してください</span>";
-                logDebug("ひらがな相互変換を制限した【フォールバックモード】で3秒後にゲームメニューを開放します...", 'warning');
-
-                // 3秒後にメニューを開放して、ゲーム自体は継続できるようにする
-                setTimeout(() => {
-                    document.getElementById('loading-engine').classList.add('hidden');
-                    document.getElementById('course-selector-area').classList.remove('hidden');
-                    logDebug("フォールバックモードでコース選択を開放しました。");
-                }, 3000);
-            }
-        }
-
         function initSpeech() {
-            logDebug("Web Speech API 音声認識のセットアップを開始...");
             if (!SpeechRecognition) {
                 document.getElementById('mic-text').innerText = "音声認識未対応";
                 document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-red-500";
-                logDebug("このブラウザは音声認識(Web Speech API)に対応していません。", 'error');
                 return;
             }
 
             recognition = new SpeechRecognition();
             recognition.continuous = true; 
             recognition.interimResults = true; 
+            // 【v1.21新設：マルチ候補サーチの設定】
+            // 漢字変換される前のひらがな・カタカナ候補を裏で最大10個まで引き出す設定に変更
+            recognition.maxAlternatives = 10; 
 
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
             recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
@@ -507,18 +389,41 @@
                 document.getElementById('mic-text').innerText = "リスニング中";
                 document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-pink-400 uppercase";
                 lastProcessedResultIndex = -1; 
-                logDebug(`マイク接続を確立しました。認識言語: ${recognition.lang}`, 'success');
             };
 
             recognition.onresult = async (event) => {
                 const lastResultIndex = event.results.length - 1;
-                const res = event.results[lastResultIndex];
+                const resList = event.results[lastResultIndex]; // 複数候補リスト
                 
-                if (lastResultIndex > lastProcessedResultIndex || !res.isFinal) {
-                    const speechResult = res[0].transcript;
+                if (lastResultIndex > lastProcessedResultIndex || !resList.isFinal) {
+                    let speechResult = "";
+
+                    // 【v1.21新設：漢字変換バイパス・マルチオルタナティブ・トラッカー】
+                    // ひらがな・カタカナコースの場合、全候補の中から「漢字を含まない（ピュアなひらがな・カタカナ）」候補を最優先で探索する
+                    const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+                    
+                    if (isJapaneseCourse) {
+                        for (let j = 0; j < resList.length; j++) {
+                            const alternativeText = resList[j].transcript;
+                            // 漢字が含まれていないかチェック
+                            const hasKanji = /[\u4e00-\u9faf]/.test(alternativeText);
+                            
+                            // 漢字が一切含まれていないひらがな・カタカナの候補が見つかったら、それを「発音」として確定採用！
+                            if (!hasKanji && alternativeText.trim() !== "") {
+                                speechResult = alternativeText;
+                                break;
+                            }
+                        }
+                    }
+
+                    // ひらがな候補が見つからなかった、または他コースの場合は、通常通り最も信頼度の高い1番目の候補を使用
+                    if (!speechResult) {
+                        speechResult = resList[0].transcript;
+                    }
+
                     if (speechResult.trim() !== '') {
                         const success = await handleSpeechInput(speechResult);
-                        if (success && res.isFinal) {
+                        if (success && resList.isFinal) {
                             lastProcessedResultIndex = lastResultIndex;
                         }
                     }
@@ -527,16 +432,13 @@
 
             recognition.onerror = (event) => {
                 console.warn('Speech recognition error:', event.error);
-                logDebug(`音声認識中にエラー検知: ${event.error}`, 'warning');
                 if (event.error === 'not-allowed') {
                     document.getElementById('mic-modal').classList.remove('hidden');
-                    logDebug("マイクの使用許可がブラウザによって拒否されました。", 'error');
                 }
             };
 
             recognition.onend = () => {
                 isSpeechActive = false;
-                logDebug("音声認識ストリーミング接続が終了しました。");
                 if (isPlaying) {
                     try {
                         recognition.start();
@@ -561,17 +463,6 @@
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
             const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
 
-            // 日本語お題コースかつ、形態素解析エンジンが起動していれば、読み上げた文章を100%完璧にひらがな化する
-            let processedText = rawText;
-            if (isJapaneseCourse && isKuroshiroReady && kuroshiro) {
-                try {
-                    // 例: "私は椅子が好きです" ➔ "わたしはいすがすきです"
-                    processedText = await kuroshiro.convert(rawText, { to: "hiragana" });
-                } catch (err) {
-                    console.error("Kuroshiro conversion error:", err);
-                }
-            }
-
             const clean = (str) => {
                 if (isJapaneseCourse) {
                     let cleaned = str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
@@ -588,8 +479,8 @@
                 }
             };
 
-            const speechText = clean(processedText);
-            showSpeechBubble(processedText); // デコードしたひらがな/文字の形で吹き出しを表示
+            const speechText = clean(rawText);
+            showSpeechBubble(rawText); 
 
             const list = courses[currentCourse];
             let matched = null;
@@ -598,7 +489,9 @@
 
             if (isJapaneseCourse) {
                 // 【ひらがな・カタカナコース：頭文字（最初の1文字）ベースで判定】
-                const cleanedRaw = processedText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
+                // v1.21では、複数候補から漢字を含まない（ひらがな・カタカナ）候補を最優先で取得するため、
+                // 1文字の頭文字抽出が極めて高い精度でジャスト判定されます。
+                const cleanedRaw = rawText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
                 
                 if (cleanedRaw.length > 0) {
                     const firstChar = cleanedRaw.charAt(0);
@@ -1689,7 +1582,6 @@
             }
         }
 
-
         // マイク許可リクエスト
         function requestMicAccess() {
             document.getElementById('mic-modal').classList.add('hidden');
@@ -1707,7 +1599,18 @@
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initSpeech();
-            initKuroshiro(); // 日本語AI解析エンジンの初期化開始
+            
+            // v1.19にて、旧バージョン(v1.17以前)で使われていた `loading-engine` 要素が
+            // HTML上に存在しない場合に、エラー `TypeError: Cannot read properties of null` を吐いて
+            // アプリ起動がストップしてしまっていた問題を回避するため、安全な存在確認（Nullガード）を導入しました。
+            const loadingEngine = document.getElementById('loading-engine');
+            if (loadingEngine) {
+                loadingEngine.classList.add('hidden');
+            }
+            const courseSelectorArea = document.getElementById('course-selector-area');
+            if (courseSelectorArea) {
+                courseSelectorArea.classList.remove('hidden');
+            }
         });
     </script>
 </body>
