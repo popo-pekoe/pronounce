@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.21 にカウントアップ -->
+                <!-- バージョン表記を v1.22 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.21</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.22</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -80,7 +80,7 @@
                 </p>
             </div>
 
-            <!-- Course Selection Scroll Container (v1.21からはローディング待機なく、オフラインでも最初から表示されます) -->
+            <!-- Course Selection Scroll Container -->
             <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
@@ -146,11 +146,23 @@
         </div>
 
         <!-- Active Subtitles / Speech Bubble Overlay (Top-Middle) -->
-        <div class="absolute top-16 left-0 right-0 z-10 px-4 flex flex-col items-center pointer-events-none">
+        <div class="absolute top-16 left-0 right-0 z-20 px-4 flex flex-col items-center pointer-events-none">
             <!-- Speech recognition feedback bubble -->
-            <div id="speech-bubble" class="bg-slate-900/90 border border-pink-500/40 px-4 py-2 rounded-2xl shadow-lg flex items-center gap-2 transform scale-0 transition-transform duration-300">
-                <span class="text-xs font-extrabold text-pink-400 uppercase tracking-widest">声：</span>
-                <span id="detected-speech" class="text-base font-black text-white italic">Panda!</span>
+            <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-4 py-2.5 rounded-2xl shadow-xl flex flex-col items-center gap-1.5 transform scale-0 transition-transform duration-300 w-11/12 max-w-[320px]">
+                <div class="flex items-center justify-between w-full border-b border-slate-800 pb-1">
+                    <span class="text-[10px] font-extrabold text-pink-400 uppercase tracking-widest flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping"></span>
+                        音声入力モニター
+                    </span>
+                    <span id="speech-status-tag" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 uppercase tracking-wider">検知中</span>
+                </div>
+                <div class="w-full text-center py-1">
+                    <p id="detected-speech" class="text-base font-black text-white italic tracking-wide">Panda!</p>
+                </div>
+                <!-- 【v1.22新設：Alternatives (候補) HUD可視化デバッグエリア】 -->
+                <div id="speech-alternatives-hud" class="w-full text-[9px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1.5">
+                    <!-- 判定候補テキストがリアルタイムに表示されます -->
+                </div>
             </div>
         </div>
 
@@ -235,7 +247,7 @@
             </div>
             <h3 class="text-xl font-bold text-slate-100 mb-2">マイクの許可が必要です</h3>
             <p class="text-sm text-slate-400 mb-6 leading-relaxed">
-                このゲームは、あなたの発音を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
+                このゲームは、あなたの発声を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
             </p>
             <button onclick="requestMicAccess()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all">
                 マイクを使う！
@@ -376,9 +388,7 @@
             recognition = new SpeechRecognition();
             recognition.continuous = true; 
             recognition.interimResults = true; 
-            // 【v1.21新設：マルチ候補サーチの設定】
-            // 漢字変換される前のひらがな・カタカナ候補を裏で最大10個まで引き出す設定に変更
-            recognition.maxAlternatives = 10; 
+            recognition.maxAlternatives = 10; // 最大10個の候補リストを取得
 
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
             recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
@@ -394,21 +404,28 @@
             recognition.onresult = async (event) => {
                 const lastResultIndex = event.results.length - 1;
                 const resList = event.results[lastResultIndex]; // 複数候補リスト
+                const isFinal = resList.isFinal;
                 
-                if (lastResultIndex > lastProcessedResultIndex || !resList.isFinal) {
+                if (lastResultIndex > lastProcessedResultIndex || !isFinal) {
                     let speechResult = "";
+                    let alternativeTexts = [];
 
-                    // 【v1.21新設：漢字変換バイパス・マルチオルタナティブ・トラッカー】
-                    // ひらがな・カタカナコースの場合、全候補の中から「漢字を含まない（ピュアなひらがな・カタカナ）」候補を最優先で探索する
+                    // デバッグHUD表示用に全候補リストを収集
+                    for (let k = 0; j = Math.min(resList.length, 4), k < j; k++) {
+                        alternativeTexts.push(resList[k].transcript);
+                    }
+
                     const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
                     
                     if (isJapaneseCourse) {
+                        // 【v1.22 漢字回避の真骨頂：Interim-Bypass (暫定結果スキャン) 法】
+                        // 音声の組み立て途中（確定前）のひらがなテキストは、漢字変換が入る前なので100%「ひらがな」です。
+                        // これをスキャンして「いす」や「いぬ」などの最初の1文字を捉えたら、その瞬間に判定合格にします。
                         for (let j = 0; j < resList.length; j++) {
                             const alternativeText = resList[j].transcript;
                             // 漢字が含まれていないかチェック
                             const hasKanji = /[\u4e00-\u9faf]/.test(alternativeText);
                             
-                            // 漢字が一切含まれていないひらがな・カタカナの候補が見つかったら、それを「発音」として確定採用！
                             if (!hasKanji && alternativeText.trim() !== "") {
                                 speechResult = alternativeText;
                                 break;
@@ -416,14 +433,19 @@
                         }
                     }
 
-                    // ひらがな候補が見つからなかった、または他コースの場合は、通常通り最も信頼度の高い1番目の候補を使用
+                    // 候補から見つからなかった場合は一番目の確定テキスト（漢字含む）を通常通りフォールバック採用
                     if (!speechResult) {
                         speechResult = resList[0].transcript;
                     }
 
                     if (speechResult.trim() !== '') {
+                        // リアルタイムにHUD表示を更新して「何がどう検知されたか」を見える化
+                        updateSpeechBubbleMonitor(speechResult, isFinal, alternativeTexts);
+
                         const success = await handleSpeechInput(speechResult);
-                        if (success && resList.isFinal) {
+                        
+                        // 正解(変身)した、もしくは完全に確定(isFinal)したインデックスは二重判定防止のためにロック
+                        if (success || isFinal) {
                             lastProcessedResultIndex = lastResultIndex;
                         }
                     }
@@ -461,7 +483,6 @@
 
             // かな変換ヘルパー関数
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
-            const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
 
             const clean = (str) => {
                 if (isJapaneseCourse) {
@@ -480,7 +501,6 @@
             };
 
             const speechText = clean(rawText);
-            showSpeechBubble(rawText); 
 
             const list = courses[currentCourse];
             let matched = null;
@@ -489,8 +509,6 @@
 
             if (isJapaneseCourse) {
                 // 【ひらがな・カタカナコース：頭文字（最初の1文字）ベースで判定】
-                // v1.21では、複数候補から漢字を含まない（ひらがな・カタカナ）候補を最優先で取得するため、
-                // 1文字の頭文字抽出が極めて高い精度でジャスト判定されます。
                 const cleanedRaw = rawText.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
                 
                 if (cleanedRaw.length > 0) {
@@ -533,19 +551,58 @@
             return false; 
         }
 
-        // フキダシに発音した言葉を漫画風にポップアップさせる
-        function showSpeechBubble(text) {
+        // 【v1.22新設：音声入力HUDモニターの更新】
+        // 何の声が検知され、なぜ合格になったかが100%見える化されます
+        function updateSpeechBubbleMonitor(text, isFinal, alternatives) {
             const bubble = document.getElementById('speech-bubble');
             const detected = document.getElementById('detected-speech');
+            const statusTag = document.getElementById('speech-status-tag');
+            const alternativesArea = document.getElementById('speech-alternatives-hud');
             
             detected.innerText = text;
+            
+            // 状態（暫定 or 確定）のパルス表示
+            if (isFinal) {
+                statusTag.innerText = "確定結果";
+                statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase tracking-wider";
+            } else {
+                statusTag.innerText = "話し中...";
+                statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 uppercase tracking-wider animate-pulse";
+            }
+
+            // Alternatives (その他の解釈候補) を丸形チップで並べる
+            alternativesArea.innerHTML = "";
+            if (alternatives && alternatives.length > 0) {
+                // 重複を除く
+                const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 3);
+                if (uniqueAlts.length > 0) {
+                    const spanLabel = document.createElement('span');
+                    spanLabel.className = "text-slate-600 mr-1";
+                    spanLabel.innerText = "候補:";
+                    alternativesArea.appendChild(spanLabel);
+                    
+                    uniqueAlts.forEach(alt => {
+                        const chip = document.createElement('span');
+                        chip.className = "px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/50 scale-95";
+                        chip.innerText = alt;
+                        alternativesArea.appendChild(chip);
+                    });
+                }
+            }
+            
             bubble.classList.remove('scale-0');
             bubble.classList.add('scale-100');
             
-            setTimeout(() => {
-                bubble.classList.remove('scale-100');
-                bubble.classList.add('scale-0');
-            }, 2000);
+            // 確定状態になったら2.5秒後に閉じる
+            if (isFinal) {
+                setTimeout(() => {
+                    // まだ別の音声の入力が始まっていなければ閉じる
+                    if (detected.innerText === text) {
+                        bubble.classList.remove('scale-100');
+                        bubble.classList.add('scale-0');
+                    }
+                }, 2500);
+            }
         }
 
         // --- お手本音声出力（音声合成） ---
@@ -1131,7 +1188,7 @@
             ctx.restore();
         }
 
-        // --- Canvas 描画エンジン（擬似3D道路） ---
+        // --- Canvas 描画エンジン（擬似 3D道路） ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
