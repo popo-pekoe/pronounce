@@ -72,10 +72,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.16 にカウントアップ -->
+                <!-- バージョン表記を v1.17 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.16</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.17</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -83,15 +83,26 @@
                 </p>
             </div>
 
-            <!-- AI日本語形態素解析エンジンの準備ローディング画面 -->
-            <div id="loading-engine" class="w-full max-w-xs bg-slate-900/80 border border-purple-500/20 rounded-2xl p-5 my-auto flex flex-col items-center gap-3">
-                <div class="w-10 h-10 border-4 border-t-pink-500 border-purple-900 rounded-full animate-spin"></div>
+            <!-- AI日本語形態素解析エンジンの準備ローディング画面 (v1.17でデバッグログコンソールを追加) -->
+            <div id="loading-engine" class="w-full max-w-xs bg-slate-900/80 border border-purple-500/20 rounded-2xl p-4 my-auto flex flex-col items-center gap-3">
+                <div class="w-8 h-8 border-4 border-t-pink-500 border-purple-900 rounded-full animate-spin"></div>
                 <p id="loading-engine-text" class="text-xs font-bold text-purple-300 tracking-wider text-center leading-relaxed">
                     AI日本語解析エンジンを起動中...<br>
                     <span class="text-[10px] text-slate-500 font-normal">(初回のみ約15MBの辞書データをロードします)</span>
                 </p>
                 <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
                     <div class="bg-gradient-to-r from-pink-500 to-purple-600 h-full w-full rounded-full animate-[pulse_1.5s_infinite]"></div>
+                </div>
+
+                <!-- 【v1.17新設】リアルタイム・デバッグログコンソール領域 -->
+                <div id="debug-log-container" class="w-full mt-2 bg-slate-950/90 rounded-lg p-2 border border-slate-800 text-left font-mono text-[9px] text-slate-400">
+                    <p class="text-slate-500 font-bold border-b border-slate-800 pb-1 mb-1 flex items-center justify-between">
+                        <span>🔍 起動・デバッグログ</span>
+                        <span class="text-[8px] font-normal text-slate-600">Console</span>
+                    </p>
+                    <div id="debug-log-area" class="h-28 overflow-y-auto space-y-1 scrollbar-none select-text">
+                        <!-- ログがここにリアルタイムに出力されます -->
+                    </div>
                 </div>
             </div>
 
@@ -324,6 +335,26 @@
             }
         }
 
+        // --- 【v1.17新設】アプリ内デバッグログ出力システム ---
+        function logDebug(message, type = 'info') {
+            const logArea = document.getElementById('debug-log-area');
+            if (!logArea) return;
+            const time = new Date().toTimeString().split(' ')[0];
+            const logItem = document.createElement('p');
+            
+            let color = 'text-slate-400';
+            let prefix = 'ℹ️';
+            
+            if (type === 'success') { color = 'text-emerald-400'; prefix = '✅'; }
+            if (type === 'warning') { color = 'text-amber-400'; prefix = '⚠️'; }
+            if (type === 'error') { color = 'text-rose-400'; prefix = '❌'; }
+            
+            logItem.className = `${color} leading-normal break-all font-mono text-[9px]`;
+            logItem.innerHTML = `<span class="text-slate-600">[${time}]</span> ${prefix} ${message}`;
+            logArea.appendChild(logItem);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
         // --- STREAMING_CHUNK: Initializing Sound Synthesizer... ---
         function playSound(type) {
             initAudio();
@@ -386,42 +417,80 @@
         let isKuroshiroReady = false;
 
         async function initKuroshiro() {
+            logDebug("Kuroshiro日本語解析の初期化を開始...");
             try {
-                // CDN経由の読み込みでは、Kuroshiro や KuromojiAnalyzer が直接グローバルな関数にならず、
-                // .default 内にビルドエクスポートされる場合があるため、互換性のためのフォールバック処理を行います。
+                // 読み込みチェック
+                logDebug("CDNライブラリの読み込み状況を確認中...");
+                if (typeof Kuroshiro === 'undefined') {
+                    logDebug("Kuroshiroライブラリが見つかりません。通信エラーの可能性があります。", 'error');
+                } else {
+                    logDebug("Kuroshiroライブラリの読み込みを検知しました。", 'success');
+                }
+
+                if (typeof KuromojiAnalyzer === 'undefined') {
+                    logDebug("KuromojiAnalyzerライブラリが見つかりません。", 'error');
+                } else {
+                    logDebug("KuromojiAnalyzerライブラリの読み込みを検知しました。", 'success');
+                }
+
                 const KuroshiroClass = (typeof Kuroshiro !== 'undefined' && Kuroshiro.default) ? Kuroshiro.default : Kuroshiro;
                 const KuromojiAnalyzerClass = (typeof KuromojiAnalyzer !== 'undefined' && KuromojiAnalyzer.default) ? KuromojiAnalyzer.default : KuromojiAnalyzer;
 
                 if (typeof KuroshiroClass !== 'function') {
-                    throw new Error("Kuroshiro class is not resolved correctly from CDN.");
+                    throw new Error("Kuroshiroコンストラクタの解決に失敗しました。");
                 }
 
                 kuroshiro = new KuroshiroClass();
+                logDebug("Kuroshiroインスタンスの生成に成功。", 'success');
+
+                logDebug("KuromojiAnalyzer辞書ファイル(約15MB)をリクエスト中...");
+                logDebug("通信環境やブラウザのCORS制限によっては数十秒かかる場合があります...", 'warning');
+
                 const analyzer = new KuromojiAnalyzerClass({
                     dictPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/"
                 });
-                await kuroshiro.init(analyzer);
-                isKuroshiroReady = true;
 
-                // ロード完了時にUIを切り替えてボタンを表示
-                document.getElementById('loading-engine').classList.add('hidden');
-                document.getElementById('course-selector-area').classList.remove('hidden');
-                console.log("Kuroshiro + Kuromoji Morphological Analyzer initialized!");
-            } catch (err) {
-                console.error("Kuroshiro initialization error, falling back:", err);
-                // 通信エラー時などのフォールバック。お題がひらがなのみならそのまま動作できるようにボタンを開放する
-                document.getElementById('loading-engine-text').innerHTML = "⚠️ オフラインまたは起動エラー<br><span class='text-[10px] text-red-400'>ひらがな判定が制限される場合があります</span>";
+                // 【v1.17機能】15秒の接続タイムアウトを明示的に設定
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("辞書データのロードがタイムアウト(15秒)しました。CORS制限または接続遅延の可能性があります。")), 15000)
+                );
+
+                logDebug("Kuromoji辞書のロードとKuroshiroへの登録を開始...");
+                // 辞書のロードとタイムアウトの競合
+                await Promise.race([kuroshiro.init(analyzer), timeoutPromise]);
+                
+                isKuroshiroReady = true;
+                logDebug("日本語形態素解析エンジンのセットアップが全て完了しました！", 'success');
+
+                // 正常ロード完了時は0.8秒後にコースセクターを開放
                 setTimeout(() => {
                     document.getElementById('loading-engine').classList.add('hidden');
                     document.getElementById('course-selector-area').classList.remove('hidden');
-                }, 2000);
+                }, 800);
+
+            } catch (err) {
+                logDebug(`解析エンジンの初期化中にエラーが発生: ${err.message}`, 'error');
+                console.error("Kuroshiro initialization error, falling back:", err);
+                
+                // エラー時のフォールバック画面更新
+                document.getElementById('loading-engine-text').innerHTML = "⚠️ 起動エラーが発生しました<br><span class='text-[10px] text-red-400'>デバッグログを確認し、コースを選択してください</span>";
+                logDebug("ひらがな相互変換を制限した【フォールバックモード】で3秒後にゲームメニューを開放します...", 'warning');
+
+                // 3秒後にメニューを開放して、ゲーム自体は継続できるようにする
+                setTimeout(() => {
+                    document.getElementById('loading-engine').classList.add('hidden');
+                    document.getElementById('course-selector-area').classList.remove('hidden');
+                    logDebug("フォールバックモードでコース選択を開放しました。");
+                }, 3000);
             }
         }
 
         function initSpeech() {
+            logDebug("Web Speech API 音声認識のセットアップを開始...");
             if (!SpeechRecognition) {
                 document.getElementById('mic-text').innerText = "音声認識未対応";
                 document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-red-500";
+                logDebug("このブラウザは音声認識(Web Speech API)に対応していません。", 'error');
                 return;
             }
 
@@ -438,6 +507,7 @@
                 document.getElementById('mic-text').innerText = "リスニング中";
                 document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-pink-400 uppercase";
                 lastProcessedResultIndex = -1; 
+                logDebug(`マイク接続を確立しました。認識言語: ${recognition.lang}`, 'success');
             };
 
             recognition.onresult = async (event) => {
@@ -457,13 +527,16 @@
 
             recognition.onerror = (event) => {
                 console.warn('Speech recognition error:', event.error);
+                logDebug(`音声認識中にエラー検知: ${event.error}`, 'warning');
                 if (event.error === 'not-allowed') {
                     document.getElementById('mic-modal').classList.remove('hidden');
+                    logDebug("マイクの使用許可がブラウザによって拒否されました。", 'error');
                 }
             };
 
             recognition.onend = () => {
                 isSpeechActive = false;
+                logDebug("音声認識ストリーミング接続が終了しました。");
                 if (isPlaying) {
                     try {
                         recognition.start();
@@ -759,7 +832,7 @@
 
                     ctx.fillStyle = "#78350f";
                     ctx.beginPath();
-                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.04, size * 0.05, 0, 0, Math.PI * 2);
+                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.05, 0, 0, Math.PI * 2);
                     ctx.fill(); ctx.stroke();
                     ctx.restore();
                     break;
@@ -1615,6 +1688,7 @@
                 recognition.stop();
             }
         }
+
 
         // マイク許可リクエスト
         function requestMicAccess() {
