@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.09 にカウントアップ -->
+                <!-- バージョン表記を v1.10 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.09</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.10</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -244,7 +244,7 @@
     </div>
 
     <script>
-        // --- コース構成データ (v1.08 ひらがな・カタカナを追加) ---
+        // --- コース構成データ ---
         const courses = {
             animals: [
                 { word: "Panda", emoji: "🐼", prompt: "パンダ" },
@@ -367,11 +367,11 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Integrating Web Speech API (with zero-latency continuous detection)... ---
-        // 音声認識の統合（Web Speech API）
+        // --- STREAMING_CHUNK: Integrating Web Speech API with cumulative lag elimination ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
+        let lastProcessedResultIndex = -1; // 【v1.10新設】最後に判定処理に成功したresultIndexを保持して被り・累積を排除
 
         function initSpeech() {
             if (!SpeechRecognition) {
@@ -381,11 +381,10 @@
             }
 
             recognition = new SpeechRecognition();
-            // 【超高速判定の核心】continuous = true にすることでマイク接続を常にキープ
-            recognition.continuous = true; 
+            recognition.continuous = true; // マイク接続を常時キープして切断ラグを排除
             recognition.interimResults = true; 
 
-            // 【v1.08 言語自動切り替え】日本語コースなら日本語、それ以外は英語
+            // 言語自動切り替え（日本語コースなら日本語、それ以外は英語）
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
             recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
 
@@ -394,25 +393,26 @@
                 document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-pink-500 animate-ping";
                 document.getElementById('mic-text').innerText = "リスニング中";
                 document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-pink-400 uppercase";
+                lastProcessedResultIndex = -1; // 起動時にインデックスを初期化
             };
 
             recognition.onresult = (event) => {
-                // 【ゼロ遅延】最新の発音（未確定/確定セグメント）だけを即時切り出して超高速解析
-                let latestInterim = '';
-                let latestFinal = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const res = event.results[i];
-                    if (res.isFinal) {
-                        latestFinal += res[0].transcript;
-                    } else {
-                        latestInterim += res[0].transcript;
+                // 【v1.10累積バグ完全解消】過去のバッファ配列をすべて無視し、
+                // プレイヤーがたった今声に出した「最後の結果（最新セグメント）」だけをピンポイント抽出！
+                const lastResultIndex = event.results.length - 1;
+                const res = event.results[lastResultIndex];
+                
+                // 新しい未確定、または確定セグメントのみ処理する
+                if (lastResultIndex > lastProcessedResultIndex || !res.isFinal) {
+                    const speechResult = res[0].transcript;
+                    if (speechResult.trim() !== '') {
+                        const success = handleSpeechInput(speechResult);
+                        // 変身に成功し、かつ確定（isFinal）セグメントの場合、
+                        // このセグメントインデックスを「処理済み」としてキャッシュし、次回以降の被りを完全シャットアウト
+                        if (success && res.isFinal) {
+                            lastProcessedResultIndex = lastResultIndex;
+                        }
                     }
-                }
-
-                const speechResult = latestFinal || latestInterim;
-                if (speechResult.trim() !== '') {
-                    handleSpeechInput(speechResult);
                 }
             };
 
@@ -425,7 +425,6 @@
 
             recognition.onend = () => {
                 isSpeechActive = false;
-                // ブラウザ側の自動切断に備えた安全装置
                 if (isPlaying) {
                     try {
                         recognition.start();
@@ -449,10 +448,18 @@
         function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
 
-            // クレンジング処理（日本語なら余分な記号排除のみ、英語なら英数字に絞る）
+            // クレンジング処理（日本語なら余分な記号排除＋重複圧縮、英語なら英数字のみにサニタイズ）
             const clean = (str) => {
                 if (isJapaneseCourse) {
-                    return str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
+                    let cleaned = str.replace(/[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]/g, "").trim();
+                    // 【v1.10一文字縮約補正】いー、いいなど文字が複数認識された場合、一文字（い）に圧縮
+                    if (cleaned.length > 1) {
+                        const firstChar = cleaned.charAt(0);
+                        if ([...cleaned].every(c => c === firstChar)) {
+                            cleaned = firstChar;
+                        }
+                    }
+                    return cleaned;
                 } else {
                     return str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
                 }
@@ -479,7 +486,7 @@
                 return toHiragana(s) === toHiragana(t) || toKatakana(s) === toKatakana(t);
             };
 
-            // 優先判定①：現在ターゲットの単語と部分一致・または完全一致しているか（遅延なし判定）
+            // 優先判定①：現在ターゲットの単語と部分一致・または完全一致しているか
             if (isMatch(speechText, activeTargetClean)) {
                 matched = activeTargetItem;
             } else {
@@ -489,7 +496,9 @@
 
             if (matched) {
                 player.transformTo(matched.word, matched.emoji);
+                return true; // 判定成功
             }
+            return false; // 判定不一致
         }
 
         // フキダシに発音した言葉を漫画風にポップアップさせる
@@ -534,8 +543,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Designing 2.5D graphics vectors on Canvas context... ---
-        // 自作ベクターイラスト描画エンジン
+        // --- 自作ベクターイラスト描画エンジン (v1.06 細部調整入り) ---
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); // 描画の基準位置をキャラクター中央へ調整
@@ -869,7 +877,6 @@
                     ctx.fill();
                     break;
 
-                // ==================== STREAMING_CHUNK: Rendering vehicles (Ambulance, Firetruck, etc.)... ====================
                 // ==================== はたらくくるま ====================
                 case "Ambulance":
                     ctx.fillStyle = "#1e293b";
@@ -1079,15 +1086,13 @@
                     ctx.stroke();
                     break;
 
-                // ==================== 【NEW v1.08】ひらがな・カタカナ ====================
+                // ==================== ひらがな・カタカナ ====================
                 default:
-                    // 文字をそのまま美しく立体・輪郭付きテキストとしてレンダリング
                     ctx.fillStyle = "#38bdf8"; // 美しいネオンシアン
                     ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
-                    // くっきりとした白い縁取りを追加
                     ctx.lineWidth = size * 0.09;
                     ctx.strokeStyle = "#ffffff";
                     ctx.strokeText(name, 0, 0);
@@ -1097,8 +1102,7 @@
             ctx.restore();
         }
 
-        // --- STREAMING_CHUNK: Setting up HTML5 Canvas dimension helper functions... ---
-        // Canvas 描画エンジン（擬似3D道路）
+        // --- Canvas 描画エンジン（擬似3D道路） ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -1129,7 +1133,8 @@
         // 道路移動用のアニメーションタイマー
         let roadOffset = 0;
 
-        // --- STREAMING_CHUNK: Defining Player and Obstacle Gate classes... ---
+        // --- ゲームクラス ---
+
         // プレイヤー（変身する本体）
         class Player {
             constructor() {
@@ -1366,7 +1371,6 @@
                     ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() / 150);
                     
                     // 【v1.06 ゲート奥のヒント表示の強化】
-                    // 奥に見えるヒント画像にも白い光彩グローを適用して遠くからでも見やすくする
                     ctx.shadowColor = "#ffffff";
                     ctx.shadowBlur = 10;
                     
@@ -1409,7 +1413,6 @@
                 ctx.rotate(this.rotation);
                 ctx.globalAlpha = this.alpha;
                 
-                // パーティクルも白いアウトライン・グローをうっすら入れる
                 ctx.shadowColor = "#ffffff";
                 ctx.shadowBlur = 6;
 
@@ -1459,7 +1462,6 @@
             const cm = document.getElementById('combo-val');
             cm.innerText = combo;
 
-            // コンボに応じてちょっと文字を拡大させるポップ演出
             cm.className = `text-xl font-black text-pink-400 transition-all ${combo > 0 ? 'scale-125 duration-100' : ''}`;
             setTimeout(() => { cm.className = "text-xl font-black text-pink-400"; }, 150);
         }
@@ -1469,7 +1471,6 @@
         function gameLoop() {
             if (!isPlaying) return;
 
-            // 1. 描画初期化 ＆ カメラシェイク（揺れ）適用
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             
@@ -1477,18 +1478,17 @@
                 const dx = (Math.random() - 0.5) * screenShake;
                 const dy = (Math.random() - 0.5) * screenShake;
                 ctx.translate(dx, dy);
-                screenShake *= 0.88; // 揺れを徐々に減衰させる
+                screenShake *= 0.88; 
                 if (screenShake < 0.2) screenShake = 0;
             }
 
-            // 2. 背景・地平線グラデーションの描画
+            // 背景
             const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.35);
-            skyGrad.addColorStop(0, '#020617'); // ディープナイト
-            skyGrad.addColorStop(1, '#0f172a'); // トワイライト
+            skyGrad.addColorStop(0, '#020617'); 
+            skyGrad.addColorStop(1, '#0f172a'); 
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height * 0.35);
 
-            // 地平線のうっすら発光
             ctx.shadowBlur = 15;
             ctx.shadowColor = activeGate ? activeGate.color : '#6366f1';
             ctx.beginPath();
@@ -1499,22 +1499,21 @@
             ctx.stroke();
             ctx.shadowBlur = 0;
 
-            // 3. 遠近感のある3D道路（コンベア）の描画
+            // 道路
             const horizonY = canvas.height * 0.35;
             const roadGrad = ctx.createLinearGradient(0, horizonY, 0, canvas.height);
-            roadGrad.addColorStop(0, '#1e1b4b'); // 暗いインディゴ
-            roadGrad.addColorStop(1, '#090514'); // ディープネイビー
+            roadGrad.addColorStop(0, '#1e1b4b'); 
+            roadGrad.addColorStop(1, '#090514'); 
             ctx.fillStyle = roadGrad;
 
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, horizonY);
-            // 道路の末端を手前両端に広げる
             ctx.lineTo(canvas.width * 1.5, canvas.height);
             ctx.lineTo(-canvas.width * 0.5, canvas.height);
             ctx.closePath();
             ctx.fill();
 
-            // 4. 動いている感を示す側面のチェッカーライン（赤白のガイドライン）の描画
+            // チェッカーライン
             roadOffset += 0.003; 
             if (roadOffset >= 1.0) roadOffset = 0;
 
@@ -1530,14 +1529,12 @@
 
                 ctx.lineWidth = 8 * pStartLeft.scale;
                 
-                // 左境界線（赤白交互）
                 ctx.strokeStyle = (i % 2 === 0) ? '#ef4444' : '#ffffff';
                 ctx.beginPath();
                 ctx.moveTo(pStartLeft.x, pStartLeft.y);
                 ctx.lineTo(pEndLeft.x, pEndLeft.y);
                 ctx.stroke();
 
-                // 右境界線（赤白交互）
                 ctx.strokeStyle = (i % 2 === 0) ? '#ef4444' : '#ffffff';
                 ctx.beginPath();
                 ctx.moveTo(pStartRight.x, pStartRight.y);
@@ -1545,17 +1542,14 @@
                 ctx.stroke();
             }
 
-            // 5. ゲートの更新・描画
             if (activeGate) {
                 activeGate.update();
                 activeGate.draw();
             }
 
-            // 6. プレイヤーの更新・描画
             player.update();
             player.draw();
 
-            // 7. エフェクト粒子群の更新・描画
             particles = particles.filter(p => {
                 p.update();
                 p.draw();
@@ -1566,7 +1560,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // --- STREAMING_CHUNK: Initializing game start and exit functions... ---
         // --- ゲーム開始のトリガー ---
         function startGame(courseType) {
             currentCourse = courseType;
@@ -1574,21 +1567,14 @@
             combo = 0;
             isPlaying = true;
             
-            // UIをゲーム中に切り替える
             document.getElementById('start-screen').classList.add('hidden');
             updateHUD();
 
-            // プレイヤー初期化
             player.reset();
-
-            // 最初のゲートを作成
             spawnNext();
 
-            // BGM ＆ 音声認識スタート
             playSound('start');
             initSpeech();
-
-            // アニメーションループ開始
             gameLoop();
         }
 
@@ -1602,7 +1588,7 @@
             }
         }
 
-        // --- マイク許可をブラウザに強制リクエストする ---
+        // マイク許可リクエスト
         function requestMicAccess() {
             document.getElementById('mic-modal').classList.add('hidden');
             navigator.mediaDevices.getUserMedia({ audio: true })
