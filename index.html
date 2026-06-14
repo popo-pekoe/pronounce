@@ -73,10 +73,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.36 にカウントアップ -->
+                <!-- バージョン表記を v1.40 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.36</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.40</span>
                 </div>
                 
                 <!-- トータル合計点表示（24時間タイマー付き） ＆ リセットボタン -->
@@ -104,13 +104,13 @@
                 <div id="main-menu-view" class="flex flex-col gap-3 w-full">
                     <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                     
-                    <!-- 1. すうじコース -->
-                    <button onclick="startGame('numbers')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                    <!-- 1. すうじコース (押すとレベル選択ビューが展開) -->
+                    <button onclick="showNumbersMenu()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-3xl">🔢</span>
-                            <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (0〜10：なな/しち、ゼロ/れい等対応)</span></span>
+                            <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (Lv1〜3：0〜100、複数読み対応)</span></span>
                         </div>
-                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
 
                     <!-- 2. テストコース (サブメニュー切り替え) -->
@@ -123,7 +123,45 @@
                     </button>
                 </div>
 
-                <!-- Test Menu Layer (くだもの、ひらがな、カタカナ - 初期非表示) -->
+                <!-- Numbers Level View (v1.40新設) -->
+                <div id="numbers-menu-view" class="flex flex-col gap-2.5 w-full hidden">
+                    <p class="text-center text-xs font-bold text-slate-500 tracking-wider font-extrabold text-purple-400 uppercase tracking-widest">🔢 すうじコース レベルせんたく</p>
+                    
+                    <!-- Lv1 (0〜10) -->
+                    <button onclick="startNumbersGame(1)" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl font-bold">①</span>
+                            <span class="text-left text-sm">レベル 1 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 10 (ぜろ 〜 じゅう)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- Lv2 (0〜30) -->
+                    <button onclick="startNumbersGame(2)" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-550 hover:to-indigo-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl font-bold">②</span>
+                            <span class="text-left text-sm">レベル 2 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 30 (ぜろ 〜 さんじゅう)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- Lv3 (0〜100) -->
+                    <button onclick="startNumbersGame(3)" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-550 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl font-bold">③</span>
+                            <span class="text-left text-sm">レベル 3 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 100 (ぜろ 〜 ひゃく)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- メインメニューに戻る -->
+                    <button onclick="showMainMenu()" class="w-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold py-2 px-4 rounded-xl transition-all duration-150 transform active:scale-95 flex items-center justify-center gap-1.5 text-xs mt-1">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>もどる</span>
+                    </button>
+                </div>
+
+                <!-- Test Menu Layer (くだもの、ひらがな、カタカナ) -->
                 <div id="test-menu-view" class="flex flex-col gap-2.5 w-full hidden">
                     <p class="text-center text-xs font-bold text-slate-500 tracking-wider font-extrabold text-pink-400 uppercase tracking-widest">🧪 テストコース</p>
 
@@ -173,7 +211,6 @@
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
             
             <!-- 音声入力モニターを左下隅に避けてコンパクトに配置 -->
-            <!-- 画面中央を走る自分（プレイヤー）の数字を一切隠さず、快適にモニタリングできます -->
             <div class="absolute bottom-4 left-4 z-20 pointer-events-none">
                 <!-- Speech recognition feedback bubble -->
                 <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-3 py-2 rounded-xl shadow-xl flex flex-col gap-1 transform scale-0 transition-transform duration-300 w-56">
@@ -272,7 +309,7 @@
             <p class="text-sm text-slate-400 mb-6 leading-relaxed">
                 このゲームは、あなたの発声を聞き取ってリアルタイムに変身します。マイクへのアクセスを許可してください！
             </p>
-            <button onclick="requestMicAccess()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all">
+            <button onclick="requestMicAccess()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all text-sm">
                 マイクを使う！
             </button>
         </div>
@@ -295,7 +332,7 @@
                 </div>
                 <div class="flex justify-between items-center text-xs text-slate-400">
                     <span>基本固定点</span>
-                    <span class="text-emerald-400 font-extrabold">+1点</span>
+                    <span id="result-fixed-points" class="text-emerald-400 font-extrabold">+1点</span>
                 </div>
                 <div class="flex justify-between items-center text-xs text-slate-400">
                     <span>加算ボーナス</span>
@@ -338,20 +375,8 @@
     <script>
         // --- コース構成データ ---
         const courses = {
-            // 【数字コース（0〜10）】複数読み対応・漢字対応を含めた設計
-            numbers: [
-                { word: "0", display: "0 (ゼロ / レイ)", kanji: "零", readings: ["ゼロ", "ぜろ", "レイ", "れい", "0", "零"], emoji: "0️⃣", char: "0" },
-                { word: "1", display: "1 (イチ)", kanji: "一", readings: ["イチ", "いち", "一", "1"], emoji: "1️⃣", char: "1" },
-                { word: "2", display: "2 (ニ)", kanji: "二", readings: ["ニ", "に", "二", "2"], emoji: "2️⃣", char: "2" },
-                { word: "3", display: "3 (サン)", kanji: "三", readings: ["サン", "さん", "三", "3"], emoji: "3️⃣", char: "3" },
-                { word: "4", display: "4 (ヨン / シ)", kanji: "四", readings: ["ヨン", "よん", "シ", "し", "四", "4"], emoji: "4️⃣", char: "4" },
-                { word: "5", display: "5 (ゴ)", kanji: "五", readings: ["ゴ", "ご", "五", "5"], emoji: "5️⃣", char: "5" },
-                { word: "6", display: "6 (ロク)", kanji: "六", readings: ["ロク", "ろく", "六", "6"], emoji: "6️⃣", char: "6" },
-                { word: "7", display: "7 (ナナ / シチ)", kanji: "七", readings: ["ナナ", "なな", "シチ", "しち", "七", "7"], emoji: "7️⃣", char: "7" },
-                { word: "8", display: "8 (ハチ)", kanji: "八", readings: ["ハチ", "はち", "八", "8"], emoji: "8️⃣", char: "8" },
-                { word: "9", display: "9 (キュウ / ク)", kanji: "九", readings: ["キュウ", "きゅう", "ク", "く", "九", "9"], emoji: "9️⃣", char: "9" },
-                { word: "10", display: "10 (ジュウ)", kanji: "十", readings: ["ジュウ", "じゅう", "十", "10"], emoji: "10", char: "10" }
-            ],
+            // 【数字コース（Lv1~Lv3に対応するため、ゲーム開始時に numbersLevelConfig に基づいて動的に 11 問生成・上書きされます）】
+            numbers: [],
             // 【テストコース群】
             fruits: [
                 { word: "Banana", emoji: "🍌", prompt: "バナナ" },
@@ -377,9 +402,11 @@
             ]
         };
 
-        // --- LEVEL構成 (v1.36: お題巨大化に合わせてスピードを少しスローダウン) ---
+        // --- LEVEL構成 (v1.40: 新しいすうじレベル設定を定義) ---
         const numbersLevelConfig = {
-            1: { fixedPoints: 1, additionPoints: 0, speed: 0.0011, title: "Lv1" }
+            1: { fixedPoints: 1, additionPoints: 0, speed: 0.0011, maxNum: 10, title: "Lv1" },
+            2: { fixedPoints: 2, additionPoints: 0, speed: 0.0013, maxNum: 30, title: "Lv2" },
+            3: { fixedPoints: 3, additionPoints: 0, speed: 0.0015, maxNum: 100, title: "Lv3" }
         };
 
         // --- ゲーム状態管理 ---
@@ -656,6 +683,181 @@
             }
         }
 
+        // --- 【v1.40新設】 0〜100に対応する「完全ローカル・動的日本語読みデコーダー」 ---
+        function generateDynamicNumbersCourse(level) {
+            const config = numbersLevelConfig[level];
+            const maxNum = config.maxNum;
+            const generatedList = [];
+
+            // 0からmaxNumまでの数字配列を作成
+            const allNums = [];
+            for (let i = 0; i <= maxNum; i++) {
+                allNums.push(i);
+            }
+            
+            // フィッシャー・イェーツのシャッフルで出題数字をランダム化
+            for (let i = allNums.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const temp = allNums[i];
+                allNums[i] = allNums[j];
+                allNums[j] = temp;
+            }
+
+            // 最大11個（または用意された最大数まで）を抽出してお題リストにする
+            const count = Math.min(11, allNums.length);
+            for (let i = 0; i < count; i++) {
+                generatedList.push(generateSingleNumberData(allNums[i]));
+            }
+
+            // numbersコースデータを動的に書き換え
+            courses.numbers = generatedList;
+        }
+
+        function generateSingleNumberData(num) {
+            if (num === 0) {
+                return { 
+                    word: "0", 
+                    display: "0 (ゼロ / レイ)", 
+                    kanji: "零", 
+                    readings: ["ゼロ", "ぜろ", "レイ", "れい", "0", "零", "れいじ", "れいじょう"], 
+                    emoji: "0️⃣", 
+                    char: "0" 
+                };
+            }
+            if (num === 100) {
+                return {
+                    word: "100",
+                    display: "100 (ヒャク)",
+                    kanji: "百",
+                    readings: ["ヒャク", "ひゃく", "百", "100"],
+                    emoji: "💯",
+                    char: "100"
+                };
+            }
+
+            const kanjiDigits = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+            const kanaDigits = ["", "いち", "に", "さん", "よん", "ご", "ろく", "なな", "はち", "きゅう"];
+            const kataDigits = ["", "イチ", "ニ", "サン", "ヨン", "ゴ", "ロク", "ナナ", "ハチ", "キュウ"];
+            
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
+            
+            let kanji = "";
+            let readings = [num.toString()];
+            
+            // 漢字表記の動的構築
+            if (tens > 0) {
+                if (tens > 1) {
+                    kanji += kanjiDigits[tens];
+                }
+                kanji += "十";
+            }
+            if (ones > 0) {
+                kanji += kanjiDigits[ones];
+            }
+            
+            readings.push(kanji);
+            
+            let hira = "";
+            let kata = "";
+            
+            // ひらがな・カタカナ表記の動的構築
+            if (tens > 0) {
+                if (tens > 1) {
+                    hira += kanaDigits[tens];
+                    kata += kataDigits[tens];
+                }
+                hira += "じゅう";
+                kata += "ジュウ";
+            }
+            if (ones > 0) {
+                hira += kanaDigits[ones];
+                kata += kataDigits[ones];
+            }
+            
+            readings.push(hira);
+            readings.push(kata);
+
+            // 4, 7, 9 のマルチ（複数）読み仮名バリエーション構築
+            let altHiras = [hira];
+
+            // 1の位の読み替え（よん/し、なな/しち、きゅう/く）
+            if (ones === 4) {
+                let base = tens > 0 ? (tens > 1 ? kanaDigits[tens] : "") + "じゅう" : "";
+                altHiras.push(base + "し");
+            }
+            if (ones === 7) {
+                let base = tens > 0 ? (tens > 1 ? kanaDigits[tens] : "") + "じゅう" : "";
+                altHiras.push(base + "しち");
+            }
+            if (ones === 9) {
+                let base = tens > 0 ? (tens > 1 ? kanaDigits[tens] : "") + "じゅう" : "";
+                altHiras.push(base + "く");
+            }
+
+            // 10の位の読み替え
+            if (tens === 4) {
+                let baseSuffix = ones > 0 ? kanaDigits[ones] : "";
+                altHiras.push("しじゅう" + baseSuffix);
+                if (ones === 4) altHiras.push("しじゅうし");
+                if (ones === 7) altHiras.push("しじゅうしち");
+                if (ones === 9) altHiras.push("しじゅうく");
+            }
+            if (tens === 7) {
+                let baseSuffix = ones > 0 ? kanaDigits[ones] : "";
+                altHiras.push("しちじゅう" + baseSuffix);
+                if (ones === 4) altHiras.push("しちじゅうし");
+                if (ones === 7) altHiras.push("しちじゅうしち");
+                if (ones === 9) altHiras.push("しちじゅうく");
+            }
+            if (tens === 9) {
+                let baseSuffix = ones > 0 ? kanaDigits[ones] : "";
+                altHiras.push("くじゅう" + baseSuffix);
+                if (ones === 4) altHiras.push("くじゅうし");
+                if (ones === 7) altHiras.push("くじゅうしち");
+                if (ones === 9) altHiras.push("くじゅうく");
+            }
+
+            // ひらがなからカタカナへの動的変換ヘルパー
+            function toKatakana(str) {
+                return str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
+            }
+
+            altHiras.forEach(h => {
+                if (!readings.includes(h)) readings.push(h);
+                const k = toKatakana(h);
+                if (!readings.includes(k)) readings.push(k);
+            });
+
+            // 表示テキストの構築
+            let display = `${num}`;
+            let subDisplay = "";
+            if (ones === 4 || ones === 7 || ones === 9 || tens === 4 || tens === 7 || tens === 9) {
+                if (num === 4) subDisplay = "よん / し";
+                else if (num === 7) subDisplay = "なな / しち";
+                else if (num === 9) subDisplay = "きゅう / く";
+                else {
+                    subDisplay = hira;
+                    if (ones === 4) subDisplay += "/し";
+                    if (ones === 7) subDisplay += "/しち";
+                    if (ones === 9) subDisplay += "/く";
+                }
+            } else {
+                subDisplay = hira;
+            }
+
+            display = `${num} (${subDisplay})`;
+
+            return {
+                word: num.toString(),
+                display: display,
+                kanji: kanji,
+                readings: readings,
+                emoji: num.toString(),
+                char: num.toString()
+            };
+        }
+
         // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
         async function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
@@ -825,7 +1027,7 @@
             ctx.save();
             
             // 【v1.34】向かってくる数字（設問）のみを面積比9倍（一辺の長さ3倍）にする
-            const isNumber = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(name);
+            const isNumber = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "100"].includes(name) || (parseInt(name, 10) >= 0 && parseInt(name, 10) <= 100);
             if (isNumber && forceEnlarge) {
                 size = size * 3.0;
             }
@@ -837,126 +1039,129 @@
 
             switch (name) {
                 // ==================== すうじ（3倍スケール＆超クッキリ輪郭） ====================
-                case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
-                    // A: 六角形背景の描画
-                    ctx.strokeStyle = "#c084fc"; 
-                    ctx.lineWidth = size * 0.05;
-                    ctx.fillStyle = "rgba(147, 51, 234, 0.12)";
-                    ctx.beginPath();
-                    for (let i = 0; i < 6; i++) {
-                        const angle = (i * Math.PI) / 3;
-                        const x = Math.cos(angle) * size * 0.44;
-                        const y = Math.sin(angle) * size * 0.44;
-                        if (i === 0) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    }
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // B: 【v1.36最適化：フラッシュや点滅のアニメーションを一切排除した、静的な最高コントラスト輪郭】
-                    ctx.font = `bold ${size * 0.65}px 'Fredoka', sans-serif`;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    
-                    // レイヤー1: 背景グロー（静的なボケ光彩効果として一度だけ後ろに描画。チカチカしません）
-                    ctx.save();
-                    ctx.shadowColor = "#f43f5e";
-                    ctx.shadowBlur = 15;
-                    ctx.lineWidth = size * 0.14; // 光彩の広がり
-                    ctx.strokeStyle = "#f43f5e";
-                    ctx.strokeText(name, 0, 0);
-                    ctx.restore();
-
-                    // レイヤー2: 完全に影（シャドウ）を無効にして、文字の「エッジ」をカミソリのようにシャープにする
-                    ctx.shadowBlur = 0;
-                    ctx.shadowColor = "transparent";
-                    
-                    // 視認コントラスト用の極太アウトライン（暗色） - 以前より太くして背景のネオンから完全に切り離します
-                    ctx.strokeStyle = "#0f172a"; // 濃紺グレー
-                    ctx.lineWidth = size * 0.12; 
-                    ctx.strokeText(name, 0, 0);
-
-                    // その上にシャープに浮かび上がる純白のアウトライン
-                    ctx.strokeStyle = "#ffffff"; 
-                    ctx.lineWidth = size * 0.03; 
-                    ctx.strokeText(name, 0, 0);
-
-                    // 最前面のクッキリしたピンクホワイト色塗りつぶし
-                    ctx.fillStyle = "#ffe4e6"; 
-                    ctx.fillText(name, 0, 0);
-                    break;
-
-                // ==================== くだもの (Apple & Banana) ====================
-                case "Apple":
-                    ctx.fillStyle = "#ea580c";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
-                    ctx.arc(size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    
-                    ctx.fillStyle = "#dc2626";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
-                    ctx.arc(size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.strokeStyle = "#78350f";
-                    ctx.lineWidth = 5;
-                    ctx.beginPath();
-                    ctx.moveTo(0, -size * 0.1);
-                    ctx.quadraticCurveTo(size * 0.15, -size * 0.25, size * 0.1, -size * 0.38);
-                    ctx.stroke();
-
-                    ctx.fillStyle = "#22c55e";
-                    ctx.beginPath();
-                    ctx.ellipse(size * 0.15, -size * 0.28, size * 0.15, size * 0.06, -Math.PI / 4, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "rgba(255,255,255,0.45)";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.12, -size * 0.12, size * 0.06, size * 0.11, Math.PI / 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                case "Banana":
-                    ctx.save();
-                    ctx.rotate(-Math.PI / 10);
-                    ctx.fillStyle = "#eab308";
-                    ctx.beginPath();
-                    ctx.arc(0, -size * 0.2, size * 0.44, 0.2 * Math.PI, 0.8 * Math.PI, false);
-                    ctx.quadraticCurveTo(0, size * 0.12, size * 0.35, size * 0.06);
-                    ctx.fill(); ctx.stroke();
-                    
-                    ctx.fillStyle = "#4d7c0f";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.32, size * 0.1, size * 0.06, size * 0.05, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#78350f";
-                    ctx.beginPath();
-                    ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.05, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.restore();
-                    break;
-
-                // ==================== ひらがな・カタカナ、またはベクター未定義くだもののフォールバック描画 ====================
+                case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10": case "100":
                 default:
-                    if (fallbackEmoji) {
-                        ctx.font = `${size * 0.7}px sans-serif`;
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-                        ctx.fillText(fallbackEmoji, 0, 0);
-                    } else {
-                        ctx.fillStyle = "#38bdf8"; 
-                        ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
+                    // 数字（動的生成分含む）の判定
+                    if (isNumber) {
+                        // A: 六角形背景の描画
+                        ctx.strokeStyle = "#c084fc"; 
+                        ctx.lineWidth = size * 0.05;
+                        ctx.fillStyle = "rgba(147, 51, 234, 0.12)";
+                        ctx.beginPath();
+                        for (let i = 0; i < 6; i++) {
+                            const angle = (i * Math.PI) / 3;
+                            const x = Math.cos(angle) * size * 0.44;
+                            const y = Math.sin(angle) * size * 0.44;
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // B: 【v1.36最適化：フラッシュや点滅のアニメーションを一切排除した、静的な最高コントラスト輪郭】
+                        // 桁数が増える（100など）ため、フォント幅を動的にアジャスト
+                        const isThreeDigits = name.length >= 3;
+                        const fontSizeFactor = isThreeDigits ? 0.48 : 0.65;
+                        ctx.font = `bold ${size * fontSizeFactor}px 'Fredoka', sans-serif`;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
                         
-                        ctx.lineWidth = size * 0.09;
-                        ctx.strokeStyle = "#ffffff";
+                        // レイヤー1: 背景グロー（静的なボケ光彩効果として一度だけ後ろに描画。チカチカしません）
+                        ctx.save();
+                        ctx.shadowColor = "#f43f5e";
+                        ctx.shadowBlur = 15;
+                        ctx.lineWidth = size * 0.14; 
+                        ctx.strokeStyle = "#f43f5e";
                         ctx.strokeText(name, 0, 0);
+                        ctx.restore();
+
+                        // レイヤー2: 完全に影（シャドウ）を無効にして、文字の「エッジ」をカミソリのようにシャープにする
+                        ctx.shadowBlur = 0;
+                        ctx.shadowColor = "transparent";
+                        
+                        // 視認コントラスト用の極太アウトライン（暗色）
+                        ctx.strokeStyle = "#0f172a"; // 濃紺グレー
+                        ctx.lineWidth = size * 0.12; 
+                        ctx.strokeText(name, 0, 0);
+
+                        // その上にシャープに浮かび上がる純白のアウトライン
+                        ctx.strokeStyle = "#ffffff"; 
+                        ctx.lineWidth = size * 0.03; 
+                        ctx.strokeText(name, 0, 0);
+
+                        // 最前面のクッキリしたピンクホワイト色塗りつぶし
+                        ctx.fillStyle = "#ffe4e6"; 
                         ctx.fillText(name, 0, 0);
+                    } else if (name === "Apple" || name === "Banana") {
+                        // くだもの描画
+                        if (name === "Apple") {
+                            ctx.fillStyle = "#ea580c";
+                            ctx.beginPath();
+                            ctx.arc(-size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
+                            ctx.arc(size * 0.15, size * 0.04, size * 0.28, 0, Math.PI * 2);
+                            ctx.fill(); ctx.stroke();
+                            
+                            ctx.fillStyle = "#dc2626";
+                            ctx.beginPath();
+                            ctx.arc(-size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
+                            ctx.arc(size * 0.12, 0, size * 0.28, 0, Math.PI * 2);
+                            ctx.fill(); ctx.stroke();
+
+                            ctx.strokeStyle = "#78350f";
+                            ctx.lineWidth = 5;
+                            ctx.beginPath();
+                            ctx.moveTo(0, -size * 0.1);
+                            ctx.quadraticCurveTo(size * 0.15, -size * 0.25, size * 0.1, -size * 0.38);
+                            ctx.stroke();
+
+                            ctx.fillStyle = "#22c55e";
+                            ctx.beginPath();
+                            ctx.ellipse(size * 0.15, -size * 0.28, size * 0.15, size * 0.06, -Math.PI / 4, 0, Math.PI * 2);
+                            ctx.fill(); ctx.stroke();
+
+                            ctx.fillStyle = "rgba(255,255,255,0.45)";
+                            ctx.beginPath();
+                            ctx.ellipse(-size * 0.12, -size * 0.12, size * 0.06, size * 0.11, Math.PI / 6, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else {
+                            ctx.save();
+                            ctx.rotate(-Math.PI / 10);
+                            ctx.fillStyle = "#eab308";
+                            ctx.beginPath();
+                            ctx.arc(0, -size * 0.2, size * 0.44, 0.2 * Math.PI, 0.8 * Math.PI, false);
+                            ctx.quadraticCurveTo(0, size * 0.12, size * 0.35, size * 0.06);
+                            ctx.fill(); ctx.stroke();
+                            
+                            ctx.fillStyle = "#4d7c0f";
+                            ctx.beginPath();
+                            ctx.ellipse(-size * 0.32, size * 0.1, size * 0.06, size * 0.05, 0, 0, Math.PI * 2);
+                            ctx.fill(); ctx.stroke();
+
+                            ctx.fillStyle = "#78350f";
+                            ctx.beginPath();
+                            ctx.ellipse(size * 0.33, size * 0.05, size * 0.05, size * 0.05, 0, 0, Math.PI * 2);
+                            ctx.fill(); ctx.stroke();
+                            ctx.restore();
+                        }
+                    } else {
+                        // かな文字等の汎用描画
+                        if (fallbackEmoji) {
+                            ctx.font = `${size * 0.7}px sans-serif`;
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            ctx.fillText(fallbackEmoji, 0, 0);
+                        } else {
+                            ctx.fillStyle = "#38bdf8"; 
+                            ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            
+                            ctx.lineWidth = size * 0.09;
+                            ctx.strokeStyle = "#ffffff";
+                            ctx.strokeText(name, 0, 0);
+                            ctx.fillText(name, 0, 0);
+                        }
                     }
                     break;
             }
@@ -1061,7 +1266,6 @@
                     const currentTargetItem = courses[currentCourse].find(item => item.char === this.currentAnimal || item.word === this.currentAnimal);
                     const fallbackEmoji = currentTargetItem ? currentTargetItem.emoji : this.emoji;
                     
-                    // 【v1.34調整】プレイヤー自身(自分)の描画時は forceEnlarge = false なので通常サイズで表示し、視界を遮りません
                     drawCustomGraphic(ctx, this.currentAnimal, size, fallbackEmoji, false);
                 } else {
                     ctx.font = `${size}px sans-serif`;
@@ -1087,7 +1291,7 @@
                 if (currentCourse === 'numbers' && numbersLevelConfig[currentNumbersLevel]) {
                     this.speed = numbersLevelConfig[currentNumbersLevel].speed;
                 } else {
-                    this.speed = 0.0011; // v1.36: デフォルトの移動スピードも 0.0011 へ確実に減速調整
+                    this.speed = 0.0011; 
                 }
                 
                 this.velocity = 0; 
@@ -1224,7 +1428,6 @@
                     ctx.save();
                     
                     // 【v1.36重要：チカチカする点滅フラッシュアニメーションを完全排除】
-                    // 不透明度（globalAlpha）を常に1.0固定（静的最大輝度表示）にすることで、一貫して極めて見やすいビジュアルに修正しました。
                     ctx.globalAlpha = 1.0; 
                     
                     ctx.shadowColor = "#ffffff";
@@ -1450,6 +1653,7 @@
             }
 
             document.getElementById('result-title').innerText = `すうじコース ${cfg.title} 結果`;
+            document.getElementById('result-fixed-points').innerText = `+${cfg.fixedPoints}点`;
             document.getElementById('result-mistakes').innerText = `-${runMistakesCount}回`;
             document.getElementById('result-earned-points').innerText = `+${earnedPoints}点`;
             
@@ -1536,6 +1740,14 @@
             gameLoop();
         }
 
+        // すうじコース起動 (v1.40新設)
+        function startNumbersGame(level) {
+            currentNumbersLevel = level;
+            // 指定されたレベル範囲の数字データをローカル完結で動的に生成する
+            generateDynamicNumbersCourse(level);
+            startGame('numbers');
+        }
+
         // 一時メニューに戻る
         function exitToMenu() {
             isPlaying = false;
@@ -1552,13 +1764,21 @@
             // マイクセッションを維持することで、再スタート時の通知ポップアップを完全に防ぎます。
         }
 
+        function showNumbersMenu() {
+            document.getElementById('main-menu-view').classList.add('hidden');
+            document.getElementById('test-menu-view').classList.add('hidden');
+            document.getElementById('numbers-menu-view').classList.remove('hidden');
+        }
+
         function showTestCourses() {
             document.getElementById('main-menu-view').classList.add('hidden');
+            document.getElementById('numbers-menu-view').classList.add('hidden');
             document.getElementById('test-menu-view').classList.remove('hidden');
         }
 
         function showMainMenu() {
             document.getElementById('test-menu-view').classList.add('hidden');
+            document.getElementById('numbers-menu-view').classList.add('hidden');
             document.getElementById('main-menu-view').classList.remove('hidden');
         }
 
