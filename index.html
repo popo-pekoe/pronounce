@@ -69,10 +69,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.23 にカウントアップ -->
+                <!-- バージョン表記を v1.24 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.23</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.24</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -81,20 +81,20 @@
             </div>
 
             <!-- Course Selection Scroll Container -->
-            <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-2.5 scrollbar-none my-auto max-w-xs">
+            <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
                 <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
-                <!-- 1. どうぶつコース -->
-                <button onclick="startGame('animals')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <!-- 1. すうじコース (NEW) -->
+                <button onclick="startGame('numbers')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">🦁</span>
-                        <span class="text-left text-sm">どうぶつコース <span class="block text-[10px] font-normal text-purple-200">Animals (Panda, Cat, etc.)</span></span>
+                        <span class="text-3xl">🔢</span>
+                        <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (0〜10：なな/しち、ゼロ/れい等対応)</span></span>
                     </div>
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
                 <!-- 2. くだものコース -->
-                <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">🍌</span>
                         <span class="text-left text-sm">くだものコース <span class="block text-[10px] font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
@@ -102,26 +102,8 @@
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
-                <!-- 3. キャラクターコース -->
-                <button onclick="startGame('characters')" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-350 hover:to-orange-450 text-slate-950 font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">🐭</span>
-                        <span class="text-left text-sm font-extrabold text-slate-900">キャラクター <span class="block text-[10px] font-semibold text-slate-800">Characters (Mickey, Pooh, etc.)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
-                </button>
-
-                <!-- 4. はたらくくるまコース -->
-                <button onclick="startGame('vehicles')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">🚒</span>
-                        <span class="text-left text-sm">はたらくくるま <span class="block text-[10px] font-normal text-teal-100">Working Vehicles (Police, Fire, etc.)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                </button>
-
-                <!-- 5. ひらがなコース -->
-                <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <!-- 3. ひらがなコース -->
+                <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">あ</span>
                         <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あめ, いす, うち, etc.)</span></span>
@@ -129,11 +111,11 @@
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
 
-                <!-- 6. カタカナコース -->
-                <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                <!-- 4. カタカナコース -->
+                <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl">ア</span>
-                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-violet-100">Katakana (アイス, イチゴ, etc.)</span></span>
+                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-teal-100">Katakana (アイス, イチゴ, etc.)</span></span>
                     </div>
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 </button>
@@ -255,15 +237,21 @@
     </div>
 
     <script>
-        // --- コース構成データ (v1.23: 漢字判定の完全回避のため、お題自体に漢字変換ペアを持たせた超安全設計) ---
+        // --- STREAMING_CHUNK: Defining Courses Data Structure (v1.24 with newly added Numbers 0-10 Course)... ---
         const courses = {
-            animals: [
-                { word: "Panda", emoji: "🐼", prompt: "パンダ" },
-                { word: "Cat", emoji: "🐱", prompt: "キャット" },
-                { word: "Dog", emoji: "🐶", prompt: "ドッグ" },
-                { word: "Frog", emoji: "🐸", prompt: "フロッグ" },
-                { word: "Lion", emoji: "🦁", prompt: "ライオン" },
-                { word: "Monkey", emoji: "🐵", prompt: "モンキー" }
+            // 【数字コース（0〜10）】複数読み対応・漢字対応を含めた超安全設計
+            numbers: [
+                { word: "0", display: "0 (ゼロ / レイ)", kanji: "零", readings: ["ゼロ", "ぜろ", "レイ", "れい", "0", "零"], emoji: "0️⃣", char: "0" },
+                { word: "1", display: "1 (イチ)", kanji: "一", readings: ["イチ", "いち", "一", "1"], emoji: "1️⃣", char: "1" },
+                { word: "2", display: "2 (ニ)", kanji: "二", readings: ["ニ", "に", "二", "2"], emoji: "2️⃣", char: "2" },
+                { word: "3", display: "3 (サン)", kanji: "三", readings: ["サン", "さん", "三", "3"], emoji: "3️⃣", char: "3" },
+                { word: "4", display: "4 (ヨン / シ)", kanji: "四", readings: ["ヨン", "よん", "シ", "し", "四", "4"], emoji: "4️⃣", char: "4" },
+                { word: "5", display: "5 (ゴ)", kanji: "五", readings: ["ゴ", "ご", "五", "5"], emoji: "5️⃣", char: "5" },
+                { word: "6", display: "6 (ロク)", kanji: "六", readings: ["ロク", "ろく", "六", "6"], emoji: "6️⃣", char: "6" },
+                { word: "7", display: "7 (ナナ / シチ)", kanji: "七", readings: ["ナナ", "なな", "シチ", "しち", "七", "7"], emoji: "7️⃣", char: "7" },
+                { word: "8", display: "8 (ハチ)", kanji: "八", readings: ["ハチ", "はち", "八", "8"], emoji: "8️⃣", char: "8" },
+                { word: "9", display: "9 (キュウ / ク)", kanji: "九", readings: ["キュウ", "きゅう", "ク", "く", "九", "9"], emoji: "9️⃣", char: "9" },
+                { word: "10", display: "10 (ジュウ)", kanji: "十", readings: ["ジュウ", "じゅう", "十", "10"], emoji: "🔟", char: "10" }
             ],
             fruits: [
                 { word: "Banana", emoji: "🍌", prompt: "バナナ" },
@@ -273,22 +261,7 @@
                 { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
                 { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
-            characters: [
-                { word: "Mickey", emoji: "🐭", prompt: "ミッキー" },
-                { word: "Donald", emoji: "🦆", prompt: "ドナルド" },
-                { word: "Pooh", emoji: "🐻", prompt: "プーさん" },
-                { word: "Elsa", emoji: "❄️", prompt: "エルサ" },
-                { word: "Simba", emoji: "🦁", prompt: "シンバ" },
-                { word: "Stitch", emoji: "👽", prompt: "スティッチ" }
-            ],
-            vehicles: [
-                { word: "Ambulance", emoji: "🚑", prompt: "救急車" },
-                { word: "Firetruck", emoji: "🚒", prompt: "消防車" },
-                { word: "Policecar", emoji: "🚓", prompt: "パトカー" },
-                { word: "Excavator", emoji: "🚜", prompt: "ショベルカー" },
-                { word: "Garbagetruck", emoji: "🚚", prompt: "ゴミ収集車" }
-            ],
-            // 【ひらがなコース】お題自体を単語化し、マイクが漢字変換しても完璧に通るようにペアを構成
+            // 【ひらがなコース】
             hiragana: [
                 { word: "あめ", display: "あ (あめ)", kanji: "飴", emoji: "あ", char: "あ" },
                 { word: "いす", display: "い (いす)", kanji: "椅子", emoji: "い", char: "い" },
@@ -307,7 +280,7 @@
         };
 
         // --- ゲーム状態管理 ---
-        let currentCourse = 'animals';
+        let currentCourse = 'numbers';
         let isPlaying = false;
         let score = 0;
         let combo = 0;
@@ -391,8 +364,9 @@
             recognition.interimResults = true; 
             recognition.maxAlternatives = 10; 
 
-            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
-            recognition.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
+            // 日本語判定が必要なコース（すうじ、ひらがな、カタカナ）は日本語認識に設定
+            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
+            recognition.lang = isJapaneseMode ? 'ja-JP' : 'en-US';
 
             recognition.onstart = () => {
                 isSpeechActive = true;
@@ -457,7 +431,7 @@
 
         // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
         async function handleSpeechInput(rawText) {
-            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
+            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
 
             // かな・カタカナ相互変換
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
@@ -474,24 +448,27 @@
 
             const activeTargetItem = list[selectedItemIndex];
 
-            if (isJapaneseCourse) {
-                // 【ひらがな・カタカナコース：お題（単語）のひらがな/カタカナ/漢字変換すべてを照合】
-                // 15MBの辞書を一切使わずに、100%確実に漢字を検知してひらがな判定を通す仕組み
+            if (isJapaneseMode) {
+                // 【日本語判別ロジック：0〜10、ひらがな、カタカナのインライン100%解決】
                 const matchesItem = (item) => {
                     const cleanWord = clean(item.word);
-                    const cleanKanji = clean(item.kanji);
+                    const cleanKanji = item.kanji ? clean(item.kanji) : "";
                     const cleanChar = clean(item.char);
                     
-                    // 漢字「椅子」の完全一致/部分一致
-                    // ひらがな「いす」の完全一致/部分一致
-                    // 頭文字「い」の完全一致
+                    // 登録されている複数読み候補（readings配列）を展開
+                    const cleanReadings = item.readings ? item.readings.map(r => clean(r)) : [];
+
+                    // 音声テキストが完全に合致、または部分的に含まれているか比較
+                    const readingMatch = cleanReadings.includes(speechText) || cleanReadings.some(r => speechText.includes(r));
+                    const k_h_Match = toHiragana(speechText).includes(toHiragana(cleanWord)) || toKatakana(speechText).includes(toKatakana(cleanWord));
+
                     return speechText === cleanWord || 
                            speechText === cleanKanji || 
                            speechText === cleanChar ||
+                           readingMatch ||
                            speechText.includes(cleanWord) ||
-                           speechText.includes(cleanKanji) ||
-                           toHiragana(speechText).includes(toHiragana(cleanWord)) ||
-                           toKatakana(speechText).includes(toKatakana(cleanWord));
+                           (cleanKanji && speechText.includes(cleanKanji)) ||
+                           k_h_Match;
                 };
 
                 if (matchesItem(activeTargetItem)) {
@@ -501,7 +478,7 @@
                     matched = list.find(item => matchesItem(item));
                 }
             } else {
-                // 【他コース（英語など）：これまで通りの部分一致・包含判定】
+                // 【英語コース（くだもの）等の標準部分一致】
                 const spokenWords = speechText.split(/\s+/);
                 const activeTargetClean = clean(activeTargetItem.word);
                 
@@ -518,7 +495,7 @@
             }
 
             if (matched) {
-                // プレイヤーの変身先は、これまで通り「あ」や「ア」などの文字（char）に設定
+                // プレイヤーの変身先を決定
                 player.transformTo(matched.char, matched.emoji);
                 return true; 
             }
@@ -582,11 +559,11 @@
             const list = courses[currentCourse];
             const currentItem = list[selectedItemIndex];
             
-            // お手本読み上げは単語の文字をしゃべる（例：「いす」）
+            // お手本読み上げは単語の文字をしゃべる（例：「あめ」やすうじ）
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
             
-            const isJapaneseCourse = (currentCourse === 'hiragana' || currentCourse === 'katakana');
-            utterance.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
+            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
+            utterance.lang = isJapaneseMode ? 'ja-JP' : 'en-US';
             utterance.rate = 0.85; 
             synth.speak(utterance);
         }
@@ -601,7 +578,8 @@
             }
         }
 
-        // --- 自作ベクターイラスト描画エンジン ---
+        // --- STREAMING_CHUNK: Vector Drawing Graphic Engine for Fruit shapes & Neon Digits... ---
+        // 自作ベクターイラスト描画エンジン
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
             ctx.translate(0, -size * 0.45); 
@@ -610,98 +588,38 @@
             ctx.lineWidth = Math.max(1.5, size * 0.02);
 
             switch (name) {
-                // ==================== キャラクター ====================
-                case "Mickey":
-                    ctx.fillStyle = "#0a0a0a";
+                // ==================== すうじ（0〜10：ネオンサイバーヘキサゴン） ====================
+                case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
+                    // サイバーバッジの背景（六角形）を描画
+                    ctx.strokeStyle = "#c084fc"; // ネオンパープル
+                    ctx.lineWidth = size * 0.06;
+                    ctx.fillStyle = "rgba(147, 51, 234, 0.15)";
                     ctx.beginPath();
-                    ctx.arc(-size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(size * 0.35, -size * 0.35, size * 0.28, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#e11d48"; 
-                    ctx.beginPath();
-                    ctx.arc(0, size * 0.12, size * 0.36, 0, Math.PI);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.12, size * 0.22, size * 0.06, 0, Math.PI * 2);
-                    ctx.arc(size * 0.12, size * 0.22, size * 0.06, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                case "Donald":
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#1d4ed8"; 
-                    ctx.beginPath();
-                    ctx.ellipse(0, -size * 0.34, size * 0.24, size * 0.1, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#dc2626";
-                    ctx.beginPath();
-                    ctx.moveTo(size * 0.1, -size * 0.34);
-                    ctx.lineTo(size * 0.25, -size * 0.22);
-                    ctx.lineTo(size * 0.2, -size * 0.42);
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * Math.PI) / 3;
+                        const x = Math.cos(angle) * size * 0.44;
+                        const y = Math.sin(angle) * size * 0.44;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
                     ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#fbbf24"; 
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.15, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#f59e0b";
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.28, size * 0.08);
-                    ctx.quadraticCurveTo(0, size * 0.14, size * 0.28, size * 0.08);
+                    ctx.fill();
                     ctx.stroke();
 
-                    ctx.fillStyle = "#06b6d4";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.09, -size * 0.1, size * 0.05, size * 0.1, 0, 0, Math.PI * 2);
-                    ctx.ellipse(size * 0.09, -size * 0.1, size * 0.05, size * 0.1, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                case "Pooh":
-                    ctx.fillStyle = "#fbbf24"; 
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
-                    ctx.arc(size * 0.28, -size * 0.28, size * 0.16, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.4, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ef4444"; 
-                    ctx.beginPath();
-                    ctx.arc(0, size * 0.2, size * 0.35, 0, Math.PI);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#451a03";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
-                    ctx.arc(size * 0.11, -size * 0.05, size * 0.035, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.06, size * 0.06);
-                    ctx.lineTo(size * 0.06, size * 0.06);
-                    ctx.lineTo(0, size * 0.12);
-                    ctx.closePath();
-                    ctx.fill();
+                    // 美しくグロー（発光）するデジタルフォント風ナンバーを描画
+                    ctx.fillStyle = "#fb7185"; // ネオンピンク
+                    ctx.font = `black ${size * 0.65}px 'Fredoka', sans-serif`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    
+                    ctx.shadowColor = "#f43f5e";
+                    ctx.shadowBlur = 15;
+                    ctx.lineWidth = size * 0.08;
+                    ctx.strokeStyle = "#ffffff";
+                    
+                    ctx.strokeText(name, 0, 0);
+                    ctx.fillText(name, 0, 0);
+                    ctx.shadowBlur = 0;
                     break;
 
                 // ==================== くだもの ====================
@@ -757,391 +675,6 @@
                     ctx.restore();
                     break;
 
-                // ==================== どうぶつ ====================
-                case "Panda":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(size * 0.3, -size * 0.3, size * 0.16, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.38, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#1e293b";
-                    ctx.save();
-                    ctx.translate(-size * 0.14, -size * 0.02);
-                    ctx.rotate(Math.PI / 6);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.translate(size * 0.14, -size * 0.02);
-                    ctx.rotate(-Math.PI / 6);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, size * 0.07, size * 0.12, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.restore();
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
-                    ctx.arc(size * 0.12, -size * 0.04, size * 0.025, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#000000";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.1, size * 0.05, size * 0.03, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                case "Lion":
-                case "Simba":
-                    ctx.fillStyle = "#b45309";
-                    ctx.beginPath();
-                    for (let i = 0; i < 16; i++) {
-                        const angle = (i * Math.PI * 2) / 16;
-                        const dist = (i % 2 === 0) ? size * 0.52 : size * 0.38;
-                        const rx = Math.cos(angle) * dist;
-                        const ry = Math.sin(angle) * dist;
-                        if (i === 0) ctx.moveTo(rx, ry);
-                        else ctx.lineTo(rx, ry);
-                    }
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#f59e0b";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.35, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, -size * 0.22, size * 0.08, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
-                    ctx.ellipse(size * 0.1, -size * 0.06, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#f43f5e";
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.05, size * 0.04);
-                    ctx.lineTo(size * 0.05, size * 0.04);
-                    ctx.lineTo(0, size * 0.1);
-                    ctx.closePath();
-                    ctx.fill();
-                    break;
-
-                case "Cat":
-                    ctx.fillStyle = "#f97316";
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.34, -size * 0.08);
-                    ctx.lineTo(-size * 0.32, -size * 0.42);
-                    ctx.lineTo(-size * 0.1, -size * 0.15);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#fca5a5";
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.3, -size * 0.12);
-                    ctx.lineTo(-size * 0.29, -size * 0.35);
-                    ctx.lineTo(-size * 0.14, -size * 0.18);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#f97316";
-                    ctx.beginPath();
-                    ctx.moveTo(size * 0.34, -size * 0.08);
-                    ctx.lineTo(size * 0.32, -size * 0.42);
-                    ctx.lineTo(size * 0.1, -size * 0.15);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#fca5a5";
-                    ctx.beginPath();
-                    ctx.moveTo(size * 0.3, -size * 0.12);
-                    ctx.lineTo(size * 0.29, -size * 0.35);
-                    ctx.lineTo(size * 0.14, -size * 0.18);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#f97316";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.strokeStyle = "#451a03";
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.2, size * 0.06); ctx.lineTo(-size * 0.42, size * 0.04);
-                    ctx.moveTo(-size * 0.2, size * 0.1);  ctx.lineTo(-size * 0.45, size * 0.11);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.moveTo(size * 0.2, size * 0.06);  ctx.lineTo(size * 0.42, size * 0.04);
-                    ctx.moveTo(size * 0.2, size * 0.1);   ctx.lineTo(size * 0.45, size * 0.11);
-                    ctx.stroke();
-
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.11, -size * 0.05, size * 0.04, size * 0.04, 0, 0, Math.PI * 2);
-                    ctx.ellipse(size * 0.11, -size * 0.05, size * 0.04, size * 0.04, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                case "Dog":
-                    ctx.fillStyle = "#d97706";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, size * 0.36, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#78350f";
-                    ctx.beginPath();
-                    ctx.ellipse(-size * 0.34, 0, size * 0.12, size * 0.26, Math.PI / 10, 0, Math.PI * 2);
-                    ctx.ellipse(size * 0.34, 0, size * 0.12, size * 0.26, -Math.PI / 10, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
-                    ctx.arc(size * 0.11, -size * 0.04, size * 0.042, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#f43f5e";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.14, size * 0.06, size * 0.09, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#fffbeb";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.08, size * 0.12, size * 0.07, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#000000";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.05, size * 0.06, size * 0.04, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-
-                // ==================== はたらくくるま ====================
-                case "Ambulance":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.38, -size * 0.24, size * 0.76, size * 0.34);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#38bdf8";
-                    ctx.beginPath();
-                    ctx.rect(size * 0.16, -size * 0.2, size * 0.16, size * 0.12);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ef4444";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.38, -size * 0.06, size * 0.76, size * 0.06);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#ef4444";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.15, -size * 0.18, size * 0.05, size * 0.15);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.2, -size * 0.13, size * 0.15, size * 0.05);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#ef4444";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.2, -size * 0.28, size * 0.06, Math.PI, 0);
-                    ctx.arc(size * 0.1, -size * 0.28, size * 0.06, Math.PI, 0);
-                    ctx.fill(); ctx.stroke();
-                    break;
-
-                case "Firetruck":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#dc2626";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.42, -size * 0.24, size * 0.84, size * 0.34);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#38bdf8";
-                    ctx.beginPath();
-                    ctx.rect(size * 0.2, -size * 0.18, size * 0.18, size * 0.14);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.strokeStyle = "#94a3b8";
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.35, -size * 0.32);
-                    ctx.lineTo(size * 0.05, -size * 0.32);
-                    ctx.moveTo(-size * 0.35, -size * 0.27);
-                    ctx.lineTo(size * 0.05, -size * 0.27);
-                    for (let x = -size * 0.3; x <= size * 0.01; x += size * 0.1) {
-                        ctx.moveTo(x, -size * 0.33);
-                        ctx.lineTo(x, -size * 0.26);
-                    }
-                    ctx.stroke();
-
-                    ctx.fillStyle = "#fbbf24";
-                    ctx.beginPath();
-                    ctx.rect(size * 0.1, -size * 0.32, size * 0.12, size * 0.06);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ef4444";
-                    ctx.beginPath();
-                    ctx.arc(size * 0.25, -size * 0.28, size * 0.06, Math.PI, 0);
-                    ctx.fill(); ctx.stroke();
-                    break;
-
-                case "Policecar":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#090d16";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.4, -size * 0.08, size * 0.8, size * 0.18);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.3, -size * 0.24, size * 0.58, size * 0.16);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#475569";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.2, -size * 0.21, size * 0.18, size * 0.11);
-                    ctx.rect(size * 0.02, -size * 0.21, size * 0.18, size * 0.11);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#e2e8f0";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.08, -size * 0.28, size * 0.16, size * 0.04);
-                    ctx.fill(); ctx.stroke();
-                    
-                    ctx.fillStyle = "#ef4444";
-                    ctx.beginPath();
-                    ctx.arc(0, -size * 0.28, size * 0.07, Math.PI, 0);
-                    ctx.fill(); ctx.stroke();
-                    break;
-
-                case "Excavator":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.ellipse(0, size * 0.12, size * 0.36, size * 0.08, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#94a3b8";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(0, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#eab308";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.28, -size * 0.18, size * 0.54, size * 0.22);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#0f172a";
-                    ctx.beginPath();
-                    ctx.rect(-size * 0.2, -size * 0.14, size * 0.16, size * 0.13);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.strokeStyle = "#eab308";
-                    ctx.lineWidth = size * 0.08;
-                    ctx.lineCap = "round";
-                    ctx.beginPath();
-                    ctx.moveTo(size * 0.15, -size * 0.05);
-                    ctx.lineTo(size * 0.35, -size * 0.32);
-                    ctx.lineTo(size * 0.5, -size * 0.12);
-                    ctx.stroke();
-
-                    ctx.fillStyle = "#334155";
-                    ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(size * 0.5, -size * 0.08, size * 0.12, -Math.PI / 4, Math.PI * 0.8);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-                    break;
-
-                case "Garbagetruck":
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.24, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.1, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.beginPath();
-                    ctx.arc(-size * 0.24, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.arc(size * 0.22, size * 0.12, size * 0.04, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = "#22c55e"; 
-                    ctx.beginPath();
-                    ctx.rect(size * 0.12, -size * 0.18, size * 0.28, size * 0.28);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#1e293b";
-                    ctx.beginPath();
-                    ctx.rect(size * 0.22, -size * 0.14, size * 0.14, size * 0.11);
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.fillStyle = "#2563eb";
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.42, -size * 0.24);
-                    ctx.lineTo(size * 0.12, -size * 0.24);
-                    ctx.lineTo(size * 0.12, size * 0.1);
-                    ctx.lineTo(-size * 0.3, size * 0.1);
-                    ctx.lineTo(-size * 0.42, -size * 0.05);
-                    ctx.closePath();
-                    ctx.fill(); ctx.stroke();
-
-                    ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(-size * 0.1, -size * 0.15);
-                    ctx.lineTo(-size * 0.25, -size * 0.15);
-                    ctx.lineTo(-size * 0.25, 0);
-                    ctx.stroke();
-                    break;
-
                 // ==================== ひらがな・カタカナ ====================
                 default:
                     ctx.fillStyle = "#38bdf8"; 
@@ -1187,6 +720,7 @@
         // 道路移動用のアニメーションタイマー
         let roadOffset = 0;
 
+        // --- STREAMING_CHUNK: Setup Player and Gate Models logic... ---
         // --- ゲームクラス ---
 
         // プレイヤー
@@ -1286,11 +820,10 @@
                 this.shakeOffset = 0; 
                 
                 this.color = '#8b5cf6'; 
-                if (currentCourse === 'fruits') this.color = '#ec4899'; 
-                else if (currentCourse === 'characters') this.color = '#f59e0b'; 
-                else if (currentCourse === 'vehicles') this.color = '#0d9488'; 
+                if (currentCourse === 'numbers') this.color = '#ec4899'; // マゼンタ
+                else if (currentCourse === 'fruits') this.color = '#ec4899'; 
                 else if (currentCourse === 'hiragana') this.color = '#06b6d4'; 
-                else if (currentCourse === 'katakana') this.color = '#d946ef'; 
+                else if (currentCourse === 'katakana') this.color = '#10b981'; 
             }
 
             update() {
@@ -1479,7 +1012,7 @@
             selectedItemIndex = nextIdx;
             const targetItem = list[selectedItemIndex];
             
-            // ゲートには display（例: い (いす) ）のテキストとお題の word（例: いす）を渡して構築
+            // ゲートには display（例: 7 (ナナ / シチ) ）のテキストとお題の word を渡して構築
             activeGate = new Gate(targetItem.word, targetItem.emoji);
             
             document.getElementById('target-word').innerText = targetItem.display ? targetItem.display : targetItem.word;
