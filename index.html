@@ -42,7 +42,7 @@
     <!-- Overall Mobile-like Game Console Wrapper -->
     <div class="w-full max-w-md bg-slate-850 border-4 border-purple-500/30 rounded-[32px] overflow-hidden shadow-2xl flex flex-col relative aspect-[9/16] max-h-[92vh] bg-gradient-to-b from-slate-950 to-indigo-950">
         
-        <!-- Game Header / Scoreboard -->
+        <!-- Game Header / Scoreboard (v1.30: レベル・クリア数表示に合わせてコンパクトに再配置) -->
         <div class="px-4 py-3 bg-slate-900/90 border-b border-purple-500/20 flex justify-between items-center z-10">
             <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse" id="mic-indicator"></span>
@@ -50,12 +50,16 @@
             </div>
             <div class="flex gap-4 items-center">
                 <div class="text-right">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">SCORE</p>
-                    <p id="score-val" class="text-xl font-black text-amber-400">0000</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">LEVEL</p>
+                    <p id="level-val" class="text-base font-black text-purple-400">1</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">COMBO</p>
-                    <p id="combo-val" class="text-xl font-black text-pink-400">0</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">SCORE</p>
+                    <p id="score-val" class="text-base font-black text-amber-400">0</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">COMBO</p>
+                    <p id="combo-val" class="text-base font-black text-pink-400">0</p>
                 </div>
             </div>
         </div>
@@ -69,10 +73,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.24 にカウントアップ -->
+                <!-- バージョン表記を v1.30 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.24</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.30</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -82,43 +86,67 @@
 
             <!-- Course Selection Scroll Container -->
             <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
-                <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                 
-                <!-- 1. すうじコース (NEW) -->
-                <button onclick="startGame('numbers')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">🔢</span>
-                        <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (0〜10：なな/しち、ゼロ/れい等対応)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                </button>
+                <!-- Main Menu Layer (すうじコース ＆ テストコース展開ボタン) -->
+                <div id="main-menu-view" class="flex flex-col gap-3 w-full">
+                    <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
+                    
+                    <!-- 1. すうじコース -->
+                    <button onclick="startGame('numbers')" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🔢</span>
+                            <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (0〜10：なな/しち、ゼロ/れい等対応)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
 
-                <!-- 2. くだものコース -->
-                <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">🍌</span>
-                        <span class="text-left text-sm">くだものコース <span class="block text-[10px] font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                </button>
+                    <!-- 2. テストコース (サブメニュー切り替え) -->
+                    <button onclick="showTestCourses()" class="w-full bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-750 hover:to-slate-650 border border-slate-750 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🧪</span>
+                            <span class="text-left text-sm">テストコース <span class="block text-[10px] font-normal text-slate-400">Other Test Courses (くだもの、かな)</span></span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
 
-                <!-- 3. ひらがなコース -->
-                <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">あ</span>
-                        <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あめ, いす, うち, etc.)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                </button>
+                <!-- Test Menu Layer (くだもの、ひらがな、カタカナ - 初期非表示) -->
+                <div id="test-menu-view" class="flex flex-col gap-2.5 w-full hidden">
+                    <p class="text-center text-xs font-bold text-slate-500 tracking-wider font-extrabold text-pink-400 uppercase tracking-widest">🧪 テストコース</p>
 
-                <!-- 4. カタカナコース -->
-                <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">ア</span>
-                        <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-teal-100">Katakana (アイス, イチゴ, etc.)</span></span>
-                    </div>
-                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                </button>
+                    <!-- 1. くだものコース -->
+                    <button onclick="startGame('fruits')" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🍌</span>
+                            <span class="text-left text-sm">くだものコース <span class="block text-[10px] font-normal text-pink-200">Fruits (Banana, Apple, etc.)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- 2. ひらがなコース -->
+                    <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">あ</span>
+                            <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あめ, いす, うち, etc.)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- 3. カタカナコース -->
+                    <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">ア</span>
+                            <span class="text-left text-sm">カタカナコース <span class="block text-[10px] font-normal text-teal-100">Katakana (アイス, イチゴ, etc.)</span></span>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <!-- メインメニューに戻る -->
+                    <button onclick="showMainMenu()" class="w-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold py-2 px-4 rounded-xl transition-all duration-150 transform active:scale-95 flex items-center justify-center gap-1.5 text-xs mt-1">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>もどる</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Pre-flight Mic warning -->
@@ -236,8 +264,25 @@
         </div>
     </div>
 
+    <!-- 【v1.30新設：5点達成・表彰ダイアログ】 -->
+    <div id="award-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border-4 border-yellow-400/80 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl transform scale-100 transition-all duration-300">
+            <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-lg animate-bounce">
+                👑
+            </div>
+            <h3 class="text-2xl font-black text-yellow-400 mb-2 tracking-wider">5点達成！</h3>
+            <p class="text-base font-extrabold text-slate-100 mb-1">おめでとうございます！</p>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+                素晴らしい発音で、5つのゲートを突破しました！<br>
+                君こそ本当の発音ロードランナーだ！
+            </p>
+            <button onclick="closeAwardModal()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-350 hover:to-amber-450 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-lg transition-all active:scale-95 text-sm uppercase tracking-widest">
+                冒険をつづける！
+            </button>
+        </div>
+    </div>
+
     <script>
-        // --- STREAMING_CHUNK: Defining Courses Data Structure (v1.24 with newly added Numbers 0-10 Course)... ---
         const courses = {
             // 【数字コース（0〜10）】複数読み対応・漢字対応を含めた超安全設計
             numbers: [
@@ -251,7 +296,7 @@
                 { word: "7", display: "7 (ナナ / シチ)", kanji: "七", readings: ["ナナ", "なな", "シチ", "しち", "七", "7"], emoji: "7️⃣", char: "7" },
                 { word: "8", display: "8 (ハチ)", kanji: "八", readings: ["ハチ", "はち", "八", "8"], emoji: "8️⃣", char: "8" },
                 { word: "9", display: "9 (キュウ / ク)", kanji: "九", readings: ["キュウ", "きゅう", "ク", "く", "九", "9"], emoji: "9️⃣", char: "9" },
-                { word: "10", display: "10 (ジュウ)", kanji: "十", readings: ["ジュウ", "じゅう", "十", "10"], emoji: "🔟", char: "10" }
+                { word: "10", display: "10 (ジュウ)", kanji: "十", readings: ["ジュウ", "じゅう", "十", "10"], emoji: "10", char: "10" }
             ],
             fruits: [
                 { word: "Banana", emoji: "🍌", prompt: "バナナ" },
@@ -282,7 +327,14 @@
         // --- ゲーム状態管理 ---
         let currentCourse = 'numbers';
         let isPlaying = false;
-        let score = 0;
+        
+        // v1.30: 点数・レベルシステム用パラメータ
+        let score = 0; // 得点 (1問正解ごとに1点)
+        let level = 1; // 現在のレベル (1Lv = 3問クリア)
+        let questionsClearedInLevel = 0; // 現在のレベル内の正解数
+        let hasAchieved5Points = false; // 5点達成の表彰をすでに行ったかどうかのフラグ
+        let levelUpNoticeFrames = 0; // レベルアップ演出テキストの残存描画フレーム
+
         let combo = 0;
         let screenShake = 0;
         let selectedItemIndex = 0; // 現在のターゲットゲートアイテムのインデックス
@@ -295,7 +347,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Initializing Sound Synthesizer... ---
         function playSound(type) {
             initAudio();
             if (!audioCtx) return;
@@ -343,10 +394,20 @@
                 gain.gain.linearRampToValueAtTime(0, now + 0.4);
                 osc.start(now);
                 osc.stop(now + 0.4);
+            } else if (type === 'levelup') {
+                // レベルアップ用のファンファーレ：テレレレ・レン！
+                osc.type = 'triangle';
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                });
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.42);
             }
         }
 
-        // --- STREAMING_CHUNK: Integrating Web Speech API with no-lag streaming... ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
@@ -429,7 +490,6 @@
             } catch (e) {}
         }
 
-        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
         async function handleSpeechInput(rawText) {
             const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
 
@@ -449,7 +509,7 @@
             const activeTargetItem = list[selectedItemIndex];
 
             if (isJapaneseMode) {
-                // 【日本語判別ロジック：0〜10、ひらがな、カタカナのインライン100%解決】
+                // 【日本語判別ロジック：0〜10、ひらがな、カタカナのインライン完全解決】
                 const matchesItem = (item) => {
                     const cleanWord = clean(item.word);
                     const cleanKanji = item.kanji ? clean(item.kanji) : "";
@@ -578,7 +638,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Vector Drawing Graphic Engine for Fruit shapes & Neon Digits... ---
         // 自作ベクターイラスト描画エンジン
         function drawCustomGraphic(ctx, name, size) {
             ctx.save();
@@ -720,7 +779,6 @@
         // 道路移動用のアニメーションタイマー
         let roadOffset = 0;
 
-        // --- STREAMING_CHUNK: Setup Player and Gate Models logic... ---
         // --- ゲームクラス ---
 
         // プレイヤー
@@ -814,14 +872,17 @@
                 
                 this.emoji = emoji;
                 this.z = 0.0; 
-                this.speed = 0.0014; 
+                
+                // v1.30: レベルに比例してスピードが少しずつ速くなる設計に拡張
+                this.speed = 0.0014 + (level - 1) * 0.0003; 
+                
                 this.velocity = 0; 
                 this.state = 'moving'; 
                 this.shakeOffset = 0; 
                 
                 this.color = '#8b5cf6'; 
-                if (currentCourse === 'numbers') this.color = '#ec4899'; // マゼンタ
-                else if (currentCourse === 'fruits') this.color = '#ec4899'; 
+                if (currentCourse === 'numbers') this.color = '#ec4899'; // サイバーマゼンタ
+                else if (currentCourse === 'fruits') this.color = '#e11d48'; 
                 else if (currentCourse === 'hiragana') this.color = '#06b6d4'; 
                 else if (currentCourse === 'katakana') this.color = '#10b981'; 
             }
@@ -838,11 +899,30 @@
                         if (isPlayerCorrectShape) {
                             this.state = 'passed';
                             playSound('pass');
-                            score += 100;
+                            
+                            // v1.30: 得点・レベルシステムの加算＆検証処理
+                            score += 1; // クリアで1点
+                            questionsClearedInLevel += 1;
                             combo += 1;
+
+                            // 1レベル3問構成
+                            if (questionsClearedInLevel >= 3) {
+                                level += 1;
+                                questionsClearedInLevel = 0;
+                                playSound('levelup'); // めでたいレベルアップ音
+                                showLevelUpNotice(); // レベルアップ描画タイマーON
+                            }
+
                             updateHUD();
                             createSparkles(this.emoji);
                             document.getElementById('clash-warning').classList.add('hidden');
+
+                            // 5点達成イベント検知 (お祝いはゲーム中一度のみ)
+                            if (score === 5 && !hasAchieved5Points) {
+                                hasAchieved5Points = true;
+                                triggerAwardEvent();
+                            }
+
                         } else {
                             this.state = 'bouncing';
                             playSound('crash');
@@ -1012,7 +1092,7 @@
             selectedItemIndex = nextIdx;
             const targetItem = list[selectedItemIndex];
             
-            // ゲートには display（例: 7 (ナナ / シチ) ）のテキストとお題の word を渡して構築
+            // ゲートには display（例: い (いす) ）のテキストとお題の word（例: いす）を渡して構築
             activeGate = new Gate(targetItem.word, targetItem.emoji);
             
             document.getElementById('target-word').innerText = targetItem.display ? targetItem.display : targetItem.word;
@@ -1028,19 +1108,65 @@
             }
         }
 
-        // --- HUD表示更新 ---
+        // --- HUD表示更新 (v1.30: 得点およびレベルに対応) ---
         function updateHUD() {
             const sc = document.getElementById('score-val');
-            sc.innerText = String(score).padStart(4, '0');
+            sc.innerText = score;
             
+            const lv = document.getElementById('level-val');
+            if (lv) lv.innerText = level;
+
             const cm = document.getElementById('combo-val');
             cm.innerText = combo;
 
-            cm.className = `text-xl font-black text-pink-400 transition-all ${combo > 0 ? 'scale-125 duration-100' : ''}`;
-            setTimeout(() => { cm.className = "text-xl font-black text-pink-400"; }, 150);
+            cm.className = `text-base font-black text-pink-400 transition-all ${combo > 0 ? 'scale-125 duration-100' : ''}`;
+            setTimeout(() => { cm.className = "text-base font-black text-pink-400"; }, 150);
         }
 
-        // --- STREAMING_CHUNK: Running real-time game loop animation on 60FPS... ---
+        // レベルアップテキスト表示のトリガー
+        function showLevelUpNotice() {
+            levelUpNoticeFrames = 75; // 約1.2秒間表示
+        }
+
+        // 【v1.30新設：5点達成・表彰イベント発動処理】
+        function triggerAwardEvent() {
+            // ゲーム画面を一時的に非アクティブ化して停止
+            isPlaying = false;
+
+            // 1. 表彰ダイアログを表示
+            const modal = document.getElementById('award-modal');
+            modal.classList.remove('hidden');
+
+            // 2. 盛大な紙吹雪 (Confetti) を乱発
+            // センターショット
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.65 }
+            });
+            // 左右からのサイドアタック
+            setTimeout(() => {
+                confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
+                confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
+            }, 250);
+
+            // 3. TTS合成音声でお祝い
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("ごてんたっせい、おめでとうございます！素晴らしい発音です！");
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 表彰ダイアログを閉じてゲームを続行する
+        function closeAwardModal() {
+            document.getElementById('award-modal').classList.add('hidden');
+            // ゲームを再開
+            isPlaying = true;
+            gameLoop();
+        }
+
         function gameLoop() {
             if (!isPlaying) return;
 
@@ -1129,6 +1255,23 @@
                 return p.alpha > 0;
             });
 
+            // v1.30: レベルアップ時の派手なグラフィック演出の描画
+            if (levelUpNoticeFrames > 0) {
+                ctx.save();
+                ctx.shadowColor = "#eab308";
+                ctx.shadowBlur = 12;
+                ctx.font = "black 28px 'Fredoka', sans-serif";
+                
+                // アルファフェード効果
+                const alpha = Math.min(1.0, levelUpNoticeFrames / 20);
+                ctx.fillStyle = `rgba(253, 224, 71, ${alpha})`; // 黄色
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`✨ LEVEL ${level} ! ✨`, canvas.width / 2, canvas.height * 0.45);
+                ctx.restore();
+                levelUpNoticeFrames--;
+            }
+
             ctx.restore();
             requestAnimationFrame(gameLoop);
         }
@@ -1136,8 +1279,15 @@
         // --- ゲーム開始のトリガー ---
         function startGame(courseType) {
             currentCourse = courseType;
+            
+            // v1.30: スコア・レベル状態の初期化
             score = 0;
             combo = 0;
+            level = 1;
+            questionsClearedInLevel = 0;
+            hasAchieved5Points = false;
+            levelUpNoticeFrames = 0;
+
             isPlaying = true;
             
             document.getElementById('start-screen').classList.add('hidden');
@@ -1156,9 +1306,21 @@
             isPlaying = false;
             document.getElementById('start-screen').classList.remove('hidden');
             document.getElementById('clash-warning').classList.add('hidden');
+            document.getElementById('award-modal').classList.add('hidden');
+            showMainMenu(); // メインメニューの表示にリセットする
             if (recognition) {
                 recognition.stop();
             }
+        }
+
+        function showTestCourses() {
+            document.getElementById('main-menu-view').classList.add('hidden');
+            document.getElementById('test-menu-view').classList.remove('hidden');
+        }
+
+        function showMainMenu() {
+            document.getElementById('test-menu-view').classList.add('hidden');
+            document.getElementById('main-menu-view').classList.remove('hidden');
         }
 
         // マイク許可リクエスト
