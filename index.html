@@ -23,7 +23,7 @@
             animation: pulse-ring 1.5s infinite;
         }
         @keyframes pulse-ring {
-            0 { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); }
             100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
         }
@@ -73,10 +73,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.34 にカウントアップ -->
+                <!-- バージョン表記を v1.36 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.34</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.36</span>
                 </div>
                 
                 <!-- トータル合計点表示（24時間タイマー付き） ＆ リセットボタン -->
@@ -172,21 +172,22 @@
         <div class="flex-grow relative overflow-hidden bg-slate-950">
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
             
-            <!-- 音声入力モニターを画面下部の手前側に移設 -->
-            <div class="absolute bottom-4 left-0 right-0 z-20 px-4 flex flex-col items-center pointer-events-none">
+            <!-- 音声入力モニターを左下隅に避けてコンパクトに配置 -->
+            <!-- 画面中央を走る自分（プレイヤー）の数字を一切隠さず、快適にモニタリングできます -->
+            <div class="absolute bottom-4 left-4 z-20 pointer-events-none">
                 <!-- Speech recognition feedback bubble -->
-                <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-4 py-2.5 rounded-2xl shadow-xl flex flex-col items-center gap-1.5 transform scale-0 transition-transform duration-300 w-11/12 max-w-[320px]">
-                    <div class="flex items-center justify-between w-full border-b border-slate-800 pb-1">
-                        <span class="text-[10px] font-extrabold text-pink-400 uppercase tracking-widest flex items-center gap-1">
+                <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-3 py-2 rounded-xl shadow-xl flex flex-col gap-1 transform scale-0 transition-transform duration-300 w-56">
+                    <div class="flex items-center justify-between w-full border-b border-slate-800 pb-0.5">
+                        <span class="text-[9px] font-extrabold text-pink-400 uppercase tracking-widest flex items-center gap-1">
                             <span class="w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping"></span>
-                            音声入力モニター
+                            モニター
                         </span>
-                        <span id="speech-status-tag" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 uppercase tracking-wider">検知中</span>
+                        <span id="speech-status-tag" class="text-[7px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 uppercase tracking-wider">検知中</span>
                     </div>
-                    <div class="w-full text-center py-1">
-                        <p id="detected-speech" class="text-base font-black text-white italic tracking-wide">Panda!</p>
+                    <div class="w-full text-center py-0.5">
+                        <p id="detected-speech" class="text-sm font-black text-white italic tracking-wide truncate"></p>
                     </div>
-                    <div id="speech-alternatives-hud" class="w-full text-[9px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1.5">
+                    <div id="speech-alternatives-hud" class="w-full text-[8px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1">
                         <!-- 判定候補テキストがリアルタイムに表示されます -->
                     </div>
                 </div>
@@ -376,9 +377,9 @@
             ]
         };
 
-        // --- LEVEL構成 ---
+        // --- LEVEL構成 (v1.36: お題巨大化に合わせてスピードを少しスローダウン) ---
         const numbersLevelConfig = {
-            1: { fixedPoints: 1, additionPoints: 0, speed: 0.0014, title: "Lv1" }
+            1: { fixedPoints: 1, additionPoints: 0, speed: 0.0011, title: "Lv1" }
         };
 
         // --- ゲーム状態管理 ---
@@ -819,12 +820,11 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.34 設問のみ巨大化対応) ---
+        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.36 輪郭くっきり二重描画エンジン) ---
         function drawCustomGraphic(ctx, name, size, fallbackEmoji = null, forceEnlarge = false) {
             ctx.save();
             
-            // 【v1.34仕様変更：向かってくる数字（設問）のみを面積比9倍（一辺の長さ3倍）にする】
-            // プレイヤー（自分自身）の変身した姿は通常の1.0倍を維持し、視界を遮りません
+            // 【v1.34】向かってくる数字（設問）のみを面積比9倍（一辺の長さ3倍）にする
             const isNumber = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(name);
             if (isNumber && forceEnlarge) {
                 size = size * 3.0;
@@ -836,11 +836,12 @@
             ctx.lineWidth = Math.max(1.5, size * 0.02);
 
             switch (name) {
-                // ==================== すうじ（3倍スケール対応） ====================
+                // ==================== すうじ（3倍スケール＆超クッキリ輪郭） ====================
                 case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
+                    // A: 六角形背景の描画
                     ctx.strokeStyle = "#c084fc"; 
-                    ctx.lineWidth = size * 0.06;
-                    ctx.fillStyle = "rgba(147, 51, 234, 0.15)";
+                    ctx.lineWidth = size * 0.05;
+                    ctx.fillStyle = "rgba(147, 51, 234, 0.12)";
                     ctx.beginPath();
                     for (let i = 0; i < 6; i++) {
                         const angle = (i * Math.PI) / 3;
@@ -853,19 +854,37 @@
                     ctx.fill();
                     ctx.stroke();
 
-                    ctx.fillStyle = "#fb7185"; 
-                    ctx.font = `bold ${size * 0.6}px 'Fredoka', sans-serif`;
+                    // B: 【v1.36最適化：フラッシュや点滅のアニメーションを一切排除した、静的な最高コントラスト輪郭】
+                    ctx.font = `bold ${size * 0.65}px 'Fredoka', sans-serif`;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
+                    // レイヤー1: 背景グロー（静的なボケ光彩効果として一度だけ後ろに描画。チカチカしません）
+                    ctx.save();
                     ctx.shadowColor = "#f43f5e";
                     ctx.shadowBlur = 15;
-                    ctx.lineWidth = size * 0.08;
-                    ctx.strokeStyle = "#ffffff";
-                    
+                    ctx.lineWidth = size * 0.14; // 光彩の広がり
+                    ctx.strokeStyle = "#f43f5e";
                     ctx.strokeText(name, 0, 0);
-                    ctx.fillText(name, 0, 0);
+                    ctx.restore();
+
+                    // レイヤー2: 完全に影（シャドウ）を無効にして、文字の「エッジ」をカミソリのようにシャープにする
                     ctx.shadowBlur = 0;
+                    ctx.shadowColor = "transparent";
+                    
+                    // 視認コントラスト用の極太アウトライン（暗色） - 以前より太くして背景のネオンから完全に切り離します
+                    ctx.strokeStyle = "#0f172a"; // 濃紺グレー
+                    ctx.lineWidth = size * 0.12; 
+                    ctx.strokeText(name, 0, 0);
+
+                    // その上にシャープに浮かび上がる純白のアウトライン
+                    ctx.strokeStyle = "#ffffff"; 
+                    ctx.lineWidth = size * 0.03; 
+                    ctx.strokeText(name, 0, 0);
+
+                    // 最前面のクッキリしたピンクホワイト色塗りつぶし
+                    ctx.fillStyle = "#ffe4e6"; 
+                    ctx.fillText(name, 0, 0);
                     break;
 
                 // ==================== くだもの (Apple & Banana) ====================
@@ -1068,7 +1087,7 @@
                 if (currentCourse === 'numbers' && numbersLevelConfig[currentNumbersLevel]) {
                     this.speed = numbersLevelConfig[currentNumbersLevel].speed;
                 } else {
-                    this.speed = 0.0014; 
+                    this.speed = 0.0011; // v1.36: デフォルトの移動スピードも 0.0011 へ確実に減速調整
                 }
                 
                 this.velocity = 0; 
@@ -1203,7 +1222,10 @@
 
                 if (this.state !== 'passed') {
                     ctx.save();
-                    ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() / 150);
+                    
+                    // 【v1.36重要：チカチカする点滅フラッシュアニメーションを完全排除】
+                    // 不透明度（globalAlpha）を常に1.0固定（静的最大輝度表示）にすることで、一貫して極めて見やすいビジュアルに修正しました。
+                    ctx.globalAlpha = 1.0; 
                     
                     ctx.shadowColor = "#ffffff";
                     ctx.shadowBlur = 10;
@@ -1473,6 +1495,7 @@
             }
         }
 
+        // お祝いダイアログを閉じる
         function closeAwardModal() {
             const modal = document.getElementById('award-modal');
             if (modal) modal.classList.add('hidden');
