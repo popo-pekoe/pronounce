@@ -73,10 +73,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.40 にカウントアップ -->
+                <!-- バージョン表記を v1.41 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.40</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.41</span>
                 </div>
                 
                 <!-- トータル合計点表示（24時間タイマー付き） ＆ リセットボタン -->
@@ -97,67 +97,50 @@
                 </p>
             </div>
 
-            <!-- Course Selection Scroll Container -->
-            <div id="course-selector-area" class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
+            <!-- Course Selection Scroll Container (v1.41: 54vhに高さを最適化) -->
+            <div id="course-selector-area" class="w-full max-h-[54vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
                 
-                <!-- Main Menu Layer (すうじコース ＆ テストコース展開ボタン) -->
-                <div id="main-menu-view" class="flex flex-col gap-3 w-full">
+                <!-- Main Menu Layer (すうじコース レベル1〜3をダイレクト表示 ＆ テストコース展開ボタン) -->
+                <div id="main-menu-view" class="flex flex-col gap-2.5 w-full">
                     <p class="text-center text-xs font-bold text-slate-500 tracking-wider">練習コースをえらんでね</p>
                     
-                    <!-- 1. すうじコース (押すとレベル選択ビューが展開) -->
-                    <button onclick="showNumbersMenu()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl">🔢</span>
-                            <span class="text-left text-sm">すうじコース <span class="block text-[10px] font-normal text-purple-200">Numbers (Lv1〜3：0〜100、複数読み対応)</span></span>
-                        </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-
-                    <!-- 2. テストコース (サブメニュー切り替え) -->
-                    <button onclick="showTestCourses()" class="w-full bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-750 hover:to-slate-650 border border-slate-750 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl">🧪</span>
-                            <span class="text-left text-sm">テストコース <span class="block text-[10px] font-normal text-slate-400">Other Test Courses (くだもの、かな)</span></span>
-                        </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                </div>
-
-                <!-- Numbers Level View (v1.40新設) -->
-                <div id="numbers-menu-view" class="flex flex-col gap-2.5 w-full hidden">
-                    <p class="text-center text-xs font-bold text-slate-500 tracking-wider font-extrabold text-purple-400 uppercase tracking-widest">🔢 すうじコース レベルせんたく</p>
-                    
-                    <!-- Lv1 (0〜10) -->
+                    <!-- すうじコース Lv1 -->
                     <button onclick="startNumbersGame(1)" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-550 hover:to-fuchsia-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl font-bold">①</span>
-                            <span class="text-left text-sm">レベル 1 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 10 (ぜろ 〜 じゅう)</span></span>
+                            <span class="text-left text-sm">すうじ Lv 1 <span class="block text-[10px] font-normal text-purple-200">数字：0 〜 10 (ぜろ 〜 じゅう)</span></span>
                         </div>
                         <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                     </button>
 
-                    <!-- Lv2 (0〜30) -->
+                    <!-- すうじコース Lv2 -->
                     <button onclick="startNumbersGame(2)" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-550 hover:to-indigo-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl font-bold">②</span>
-                            <span class="text-left text-sm">レベル 2 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 30 (ぜろ 〜 さんじゅう)</span></span>
+                            <span class="text-left text-sm">すうじ Lv 2 <span class="block text-[10px] font-normal text-purple-200">数字：0 〜 30 (ぜろ 〜 さんじゅう)</span></span>
                         </div>
                         <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                     </button>
 
-                    <!-- Lv3 (0〜100) -->
+                    <!-- すうじコース Lv3 -->
                     <button onclick="startNumbersGame(3)" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-550 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl font-bold">③</span>
-                            <span class="text-left text-sm">レベル 3 <span class="block text-[10px] font-normal text-purple-200">すうじ：0 〜 100 (ぜろ 〜 ひゃく)</span></span>
+                            <span class="text-left text-sm">すうじ Lv 3 <span class="block text-[10px] font-normal text-purple-200">数字：0 〜 100 (ぜろ 〜 ひゃく)</span></span>
                         </div>
                         <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                     </button>
 
-                    <!-- メインメニューに戻る -->
-                    <button onclick="showMainMenu()" class="w-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold py-2 px-4 rounded-xl transition-all duration-150 transform active:scale-95 flex items-center justify-center gap-1.5 text-xs mt-1">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        <span>もどる</span>
+                    <!-- ディバイダー分割線 -->
+                    <div class="border-t border-slate-800 my-1 w-full opacity-50"></div>
+
+                    <!-- 2. テストコース (サブメニュー切り替え) -->
+                    <button onclick="showTestCourses()" class="w-full bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-750 hover:to-slate-650 border border-slate-750 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🧪</span>
+                            <span class="text-left text-sm">テストコース <span class="block text-[10px] font-normal text-slate-400">Other Test Courses (くだもの、かな)</span></span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
                 </div>
 
@@ -646,7 +629,7 @@
                 };
             }
 
-            // 【iOS通知対策】言語設定の変更のみ行い、極力stop/startでのマイク物理切断を避ける
+            // 【iOS通知対策】言語設定 of 変更のみ行い、極力stop/startでのマイク物理切断を避ける
             if (recognition.lang !== targetLang) {
                 if (isSpeechActive) {
                     recognition.stop();
@@ -1022,7 +1005,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.36 輪郭くっきり二重描画エンジン) ---
+        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine ---
         function drawCustomGraphic(ctx, name, size, fallbackEmoji = null, forceEnlarge = false) {
             ctx.save();
             
@@ -1699,7 +1682,6 @@
             }
         }
 
-        // お祝いダイアログを閉じる
         function closeAwardModal() {
             const modal = document.getElementById('award-modal');
             if (modal) modal.classList.add('hidden');
@@ -1740,7 +1722,7 @@
             gameLoop();
         }
 
-        // すうじコース起動 (v1.40新設)
+        // すうじコース起動 (v1.40)
         function startNumbersGame(level) {
             currentNumbersLevel = level;
             // 指定されたレベル範囲の数字データをローカル完結で動的に生成する
@@ -1764,21 +1746,13 @@
             // マイクセッションを維持することで、再スタート時の通知ポップアップを完全に防ぎます。
         }
 
-        function showNumbersMenu() {
-            document.getElementById('main-menu-view').classList.add('hidden');
-            document.getElementById('test-menu-view').classList.add('hidden');
-            document.getElementById('numbers-menu-view').classList.remove('hidden');
-        }
-
         function showTestCourses() {
             document.getElementById('main-menu-view').classList.add('hidden');
-            document.getElementById('numbers-menu-view').classList.add('hidden');
             document.getElementById('test-menu-view').classList.remove('hidden');
         }
 
         function showMainMenu() {
             document.getElementById('test-menu-view').classList.add('hidden');
-            document.getElementById('numbers-menu-view').classList.add('hidden');
             document.getElementById('main-menu-view').classList.remove('hidden');
         }
 
