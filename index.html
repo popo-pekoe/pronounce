@@ -42,7 +42,7 @@
     <!-- Overall Mobile-like Game Console Wrapper -->
     <div class="w-full max-w-md bg-slate-850 border-4 border-purple-500/30 rounded-[32px] overflow-hidden shadow-2xl flex flex-col relative aspect-[9/16] max-h-[92vh] bg-gradient-to-b from-slate-950 to-indigo-950">
         
-        <!-- Game Header / Scoreboard (v1.30: レベル・クリア数表示に合わせてコンパクトに再配置) -->
+        <!-- Game Header / Scoreboard -->
         <div class="px-4 py-3 bg-slate-900/90 border-b border-purple-500/20 flex justify-between items-center z-10">
             <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse" id="mic-indicator"></span>
@@ -73,10 +73,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.30 にカウントアップ -->
+                <!-- バージョン表記を v1.32 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.30</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.32</span>
                 </div>
                 
                 <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
@@ -264,7 +264,46 @@
         </div>
     </div>
 
-    <!-- 【v1.30新設：5点達成・表彰ダイアログ】 -->
+    <!-- すうじコース専用 集計ダイアログ -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 z-40 hidden">
+        <div class="bg-slate-900 border-2 border-purple-500/50 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl animate-pulse">
+                📊
+            </div>
+            <h3 class="text-xl font-black text-purple-300 mb-1 tracking-wider" id="result-title">すうじコース Lv1 結果</h3>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-4">Stage Cleared</p>
+            
+            <!-- スコア算出の内訳 -->
+            <div class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800 text-sm text-slate-300 font-bold flex flex-col gap-2.5 mb-6">
+                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-900 pb-1.5">
+                    <span>クリアした数</span>
+                    <span class="text-slate-100 font-extrabold">3 / 3 ゲート</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>基本固定点</span>
+                    <span class="text-emerald-400 font-extrabold">+1点</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>加算ボーナス</span>
+                    <span class="text-slate-500 font-extrabold">+0点</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-900 pb-2">
+                    <span>まちがえた回数</span>
+                    <span id="result-mistakes" class="text-rose-400 font-extrabold">-0回</span>
+                </div>
+                <div class="flex justify-between items-center pt-1 text-base text-white">
+                    <span>今回の獲得スコア</span>
+                    <span id="result-earned-points" class="text-amber-400 font-black text-lg">+1点</span>
+                </div>
+            </div>
+
+            <button onclick="closeResultModal()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-550 hover:to-indigo-550 text-white font-extrabold py-3 px-6 rounded-2xl shadow-lg transition-all active:scale-95 text-sm">
+                全体スコアに反映する！
+            </button>
+        </div>
+    </div>
+
+    <!-- 5点達成・表彰ダイアログ -->
     <div id="award-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-slate-900 border-4 border-yellow-400/80 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl transform scale-100 transition-all duration-300">
             <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-lg animate-bounce">
@@ -283,8 +322,9 @@
     </div>
 
     <script>
+        // --- コース構成データ ---
         const courses = {
-            // 【数字コース（0〜10）】複数読み対応・漢字対応を含めた超安全設計
+            // 【数字コース（0〜10）】複数読み対応・漢字対応を含めた設計
             numbers: [
                 { word: "0", display: "0 (ゼロ / レイ)", kanji: "零", readings: ["ゼロ", "ぜろ", "レイ", "れい", "0", "零"], emoji: "0️⃣", char: "0" },
                 { word: "1", display: "1 (イチ)", kanji: "一", readings: ["イチ", "いち", "一", "1"], emoji: "1️⃣", char: "1" },
@@ -298,6 +338,7 @@
                 { word: "9", display: "9 (キュウ / ク)", kanji: "九", readings: ["キュウ", "きゅう", "ク", "く", "九", "9"], emoji: "9️⃣", char: "9" },
                 { word: "10", display: "10 (ジュウ)", kanji: "十", readings: ["ジュウ", "じゅう", "十", "10"], emoji: "10", char: "10" }
             ],
+            // 【テストコース群】
             fruits: [
                 { word: "Banana", emoji: "🍌", prompt: "バナナ" },
                 { word: "Apple", emoji: "🍎", prompt: "アップル" },
@@ -306,7 +347,6 @@
                 { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
                 { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
-            // 【ひらがなコース】
             hiragana: [
                 { word: "あめ", display: "あ (あめ)", kanji: "飴", emoji: "あ", char: "あ" },
                 { word: "いす", display: "い (いす)", kanji: "椅子", emoji: "い", char: "い" },
@@ -314,7 +354,6 @@
                 { word: "えんぴつ", display: "え (えんぴつ)", kanji: "鉛筆", emoji: "え", char: "え" },
                 { word: "おにぎり", display: "お (おにぎり)", kanji: "おにぎり", emoji: "お", char: "お" }
             ],
-            // 【カタカナコース】
             katakana: [
                 { word: "アイス", display: "ア (アイス)", kanji: "アイス", emoji: "ア", char: "ア" },
                 { word: "イチゴ", display: "イ (イチゴ)", kanji: "いちご", emoji: "イ", char: "イ" },
@@ -324,20 +363,25 @@
             ]
         };
 
+        // --- LEVEL構成 ---
+        const numbersLevelConfig = {
+            1: { fixedPoints: 1, additionPoints: 0, speed: 0.0014, title: "Lv1" }
+        };
+
         // --- ゲーム状態管理 ---
-        let currentCourse = 'numbers';
+        let currentCourse = 'animals';
+        let currentNumbersLevel = 1; 
         let isPlaying = false;
         
-        // v1.30: 点数・レベルシステム用パラメータ
-        let score = 0; // 得点 (1問正解ごとに1点)
-        let level = 1; // 現在のレベル (1Lv = 3問クリア)
-        let questionsClearedInLevel = 0; // 現在のレベル内の正解数
-        let hasAchieved5Points = false; // 5点達成の表彰をすでに行ったかどうかのフラグ
-        let levelUpNoticeFrames = 0; // レベルアップ演出テキストの残存描画フレーム
-
+        let globalScore = 0;              
         let combo = 0;
         let screenShake = 0;
-        let selectedItemIndex = 0; // 現在のターゲットゲートアイテムのインデックス
+        let selectedItemIndex = 0;        
+
+        let runQuestionsCount = 0;        
+        let runMistakesCount = 0;         
+        let pendingAwardTrigger = false;  
+        let hasAchieved5Points = false;   
 
         // Web Audio APIの初期化
         let audioCtx = null;
@@ -347,6 +391,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK: Initializing Sound Synthesizer... ---
         function playSound(type) {
             initAudio();
             if (!audioCtx) return;
@@ -394,20 +439,10 @@
                 gain.gain.linearRampToValueAtTime(0, now + 0.4);
                 osc.start(now);
                 osc.stop(now + 0.4);
-            } else if (type === 'levelup') {
-                // レベルアップ用のファンファーレ：テレレレ・レン！
-                osc.type = 'triangle';
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                });
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.42);
             }
         }
 
+        // --- STREAMING_CHUNK: Integrating Web Speech API with strict singleton lock... ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
@@ -420,78 +455,106 @@
                 return;
             }
 
-            recognition = new SpeechRecognition();
-            recognition.continuous = true; 
-            recognition.interimResults = true; 
-            recognition.maxAlternatives = 10; 
+            const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
+            const targetLang = isJapaneseCourse ? 'ja-JP' : 'en-US';
 
-            // 日本語判定が必要なコース（すうじ、ひらがな、カタカナ）は日本語認識に設定
-            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
-            recognition.lang = isJapaneseMode ? 'ja-JP' : 'en-US';
+            // インスタンスが存在しない場合のみ新規作成（シングルトン設計）
+            if (!recognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true; 
+                recognition.interimResults = true; 
+                recognition.maxAlternatives = 10; 
 
-            recognition.onstart = () => {
-                isSpeechActive = true;
-                document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-pink-500 animate-ping";
-                document.getElementById('mic-text').innerText = "リスニング中";
-                document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-pink-400 uppercase";
-                lastProcessedResultIndex = -1; 
-            };
+                recognition.onstart = () => {
+                    isSpeechActive = true;
+                    document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-pink-500 animate-ping";
+                    document.getElementById('mic-text').innerText = "リスニング中";
+                    document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-pink-400 uppercase";
+                    lastProcessedResultIndex = -1; 
+                };
 
-            recognition.onresult = async (event) => {
-                const lastResultIndex = event.results.length - 1;
-                const resList = event.results[lastResultIndex]; 
-                const isFinal = resList.isFinal;
-                
-                if (lastResultIndex > lastProcessedResultIndex || !isFinal) {
-                    let speechResult = "";
-                    let alternativeTexts = [];
+                recognition.onresult = async (event) => {
+                    const lastResultIndex = event.results.length - 1;
+                    const resList = event.results[lastResultIndex]; 
+                    const isFinal = resList.isFinal;
+                    
+                    if (lastResultIndex > lastProcessedResultIndex || !isFinal) {
+                        let speechResult = "";
+                        let alternativeTexts = [];
 
-                    for (let k = 0; j = Math.min(resList.length, 4), k < j; k++) {
-                        alternativeTexts.push(resList[k].transcript);
-                    }
+                        for (let k = 0; j = Math.min(resList.length, 4), k < j; k++) {
+                            alternativeTexts.push(resList[k].transcript);
+                        }
 
-                    // 候補から1番目のテキスト（漢字含む）を最優先で採用
-                    speechResult = resList[0].transcript;
+                        speechResult = resList[0].transcript;
 
-                    if (speechResult.trim() !== '') {
-                        updateSpeechBubbleMonitor(speechResult, isFinal, alternativeTexts);
+                        if (speechResult.trim() !== '') {
+                            updateSpeechBubbleMonitor(speechResult, isFinal, alternativeTexts);
 
-                        const success = await handleSpeechInput(speechResult);
-                        
-                        if (success || isFinal) {
-                            lastProcessedResultIndex = lastResultIndex;
+                            const success = await handleSpeechInput(speechResult);
+                            
+                            if (success || isFinal) {
+                                lastProcessedResultIndex = lastResultIndex;
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            recognition.onerror = (event) => {
-                console.warn('Speech recognition error:', event.error);
-                if (event.error === 'not-allowed') {
-                    document.getElementById('mic-modal').classList.remove('hidden');
-                }
-            };
+                recognition.onerror = (event) => {
+                    console.warn('Speech recognition error:', event.error);
+                    if (event.error === 'not-allowed') {
+                        document.getElementById('mic-modal').classList.remove('hidden');
+                    }
+                    if (event.error === 'aborted') {
+                        isSpeechActive = false;
+                    }
+                };
 
-            recognition.onend = () => {
-                isSpeechActive = false;
-                if (isPlaying) {
-                    try {
-                        recognition.start();
-                    } catch (e) {}
-                } else {
-                    document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-amber-400";
-                    document.getElementById('mic-text').innerText = "マイク待機中";
-                    document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-amber-400 uppercase";
-                }
-            };
+                recognition.onend = () => {
+                    isSpeechActive = false;
+                    if (isPlaying) {
+                        tryRestartSpeech();
+                    } else {
+                        document.getElementById('mic-indicator').className = "w-3 h-3 rounded-full bg-amber-400";
+                        document.getElementById('mic-text').innerText = "マイク待機中";
+                        document.getElementById('mic-text').className = "text-xs font-extrabold tracking-wider text-amber-400 uppercase";
+                    }
+                };
+            }
 
+            if (isSpeechActive && recognition.lang === targetLang) {
+                return;
+            }
+
+            if (isSpeechActive) {
+                recognition.stop();
+                recognition.lang = targetLang;
+                return;
+            }
+
+            recognition.lang = targetLang;
             try {
                 recognition.start();
-            } catch (e) {}
+                isSpeechActive = true;
+            } catch (e) {
+                console.error("SpeechRecognition start failed gracefully:", e);
+            }
         }
 
+        function tryRestartSpeech() {
+            if (!isSpeechActive && recognition && isPlaying) {
+                try {
+                    recognition.start();
+                    isSpeechActive = true;
+                } catch (e) {
+                    console.error("tryRestartSpeech failed gracefully:", e);
+                }
+            }
+        }
+
+        // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
         async function handleSpeechInput(rawText) {
-            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
+            const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
 
             // かな・カタカナ相互変換
             const toHiragana = (str) => str.replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
@@ -508,37 +571,48 @@
 
             const activeTargetItem = list[selectedItemIndex];
 
-            if (isJapaneseMode) {
-                // 【日本語判別ロジック：0〜10、ひらがな、カタカナのインライン完全解決】
+            if (currentCourse === 'numbers') {
                 const matchesItem = (item) => {
                     const cleanWord = clean(item.word);
                     const cleanKanji = item.kanji ? clean(item.kanji) : "";
                     const cleanChar = clean(item.char);
-                    
-                    // 登録されている複数読み候補（readings配列）を展開
                     const cleanReadings = item.readings ? item.readings.map(r => clean(r)) : [];
-
-                    // 音声テキストが完全に合致、または部分的に含まれているか比較
-                    const readingMatch = cleanReadings.includes(speechText) || cleanReadings.some(r => speechText.includes(r));
-                    const k_h_Match = toHiragana(speechText).includes(toHiragana(cleanWord)) || toKatakana(speechText).includes(toKatakana(cleanWord));
 
                     return speechText === cleanWord || 
                            speechText === cleanKanji || 
                            speechText === cleanChar ||
-                           readingMatch ||
+                           cleanReadings.includes(speechText) ||
                            speechText.includes(cleanWord) ||
                            (cleanKanji && speechText.includes(cleanKanji)) ||
-                           k_h_Match;
+                           cleanReadings.some(r => speechText.includes(r));
                 };
 
                 if (matchesItem(activeTargetItem)) {
                     matched = activeTargetItem;
                 } else {
-                    // コース内の別のお題との一致確認
+                    matched = list.find(item => matchesItem(item));
+                }
+            } else if (isJapaneseCourse) {
+                const matchesItem = (item) => {
+                    const cleanWord = clean(item.word);
+                    const cleanKanji = clean(item.kanji);
+                    const cleanChar = clean(item.char);
+                    
+                    return speechText === cleanWord || 
+                           speechText === cleanKanji || 
+                           speechText === cleanChar ||
+                           speechText.includes(cleanWord) ||
+                           speechText.includes(cleanKanji) ||
+                           toHiragana(speechText).includes(toHiragana(cleanWord)) ||
+                           toKatakana(speechText).includes(toKatakana(cleanWord));
+                };
+
+                if (matchesItem(activeTargetItem)) {
+                    matched = activeTargetItem;
+                } else {
                     matched = list.find(item => matchesItem(item));
                 }
             } else {
-                // 【英語コース（くだもの）等の標準部分一致】
                 const spokenWords = speechText.split(/\s+/);
                 const activeTargetClean = clean(activeTargetItem.word);
                 
@@ -555,7 +629,6 @@
             }
 
             if (matched) {
-                // プレイヤーの変身先を決定
                 player.transformTo(matched.char, matched.emoji);
                 return true; 
             }
@@ -619,11 +692,10 @@
             const list = courses[currentCourse];
             const currentItem = list[selectedItemIndex];
             
-            // お手本読み上げは単語の文字をしゃべる（例：「あめ」やすうじ）
             const utterance = new SpeechSynthesisUtterance(currentItem.word);
             
-            const isJapaneseMode = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
-            utterance.lang = isJapaneseMode ? 'ja-JP' : 'en-US';
+            const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
+            utterance.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
             utterance.rate = 0.85; 
             synth.speak(utterance);
         }
@@ -638,8 +710,8 @@
             }
         }
 
-        // 自作ベクターイラスト描画エンジン
-        function drawCustomGraphic(ctx, name, size) {
+        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.32 フォールバック対応) ---
+        function drawCustomGraphic(ctx, name, size, fallbackEmoji = null) {
             ctx.save();
             ctx.translate(0, -size * 0.45); 
 
@@ -649,8 +721,7 @@
             switch (name) {
                 // ==================== すうじ（0〜10：ネオンサイバーヘキサゴン） ====================
                 case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
-                    // サイバーバッジの背景（六角形）を描画
-                    ctx.strokeStyle = "#c084fc"; // ネオンパープル
+                    ctx.strokeStyle = "#c084fc"; 
                     ctx.lineWidth = size * 0.06;
                     ctx.fillStyle = "rgba(147, 51, 234, 0.15)";
                     ctx.beginPath();
@@ -665,9 +736,8 @@
                     ctx.fill();
                     ctx.stroke();
 
-                    // 美しくグロー（発光）するデジタルフォント風ナンバーを描画
-                    ctx.fillStyle = "#fb7185"; // ネオンピンク
-                    ctx.font = `black ${size * 0.65}px 'Fredoka', sans-serif`;
+                    ctx.fillStyle = "#fb7185"; 
+                    ctx.font = `bold ${size * 0.6}px 'Fredoka', sans-serif`;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
@@ -681,7 +751,7 @@
                     ctx.shadowBlur = 0;
                     break;
 
-                // ==================== くだもの ====================
+                // ==================== くだもの (Apple & Banana) ====================
                 case "Apple":
                     ctx.fillStyle = "#ea580c";
                     ctx.beginPath();
@@ -734,27 +804,37 @@
                     ctx.restore();
                     break;
 
-                // ==================== ひらがな・カタカナ ====================
+                // ==================== ひらがな・カタカナ、またはベクター未定義くだもののフォールバック描画 ====================
                 default:
-                    ctx.fillStyle = "#38bdf8"; 
-                    ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    
-                    ctx.lineWidth = size * 0.09;
-                    ctx.strokeStyle = "#ffffff";
-                    ctx.strokeText(name, 0, 0);
-                    ctx.fillText(name, 0, 0);
+                    if (fallbackEmoji) {
+                        // 【v1.32新設：フォールバック絵文字の自動描画システム】
+                        // グレープ、レモン、ピーチ、チェリーなどベクターコードのないアイテムは
+                        // お題に紐付いた美しい絵文字アイコンを Canvas 上に綺麗に描画します。
+                        ctx.font = `${size * 0.7}px sans-serif`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(fallbackEmoji, 0, 0);
+                    } else {
+                        // 文字が直接届いた場合（かな・テストテキストなど）のフォールバック
+                        ctx.fillStyle = "#38bdf8"; 
+                        ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        
+                        ctx.lineWidth = size * 0.09;
+                        ctx.strokeStyle = "#ffffff";
+                        ctx.strokeText(name, 0, 0);
+                        ctx.fillText(name, 0, 0);
+                    }
                     break;
             }
             ctx.restore();
         }
 
-        // --- Canvas 描画エンジン（擬似 3D道路） ---
+        // --- STREAMING_CHUNK: Setting up Perspective Road Projection ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // レスポンシブCanvasリサイズ
         function resizeCanvas() {
             const rect = canvas.parentNode.getBoundingClientRect();
             canvas.width = rect.width;
@@ -763,9 +843,8 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 3Dパースペクティブ射影 of 変換計算
         function project(xOffset, z) {
-            const horizonY = canvas.height * 0.35; // 遠くの地平線
+            const horizonY = canvas.height * 0.35; 
             const roadHeight = canvas.height * 0.65;
             
             const scale = 0.04 + 0.96 * Math.pow(z, 2.5);
@@ -776,12 +855,9 @@
             return { x: screenX, y: screenY, scale: scale };
         }
 
-        // 道路移動用のアニメーションタイマー
         let roadOffset = 0;
 
-        // --- ゲームクラス ---
-
-        // プレイヤー
+        // --- プレイヤー ---
         class Player {
             constructor() {
                 this.xOffset = 0; 
@@ -850,7 +926,11 @@
                 ctx.shadowBlur = 12;
 
                 if (this.currentAnimal) {
-                    drawCustomGraphic(ctx, this.currentAnimal, size);
+                    // プレイヤーの変身描画時、お題データベースから対応するemojiを引き出してフォールバックに利用
+                    const currentTargetItem = courses[currentCourse].find(item => item.char === this.currentAnimal || item.word === this.currentAnimal);
+                    const fallbackEmoji = currentTargetItem ? currentTargetItem.emoji : this.emoji;
+                    
+                    drawCustomGraphic(ctx, this.currentAnimal, size, fallbackEmoji);
                 } else {
                     ctx.font = `${size}px sans-serif`;
                     ctx.textAlign = 'center';
@@ -862,10 +942,9 @@
             }
         }
 
-        // ゲート
+        // --- ゲート ---
         class Gate {
             constructor(word, emoji) {
-                // 表示用お題（ display などの修飾テキスト）を無視して本来の判定ワードをターゲットにする
                 const matchedCourse = courses[currentCourse].find(item => item.display === word || item.word === word);
                 this.target = matchedCourse ? matchedCourse.word : word;
                 this.displayWord = matchedCourse && matchedCourse.display ? matchedCourse.display : word;
@@ -873,15 +952,18 @@
                 this.emoji = emoji;
                 this.z = 0.0; 
                 
-                // v1.30: レベルに比例してスピードが少しずつ速くなる設計に拡張
-                this.speed = 0.0014 + (level - 1) * 0.0003; 
+                if (currentCourse === 'numbers' && numbersLevelConfig[currentNumbersLevel]) {
+                    this.speed = numbersLevelConfig[currentNumbersLevel].speed;
+                } else {
+                    this.speed = 0.0014; 
+                }
                 
                 this.velocity = 0; 
                 this.state = 'moving'; 
                 this.shakeOffset = 0; 
                 
                 this.color = '#8b5cf6'; 
-                if (currentCourse === 'numbers') this.color = '#ec4899'; // サイバーマゼンタ
+                if (currentCourse === 'numbers') this.color = '#ec4899'; 
                 else if (currentCourse === 'fruits') this.color = '#e11d48'; 
                 else if (currentCourse === 'hiragana') this.color = '#06b6d4'; 
                 else if (currentCourse === 'katakana') this.color = '#10b981'; 
@@ -891,7 +973,6 @@
                 if (this.state === 'moving') {
                     this.z += this.speed;
 
-                    // プレイヤーの変身後の状態と比較（文字 char で一致しているか）
                     const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
                     const isPlayerCorrectShape = currentTargetItem && player.currentAnimal === currentTargetItem.char;
 
@@ -899,34 +980,19 @@
                         if (isPlayerCorrectShape) {
                             this.state = 'passed';
                             playSound('pass');
-                            
-                            // v1.30: 得点・レベルシステムの加算＆検証処理
-                            score += 1; // クリアで1点
-                            questionsClearedInLevel += 1;
                             combo += 1;
-
-                            // 1レベル3問構成
-                            if (questionsClearedInLevel >= 3) {
-                                level += 1;
-                                questionsClearedInLevel = 0;
-                                playSound('levelup'); // めでたいレベルアップ音
-                                showLevelUpNotice(); // レベルアップ描画タイマーON
-                            }
-
                             updateHUD();
                             createSparkles(this.emoji);
                             document.getElementById('clash-warning').classList.add('hidden');
-
-                            // 5点達成イベント検知 (お祝いはゲーム中一度のみ)
-                            if (score === 5 && !hasAchieved5Points) {
-                                hasAchieved5Points = true;
-                                triggerAwardEvent();
-                            }
-
                         } else {
                             this.state = 'bouncing';
                             playSound('crash');
                             combo = 0; 
+                            
+                            if (currentCourse === 'numbers') {
+                                runMistakesCount += 1;
+                            }
+
                             updateHUD();
                             screenShake = 12; 
                             this.velocity = -0.0125; 
@@ -949,7 +1015,16 @@
                 } else if (this.state === 'passed') {
                     this.z += 0.014; 
                     if (this.z > 1.4) {
-                        spawnNext();
+                        if (currentCourse === 'numbers') {
+                            runQuestionsCount += 1;
+                            if (runQuestionsCount >= 3) {
+                                triggerRunAggregation(); 
+                            } else {
+                                spawnNext();
+                            }
+                        } else {
+                            spawnNext();
+                        }
                     }
                 }
             }
@@ -1023,11 +1098,11 @@
                     const emojiSize = 44 + 60 * pos.scale; 
                     ctx.translate(0, -holeH * 0.22);
                     
-                    // 看板に表示するべきベクターグラフィックは文字（char）として描画
                     const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
                     const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.target;
                     
-                    drawCustomGraphic(ctx, drawGraphicName, emojiSize);
+                    // ゲート奥のヒントアイコン描画でも、絵文字（emoji）をフォールバックに渡す
+                    drawCustomGraphic(ctx, drawGraphicName, emojiSize, currentTargetItem ? currentTargetItem.emoji : null);
                     ctx.restore();
                 }
 
@@ -1035,7 +1110,7 @@
             }
         }
 
-        // 星屑パーティクル
+        // --- 星屑パーティクル ---
         class Particle {
             constructor(x, y, emoji, targetWord) {
                 this.x = x;
@@ -1068,11 +1143,11 @@
 
                 const size = 64 * this.scale;
                 
-                // お題データを解決して正解のネオン文字（char）のグラフィックで粒子を散らせる
                 const currentTargetItem = courses[currentCourse].find(item => item.word === this.targetWord);
                 const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.targetWord;
 
-                drawCustomGraphic(ctx, drawGraphicName, size);
+                // パーティクルが散りばめられる際にも、お題データに設定されている絵文字をフォールバックに適用
+                drawCustomGraphic(ctx, drawGraphicName, size, currentTargetItem ? currentTargetItem.emoji : null);
                 ctx.restore();
             }
         }
@@ -1081,7 +1156,6 @@
         let activeGate = null;
         let particles = [];
 
-        // 新しい次のゲートを出現させる
         function spawnNext() {
             const list = courses[currentCourse];
             let nextIdx;
@@ -1092,7 +1166,6 @@
             selectedItemIndex = nextIdx;
             const targetItem = list[selectedItemIndex];
             
-            // ゲートには display（例: い (いす) ）のテキストとお題の word（例: いす）を渡して構築
             activeGate = new Gate(targetItem.word, targetItem.emoji);
             
             document.getElementById('target-word').innerText = targetItem.display ? targetItem.display : targetItem.word;
@@ -1100,7 +1173,6 @@
             document.getElementById('clash-warning').classList.add('hidden');
         }
 
-        // 通過時のご褒ベエフェクト
         function createSparkles(emoji) {
             const pos = project(0, 0.85);
             for (let i = 0; i < 15; i++) {
@@ -1108,13 +1180,16 @@
             }
         }
 
-        // --- HUD表示更新 (v1.30: 得点およびレベルに対応) ---
         function updateHUD() {
             const sc = document.getElementById('score-val');
-            sc.innerText = score;
+            sc.innerText = globalScore; 
             
             const lv = document.getElementById('level-val');
-            if (lv) lv.innerText = level;
+            if (currentCourse === 'numbers') {
+                lv.innerText = currentNumbersLevel;
+            } else {
+                lv.innerText = "テスト";
+            }
 
             const cm = document.getElementById('combo-val');
             cm.innerText = combo;
@@ -1123,50 +1198,7 @@
             setTimeout(() => { cm.className = "text-base font-black text-pink-400"; }, 150);
         }
 
-        // レベルアップテキスト表示のトリガー
-        function showLevelUpNotice() {
-            levelUpNoticeFrames = 75; // 約1.2秒間表示
-        }
-
-        // 【v1.30新設：5点達成・表彰イベント発動処理】
-        function triggerAwardEvent() {
-            // ゲーム画面を一時的に非アクティブ化して停止
-            isPlaying = false;
-
-            // 1. 表彰ダイアログを表示
-            const modal = document.getElementById('award-modal');
-            modal.classList.remove('hidden');
-
-            // 2. 盛大な紙吹雪 (Confetti) を乱発
-            // センターショット
-            confetti({
-                particleCount: 120,
-                spread: 80,
-                origin: { y: 0.65 }
-            });
-            // 左右からのサイドアタック
-            setTimeout(() => {
-                confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
-                confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
-            }, 250);
-
-            // 3. TTS合成音声でお祝い
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("ごてんたっせい、おめでとうございます！素晴らしい発音です！");
-                utterance.lang = 'ja-JP';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // 表彰ダイアログを閉じてゲームを続行する
-        function closeAwardModal() {
-            document.getElementById('award-modal').classList.add('hidden');
-            // ゲームを再開
-            isPlaying = true;
-            gameLoop();
-        }
-
+        // --- STREAMING_CHUNK: Running real-time game loop animation on 60FPS... ---
         function gameLoop() {
             if (!isPlaying) return;
 
@@ -1255,49 +1287,99 @@
                 return p.alpha > 0;
             });
 
-            // v1.30: レベルアップ時の派手なグラフィック演出の描画
-            if (levelUpNoticeFrames > 0) {
-                ctx.save();
-                ctx.shadowColor = "#eab308";
-                ctx.shadowBlur = 12;
-                ctx.font = "black 28px 'Fredoka', sans-serif";
-                
-                // アルファフェード効果
-                const alpha = Math.min(1.0, levelUpNoticeFrames / 20);
-                ctx.fillStyle = `rgba(253, 224, 71, ${alpha})`; // 黄色
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(`✨ LEVEL ${level} ! ✨`, canvas.width / 2, canvas.height * 0.45);
-                ctx.restore();
-                levelUpNoticeFrames--;
-            }
-
             ctx.restore();
             requestAnimationFrame(gameLoop);
+        }
+
+        // --- STREAMING_CHUNK: Managing Level Score Aggregation ---
+        function triggerRunAggregation() {
+            isPlaying = false; 
+            
+            const cfg = numbersLevelConfig[currentNumbersLevel] || { fixedPoints: 1, additionPoints: 0, title: "Lv1" };
+            
+            let earnedPoints = cfg.fixedPoints + cfg.additionPoints - runMistakesCount;
+            if (earnedPoints < 0) {
+                earnedPoints = 0;
+            }
+
+            const oldScore = globalScore;
+            globalScore += earnedPoints;
+
+            if (globalScore >= 5 && oldScore < 5 && !hasAchieved5Points) {
+                pendingAwardTrigger = true;
+            }
+
+            document.getElementById('result-title').innerText = `すうじコース ${cfg.title} 結果`;
+            document.getElementById('result-mistakes').innerText = `-${runMistakesCount}回`;
+            document.getElementById('result-earned-points').innerText = `+${earnedPoints}点`;
+            
+            const modal = document.getElementById('result-modal');
+            modal.classList.remove('hidden');
+        }
+
+        // 結果発表ダイアログを閉じる
+        function closeResultModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+            updateHUD();
+
+            if (pendingAwardTrigger) {
+                pendingAwardTrigger = false;
+                hasAchieved5Points = true;
+                triggerAwardEvent(); 
+            } else {
+                exitToMenu();
+            }
+        }
+
+        // 5点達成お祝いイベント
+        function triggerAwardEvent() {
+            const modal = document.getElementById('award-modal');
+            modal.classList.remove('hidden');
+
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+            setTimeout(() => {
+                confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
+                confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
+            }, 250);
+
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("ごてんたっせい、おめでとうございます！素晴らしい発音です！");
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function closeAwardModal() {
+            document.getElementById('award-modal').classList.add('hidden');
+            exitToMenu();
         }
 
         // --- ゲーム開始のトリガー ---
         function startGame(courseType) {
             currentCourse = courseType;
-            
-            // v1.30: スコア・レベル状態の初期化
-            score = 0;
             combo = 0;
-            level = 1;
-            questionsClearedInLevel = 0;
-            hasAchieved5Points = false;
-            levelUpNoticeFrames = 0;
+            
+            runQuestionsCount = 0;
+            runMistakesCount = 0;
+            pendingAwardTrigger = false;
 
             isPlaying = true;
             
             document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+            document.getElementById('award-modal').classList.add('hidden');
             updateHUD();
 
             player.reset();
             spawnNext();
 
             playSound('start');
-            initSpeech();
+            initSpeech(); 
             gameLoop();
         }
 
@@ -1306,8 +1388,9 @@
             isPlaying = false;
             document.getElementById('start-screen').classList.remove('hidden');
             document.getElementById('clash-warning').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
             document.getElementById('award-modal').classList.add('hidden');
-            showMainMenu(); // メインメニューの表示にリセットする
+            showMainMenu(); 
             if (recognition) {
                 recognition.stop();
             }
@@ -1323,7 +1406,6 @@
             document.getElementById('main-menu-view').classList.remove('hidden');
         }
 
-        // マイク許可リクエスト
         function requestMicAccess() {
             document.getElementById('mic-modal').classList.add('hidden');
             navigator.mediaDevices.getUserMedia({ audio: true })
@@ -1336,10 +1418,9 @@
                 });
         }
 
-        // ページロード時初期化
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            initSpeech();
+            initSpeech(); 
             
             const loadingEngine = document.getElementById('loading-engine');
             if (loadingEngine) {
