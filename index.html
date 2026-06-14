@@ -66,26 +66,39 @@
 
         <!-- Course Selector Overlay (Start Screen) -->
         <div id="start-screen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col justify-between p-5 items-center">
-            <div class="w-full text-center mt-3">
+            <div class="w-full text-center mt-3 flex flex-col items-center">
                 <!-- Title Logo -->
                 <div class="inline-flex w-14 h-14 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-2xl items-center justify-center text-white shadow-lg transform -rotate-6 mb-2">
                     <i data-lucide="speech" class="w-8 h-8"></i>
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.32 にカウントアップ -->
+                <!-- バージョン表記を v1.33 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.32</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.33</span>
                 </div>
                 
-                <p class="text-[11px] text-slate-400 mt-2 px-4 leading-normal">
+                <!-- 【v1.33新設：トータル合計点表示（24時間タイマー付き） ＆ リセットボタン】 -->
+                <div class="my-4 bg-slate-900/80 border border-purple-500/20 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-4 max-w-xs w-full shadow-inner">
+                    <div class="text-left">
+                        <p class="text-[9px] text-purple-300 font-extrabold uppercase tracking-widest leading-none">TOTAL SCORE</p>
+                        <p id="start-total-score" class="text-xl font-black text-amber-400 mt-1">0 点</p>
+                        <p id="score-timer-status" class="text-[8px] text-slate-500 font-normal leading-none mt-0.5">有効期限: 24時間</p>
+                    </div>
+                    <button onclick="resetTotalScore()" class="bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border border-rose-500/20 text-[10px] font-extrabold px-3 py-1.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>リセット</span>
+                    </button>
+                </div>
+
+                <p class="text-[11px] text-slate-400 mt-1 px-4 leading-normal">
                     おくから流れてくるゲートの文字や単語を発音して、正しいすがたに変身しよう！
                 </p>
             </div>
 
             <!-- Course Selection Scroll Container -->
-            <div id="course-selector-area" class="w-full max-h-[58vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
+            <div id="course-selector-area" class="w-full max-h-[48vh] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-none my-auto max-w-xs">
                 
                 <!-- Main Menu Layer (すうじコース ＆ テストコース展開ボタン) -->
                 <div id="main-menu-view" class="flex flex-col gap-3 w-full">
@@ -388,6 +401,92 @@
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // --- 【v1.33新設：トータルスコア24時間管理機能】 ---
+        function loadTotalScore() {
+            const savedScore = localStorage.getItem('playrunner_total_score');
+            const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
+            const now = Date.now();
+
+            if (savedScore && savedTimestamp) {
+                const elapsed = now - parseInt(savedTimestamp, 10);
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (elapsed > twentyFourHours) {
+                    // 24時間以上経過していたら自動リセット
+                    localStorage.setItem('playrunner_total_score', '0');
+                    localStorage.setItem('playrunner_score_timestamp', now.toString());
+                    globalScore = 0;
+                    hasAchieved5Points = false;
+                    console.log("Total score reset automatically (over 24 hours).");
+                } else {
+                    globalScore = parseInt(savedScore, 10);
+                    // 5点達成フラグもスコア基準で整合性を保つ
+                    if (globalScore >= 5) {
+                        hasAchieved5Points = true;
+                    } else {
+                        hasAchieved5Points = false;
+                    }
+                }
+            } else {
+                localStorage.setItem('playrunner_total_score', '0');
+                localStorage.setItem('playrunner_score_timestamp', now.toString());
+                globalScore = 0;
+                hasAchieved5Points = false;
+            }
+            updateStartScreenUI();
+            updateHUD();
+        }
+
+        function saveTotalScore() {
+            localStorage.setItem('playrunner_total_score', globalScore.toString());
+            // 初めてスコアが入ったタイミング（または0点から増加した時）に、24時間タイマーの起算点をセット
+            const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
+            if (!savedTimestamp || globalScore === 0) {
+                localStorage.setItem('playrunner_score_timestamp', Date.now().toString());
+            }
+            updateStartScreenUI();
+        }
+
+        function resetTotalScore() {
+            localStorage.setItem('playrunner_total_score', '0');
+            localStorage.setItem('playrunner_score_timestamp', Date.now().toString());
+            globalScore = 0;
+            hasAchieved5Points = false;
+            updateStartScreenUI();
+            updateHUD();
+            
+            // アラートの代わりに、音声入力モニターを一時的に使って完了通知を表示
+            updateSpeechBubbleMonitor("スコアをリセットしました", true, []);
+            playSound('transform');
+        }
+
+        function updateStartScreenUI() {
+            const totalScoreEl = document.getElementById('start-total-score');
+            const timerStatusEl = document.getElementById('score-timer-status');
+            if (totalScoreEl) {
+                totalScoreEl.innerText = `${globalScore} 点`;
+            }
+
+            const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
+            if (savedTimestamp && timerStatusEl && globalScore > 0) {
+                const elapsed = Date.now() - parseInt(savedTimestamp, 10);
+                const remaining = (24 * 60 * 60 * 1000) - elapsed;
+                
+                if (remaining > 0) {
+                    const hours = Math.floor(remaining / (60 * 60 * 1000));
+                    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+                    timerStatusEl.innerText = `残り期限: 約${hours}時間${minutes}分`;
+                    timerStatusEl.className = "text-[8px] text-amber-500 font-extrabold leading-none mt-0.5";
+                } else {
+                    timerStatusEl.innerText = "有効期限: 24時間";
+                    timerStatusEl.className = "text-[8px] text-slate-500 font-normal leading-none mt-0.5";
+                }
+            } else if (timerStatusEl) {
+                timerStatusEl.innerText = "有効期限: 24時間";
+                timerStatusEl.className = "text-[8px] text-slate-500 font-normal leading-none mt-0.5";
             }
         }
 
@@ -710,16 +809,24 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.32 フォールバック対応) ---
+        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.33 面積比9倍調整) ---
         function drawCustomGraphic(ctx, name, size, fallbackEmoji = null) {
             ctx.save();
+            
+            // 【v1.33仕様変更：向かってくる数字の面積比を9倍（一辺の長さ3倍）にする】
+            // 0から10の数字の場合は、描画基準サイズ(size)自体をあらかじめ3倍にしてから内部の数値を計算
+            const isNumber = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(name);
+            if (isNumber) {
+                size = size * 3.0;
+            }
+
             ctx.translate(0, -size * 0.45); 
 
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = Math.max(1.5, size * 0.02);
 
             switch (name) {
-                // ==================== すうじ（0〜10：ネオンサイバーヘキサゴン） ====================
+                // ==================== すうじ（3倍スケール対応済） ====================
                 case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
                     ctx.strokeStyle = "#c084fc"; 
                     ctx.lineWidth = size * 0.06;
@@ -807,15 +914,11 @@
                 // ==================== ひらがな・カタカナ、またはベクター未定義くだもののフォールバック描画 ====================
                 default:
                     if (fallbackEmoji) {
-                        // 【v1.32新設：フォールバック絵文字の自動描画システム】
-                        // グレープ、レモン、ピーチ、チェリーなどベクターコードのないアイテムは
-                        // お題に紐付いた美しい絵文字アイコンを Canvas 上に綺麗に描画します。
                         ctx.font = `${size * 0.7}px sans-serif`;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
                         ctx.fillText(fallbackEmoji, 0, 0);
                     } else {
-                        // 文字が直接届いた場合（かな・テストテキストなど）のフォールバック
                         ctx.fillStyle = "#38bdf8"; 
                         ctx.font = `bold ${size * 0.8}px 'Kiwi Maru', sans-serif`;
                         ctx.textAlign = "center";
@@ -926,7 +1029,6 @@
                 ctx.shadowBlur = 12;
 
                 if (this.currentAnimal) {
-                    // プレイヤーの変身描画時、お題データベースから対応するemojiを引き出してフォールバックに利用
                     const currentTargetItem = courses[currentCourse].find(item => item.char === this.currentAnimal || item.word === this.currentAnimal);
                     const fallbackEmoji = currentTargetItem ? currentTargetItem.emoji : this.emoji;
                     
@@ -1101,7 +1203,6 @@
                     const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
                     const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.target;
                     
-                    // ゲート奥のヒントアイコン描画でも、絵文字（emoji）をフォールバックに渡す
                     drawCustomGraphic(ctx, drawGraphicName, emojiSize, currentTargetItem ? currentTargetItem.emoji : null);
                     ctx.restore();
                 }
@@ -1146,7 +1247,6 @@
                 const currentTargetItem = courses[currentCourse].find(item => item.word === this.targetWord);
                 const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.targetWord;
 
-                // パーティクルが散りばめられる際にも、お題データに設定されている絵文字をフォールバックに適用
                 drawCustomGraphic(ctx, drawGraphicName, size, currentTargetItem ? currentTargetItem.emoji : null);
                 ctx.restore();
             }
@@ -1305,6 +1405,9 @@
             const oldScore = globalScore;
             globalScore += earnedPoints;
 
+            // スコア変動を24時間マネージャーでセーブ
+            saveTotalScore();
+
             if (globalScore >= 5 && oldScore < 5 && !hasAchieved5Points) {
                 pendingAwardTrigger = true;
             }
@@ -1391,6 +1494,10 @@
             document.getElementById('result-modal').classList.add('hidden');
             document.getElementById('award-modal').classList.add('hidden');
             showMainMenu(); 
+            
+            // スタート画面に戻った時にも24時間期限切れをチェック
+            loadTotalScore();
+
             if (recognition) {
                 recognition.stop();
             }
@@ -1420,8 +1527,19 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            
+            // アプリ起動時に前回の合計点数を復元（24時間の寿命チェックも実行）
+            loadTotalScore();
+            
             initSpeech(); 
             
+            // 24時間タイマー表示をリアルタイムでアップデート（1分ごとに更新）
+            setInterval(() => {
+                if (!isPlaying) {
+                    loadTotalScore();
+                }
+            }, 60000);
+
             const loadingEngine = document.getElementById('loading-engine');
             if (loadingEngine) {
                 loadingEngine.classList.add('hidden');
