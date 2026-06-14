@@ -73,13 +73,13 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.33 にカウントアップ -->
+                <!-- バージョン表記を v1.34 にカウントアップ -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.33</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.34</span>
                 </div>
                 
-                <!-- 【v1.33新設：トータル合計点表示（24時間タイマー付き） ＆ リセットボタン】 -->
+                <!-- トータル合計点表示（24時間タイマー付き） ＆ リセットボタン -->
                 <div class="my-4 bg-slate-900/80 border border-purple-500/20 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-4 max-w-xs w-full shadow-inner">
                     <div class="text-left">
                         <p class="text-[9px] text-purple-300 font-extrabold uppercase tracking-widest leading-none">TOTAL SCORE</p>
@@ -168,30 +168,31 @@
             </div>
         </div>
 
-        <!-- Active Subtitles / Speech Bubble Overlay (Top-Middle) -->
-        <div class="absolute top-16 left-0 right-0 z-20 px-4 flex flex-col items-center pointer-events-none">
-            <!-- Speech recognition feedback bubble -->
-            <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-4 py-2.5 rounded-2xl shadow-xl flex flex-col items-center gap-1.5 transform scale-0 transition-transform duration-300 w-11/12 max-w-[320px]">
-                <div class="flex items-center justify-between w-full border-b border-slate-800 pb-1">
-                    <span class="text-[10px] font-extrabold text-pink-400 uppercase tracking-widest flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping"></span>
-                        音声入力モニター
-                    </span>
-                    <span id="speech-status-tag" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 uppercase tracking-wider">検知中</span>
-                </div>
-                <div class="w-full text-center py-1">
-                    <p id="detected-speech" class="text-base font-black text-white italic tracking-wide">Panda!</p>
-                </div>
-                <div id="speech-alternatives-hud" class="w-full text-[9px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1.5">
-                    <!-- 判定候補テキストがリアルタイムに表示されます -->
-                </div>
-            </div>
-        </div>
-
         <!-- Main Game Viewport Canvas -->
         <div class="flex-grow relative overflow-hidden bg-slate-950">
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
             
+            <!-- 【v1.34最適化：音声入力モニターを画面上部から『画面下部の手前側』に移設】 -->
+            <!-- 地平線（奥の設問が出現する場所）に被らなくなり、数字ゲートの全貌が100%遮られずに丸見えになります -->
+            <div class="absolute bottom-4 left-0 right-0 z-20 px-4 flex flex-col items-center pointer-events-none">
+                <!-- Speech recognition feedback bubble -->
+                <div id="speech-bubble" class="bg-slate-900/95 border border-pink-500/40 px-4 py-2.5 rounded-2xl shadow-xl flex flex-col items-center gap-1.5 transform scale-0 transition-transform duration-300 w-11/12 max-w-[320px]">
+                    <div class="flex items-center justify-between w-full border-b border-slate-800 pb-1">
+                        <span class="text-[10px] font-extrabold text-pink-400 uppercase tracking-widest flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping"></span>
+                            音声入力モニター
+                        </span>
+                        <span id="speech-status-tag" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 uppercase tracking-wider">検知中</span>
+                    </div>
+                    <div class="w-full text-center py-1">
+                        <p id="detected-speech" class="text-base font-black text-white italic tracking-wide">Panda!</p>
+                    </div>
+                    <div id="speech-alternatives-hud" class="w-full text-[9px] text-slate-500 font-mono flex flex-wrap gap-1 items-center justify-center border-t border-slate-800/50 pt-1.5">
+                        <!-- 判定候補テキストがリアルタイムに表示されます -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Helper / Guide Overlays -->
             <div id="clash-warning" class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center text-center px-6 hidden pointer-events-none animate-bounce">
                 <div class="bg-red-600 text-white font-black text-lg px-4 py-2 rounded-xl shadow-lg tracking-wider border-2 border-white/80">
@@ -404,7 +405,7 @@
             }
         }
 
-        // --- 【v1.33新設：トータルスコア24時間管理機能】 ---
+        // --- トータルスコア24時間管理機能 ---
         function loadTotalScore() {
             const savedScore = localStorage.getItem('playrunner_total_score');
             const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
@@ -423,7 +424,6 @@
                     console.log("Total score reset automatically (over 24 hours).");
                 } else {
                     globalScore = parseInt(savedScore, 10);
-                    // 5点達成フラグもスコア基準で整合性を保つ
                     if (globalScore >= 5) {
                         hasAchieved5Points = true;
                     } else {
@@ -442,7 +442,6 @@
 
         function saveTotalScore() {
             localStorage.setItem('playrunner_total_score', globalScore.toString());
-            // 初めてスコアが入ったタイミング（または0点から増加した時）に、24時間タイマーの起算点をセット
             const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
             if (!savedTimestamp || globalScore === 0) {
                 localStorage.setItem('playrunner_score_timestamp', Date.now().toString());
@@ -458,7 +457,6 @@
             updateStartScreenUI();
             updateHUD();
             
-            // アラートの代わりに、音声入力モニターを一時的に使って完了通知を表示
             updateSpeechBubbleMonitor("スコアをリセットしました", true, []);
             playSound('transform');
         }
@@ -490,58 +488,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Initializing Sound Synthesizer... ---
-        function playSound(type) {
-            initAudio();
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-
-            if (type === 'transform') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(1320, now + 0.15);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.15);
-                osc.start(now);
-                osc.stop(now + 0.15);
-            } else if (type === 'crash') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(140, now);
-                osc.frequency.linearRampToValueAtTime(30, now + 0.25);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.25);
-                osc.start(now);
-                osc.stop(now + 0.25);
-            } else if (type === 'pass') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(587.33, now); 
-                osc.frequency.setValueAtTime(880, now + 0.08); 
-                osc.frequency.setValueAtTime(1174.66, now + 0.16); 
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === 'start') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(329.63, now); 
-                osc.frequency.setValueAtTime(392.00, now + 0.08); 
-                osc.frequency.setValueAtTime(523.25, now + 0.16); 
-                osc.frequency.setValueAtTime(659.25, now + 0.24); 
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.4);
-            }
-        }
-
-        // --- STREAMING_CHUNK: Integrating Web Speech API with strict singleton lock... ---
+        // --- STREAMING_CHUNK: Integrating Web Speech API with strict singleton lock ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
@@ -748,40 +695,46 @@
             const statusTag = document.getElementById('speech-status-tag');
             const alternativesArea = document.getElementById('speech-alternatives-hud');
             
-            detected.innerText = text;
+            if (detected) detected.innerText = text;
             
-            if (isFinal) {
-                statusTag.innerText = "確定結果";
-                statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase tracking-wider";
-            } else {
-                statusTag.innerText = "話し中...";
-                statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 uppercase tracking-wider animate-pulse";
+            if (statusTag) {
+                if (isFinal) {
+                    statusTag.innerText = "確定結果";
+                    statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase tracking-wider";
+                } else {
+                    statusTag.innerText = "話し中...";
+                    statusTag.className = "text-[8px] font-bold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 uppercase tracking-wider animate-pulse";
+                }
             }
 
-            alternativesArea.innerHTML = "";
-            if (alternatives && alternatives.length > 0) {
-                const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 3);
-                if (uniqueAlts.length > 0) {
-                    const spanLabel = document.createElement('span');
-                    spanLabel.className = "text-slate-600 mr-1";
-                    spanLabel.innerText = "候補:";
-                    alternativesArea.appendChild(spanLabel);
-                    
-                    uniqueAlts.forEach(alt => {
-                        const chip = document.createElement('span');
-                        chip.className = "px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/50 scale-95";
-                        chip.innerText = alt;
-                        alternativesArea.appendChild(chip);
-                    });
+            if (alternativesArea) {
+                alternativesArea.innerHTML = "";
+                if (alternatives && alternatives.length > 0) {
+                    const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 3);
+                    if (uniqueAlts.length > 0) {
+                        const spanLabel = document.createElement('span');
+                        spanLabel.className = "text-slate-600 mr-1";
+                        spanLabel.innerText = "候補:";
+                        alternativesArea.appendChild(spanLabel);
+                        
+                        uniqueAlts.forEach(alt => {
+                            const chip = document.createElement('span');
+                            chip.className = "px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/50 scale-95";
+                            chip.innerText = alt;
+                            alternativesArea.appendChild(chip);
+                        });
+                    }
                 }
             }
             
-            bubble.classList.remove('scale-0');
-            bubble.classList.add('scale-100');
+            if (bubble) {
+                bubble.classList.remove('scale-0');
+                bubble.classList.add('scale-100');
+            }
             
             if (isFinal) {
                 setTimeout(() => {
-                    if (detected.innerText === text) {
+                    if (detected && detected.innerText === text && bubble) {
                         bubble.classList.remove('scale-100');
                         bubble.classList.add('scale-0');
                     }
@@ -816,14 +769,14 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.33 面積比9倍調整) ---
-        function drawCustomGraphic(ctx, name, size, fallbackEmoji = null) {
+        // --- STREAMING_CHUNK: Defining Vector Graphic Render Engine (v1.34 設問のみ巨大化対応) ---
+        function drawCustomGraphic(ctx, name, size, fallbackEmoji = null, forceEnlarge = false) {
             ctx.save();
             
-            // 【v1.33仕様変更：向かってくる数字の面積比を9倍（一辺の長さ3倍）にする】
-            // 0から10の数字の場合は、描画基準サイズ(size)自体をあらかじめ3倍にしてから内部の数値を計算
+            // 【v1.34仕様変更：向かってくる数字（設問）のみを面積比9倍（一辺の長さ3倍）にする】
+            // プレイヤー（自分自身）の変身した姿は通常の1.0倍を維持し、視界を遮りません
             const isNumber = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(name);
-            if (isNumber) {
+            if (isNumber && forceEnlarge) {
                 size = size * 3.0;
             }
 
@@ -833,7 +786,7 @@
             ctx.lineWidth = Math.max(1.5, size * 0.02);
 
             switch (name) {
-                // ==================== すうじ（3倍スケール対応済） ====================
+                // ==================== すうじ（3倍スケール対応） ====================
                 case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9": case "10":
                     ctx.strokeStyle = "#c084fc"; 
                     ctx.lineWidth = size * 0.06;
@@ -1039,7 +992,8 @@
                     const currentTargetItem = courses[currentCourse].find(item => item.char === this.currentAnimal || item.word === this.currentAnimal);
                     const fallbackEmoji = currentTargetItem ? currentTargetItem.emoji : this.emoji;
                     
-                    drawCustomGraphic(ctx, this.currentAnimal, size, fallbackEmoji);
+                    // 【v1.34調整】プレイヤー自身(自分)の描画時は forceEnlarge = false なので通常サイズで表示し、視界を遮りません
+                    drawCustomGraphic(ctx, this.currentAnimal, size, fallbackEmoji, false);
                 } else {
                     ctx.font = `${size}px sans-serif`;
                     ctx.textAlign = 'center';
@@ -1210,7 +1164,8 @@
                     const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
                     const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.target;
                     
-                    drawCustomGraphic(ctx, drawGraphicName, emojiSize, currentTargetItem ? currentTargetItem.emoji : null);
+                    // 【v1.34調整】向かってくる設問の数字（ゲート内）の描画時のみ forceEnlarge = true (第5引数) を指定して面積比9倍化
+                    drawCustomGraphic(ctx, drawGraphicName, emojiSize, currentTargetItem ? currentTargetItem.emoji : null, true);
                     ctx.restore();
                 }
 
@@ -1254,7 +1209,7 @@
                 const currentTargetItem = courses[currentCourse].find(item => item.word === this.targetWord);
                 const drawGraphicName = currentTargetItem ? currentTargetItem.char : this.targetWord;
 
-                drawCustomGraphic(ctx, drawGraphicName, size, currentTargetItem ? currentTargetItem.emoji : null);
+                drawCustomGraphic(ctx, drawGraphicName, size, currentTargetItem ? currentTargetItem.emoji : null, false);
                 ctx.restore();
             }
         }
@@ -1289,23 +1244,26 @@
 
         function updateHUD() {
             const sc = document.getElementById('score-val');
-            sc.innerText = globalScore; 
+            if (sc) sc.innerText = globalScore; 
             
             const lv = document.getElementById('level-val');
-            if (currentCourse === 'numbers') {
-                lv.innerText = currentNumbersLevel;
-            } else {
-                lv.innerText = "テスト";
+            if (lv) {
+                if (currentCourse === 'numbers') {
+                    lv.innerText = currentNumbersLevel;
+                } else {
+                    lv.innerText = "テスト";
+                }
             }
 
             const cm = document.getElementById('combo-val');
-            cm.innerText = combo;
-
-            cm.className = `text-base font-black text-pink-400 transition-all ${combo > 0 ? 'scale-125 duration-100' : ''}`;
-            setTimeout(() => { cm.className = "text-base font-black text-pink-400"; }, 150);
+            if (cm) {
+                cm.innerText = combo;
+                cm.className = `text-base font-black text-pink-400 transition-all ${combo > 0 ? 'scale-125 duration-100' : ''}`;
+                setTimeout(() => { cm.className = "text-base font-black text-pink-400"; }, 150);
+            }
         }
 
-        // --- STREAMING_CHUNK: Running real-time game loop animation on 60FPS... ---
+        // --- STREAMING_CHUNK: Running real-time game loop animation on 60FPS ---
         function gameLoop() {
             if (!isPlaying) return;
 
@@ -1424,12 +1382,13 @@
             document.getElementById('result-earned-points').innerText = `+${earnedPoints}点`;
             
             const modal = document.getElementById('result-modal');
-            modal.classList.remove('hidden');
+            if (modal) modal.classList.remove('hidden');
         }
 
         // 結果発表ダイアログを閉じる
         function closeResultModal() {
-            document.getElementById('result-modal').classList.add('hidden');
+            const modal = document.getElementById('result-modal');
+            if (modal) modal.classList.add('hidden');
             updateHUD();
 
             if (pendingAwardTrigger) {
@@ -1444,7 +1403,7 @@
         // 5点達成お祝いイベント
         function triggerAwardEvent() {
             const modal = document.getElementById('award-modal');
-            modal.classList.remove('hidden');
+            if (modal) modal.classList.remove('hidden');
 
             confetti({
                 particleCount: 120,
@@ -1465,7 +1424,8 @@
         }
 
         function closeAwardModal() {
-            document.getElementById('award-modal').classList.add('hidden');
+            const modal = document.getElementById('award-modal');
+            if (modal) modal.classList.add('hidden');
             exitToMenu();
         }
 
