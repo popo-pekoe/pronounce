@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+<!-- 発音マスター - 変身ロードランナー  Version: v1.42 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- kuromoji.js (v1.42: 音声認識結果の漢字を「読み」に変換するための形態素解析) -->
+    <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,10 +76,11 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.41 に更新 -->
+                <!-- バージョン表記を v1.42 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.41</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.42</span>
+                    <span id="dict-status" class="text-[10px] text-slate-500 font-bold">辞書: 読込中…</span>
                 </div>
                 
                 <!-- トータル合計点表示（24時間タイマー付き） ＆ リセットボタン -->
@@ -599,7 +603,13 @@
                         speechResult = resList[0].transcript;
 
                         if (speechResult.trim() !== '') {
-                            updateSpeechBubbleMonitor(speechResult, isFinal, alternativeTexts);
+                            // v1.42: ひらがな・カタカナコースでは、吹き出しに「よみ」も併記する
+                            let shownText = speechResult;
+                            if (currentCourse === 'hiragana' || currentCourse === 'katakana') {
+                                const reading = toReadingHiragana(speechResult);
+                                if (reading !== speechResult) shownText = `${speechResult} (${reading})`;
+                            }
+                            updateSpeechBubbleMonitor(shownText, isFinal, alternativeTexts);
 
                             const success = await handleSpeechInput(speechResult);
                             
@@ -841,6 +851,59 @@
             };
         }
 
+        // --- 【v1.42新設】 認識結果(漢字まじり)を kuromoji で「読み」に変換し、先頭の音で判定する ---
+        // 例: 「尾張」→「おわり」→ 先頭「お」 / 「笑」→「えみ」→ 先頭「え」
+        let kuromojiTokenizer = null;
+
+        function setDictStatus(text, className) {
+            const el = document.getElementById('dict-status');
+            if (el) {
+                el.innerText = text;
+                el.className = className;
+            }
+        }
+
+        function initKuromoji() {
+            if (typeof kuromoji === 'undefined') {
+                setDictStatus("辞書: なし", "text-[10px] text-rose-400 font-bold");
+                return;
+            }
+            kuromoji.builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' }).build((err, tokenizer) => {
+                if (err) {
+                    console.warn('kuromoji dictionary load failed:', err);
+                    setDictStatus("辞書: なし", "text-[10px] text-rose-400 font-bold");
+                    return;
+                }
+                kuromojiTokenizer = tokenizer;
+                setDictStatus("辞書: OK", "text-[10px] text-emerald-400 font-bold");
+            });
+        }
+
+        function kanaToHiragana(str) {
+            return str.replace(/[ァ-ヶ]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60));
+        }
+
+        // 認識結果の全体を、ひらがなの読みに変換する（辞書が未ロードなら、かな正規化のみ）
+        function toReadingHiragana(text) {
+            let reading = text;
+            if (kuromojiTokenizer) {
+                try {
+                    reading = kuromojiTokenizer.tokenize(text).map(t => t.reading || t.surface_form).join('');
+                } catch (e) {
+                    console.warn('kuromoji tokenize failed:', e);
+                }
+            }
+            return kanaToHiragana(reading.normalize('NFKC'));
+        }
+
+        // 読みの先頭1文字（あいうえおの小書きは大書きに揃える）。かなで始まらない場合は空文字
+        function getReadingHead(text) {
+            const first = toReadingHiragana(text).replace(/^[\s.,\/#!$%\^&\*;:{}=\-_`~()?？。、]+/, "").charAt(0);
+            if (!/[ぁ-ゖ]/.test(first)) return "";
+            const small = { "ぁ": "あ", "ぃ": "い", "ぅ": "う", "ぇ": "え", "ぉ": "お" };
+            return small[first] || first;
+        }
+
         // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
         async function handleSpeechInput(rawText) {
             const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
@@ -882,18 +945,22 @@
                     matched = list.find(item => matchesItem(item));
                 }
             } else if (isJapaneseCourse) {
+                // v1.42: 認識結果の「読み」の先頭1文字で判定（漢字変換されても、先頭の音が合えば正解）
+                const speechHead = getReadingHead(speechText);
+
                 const matchesItem = (item) => {
                     const cleanWord = clean(item.word);
                     const cleanKanji = clean(item.kanji);
                     const cleanChar = clean(item.char);
-                    
-                    return speechText === cleanWord || 
-                           speechText === cleanKanji || 
+
+                    return speechText === cleanWord ||
+                           speechText === cleanKanji ||
                            speechText === cleanChar ||
                            speechText.includes(cleanWord) ||
                            speechText.includes(cleanKanji) ||
                            toHiragana(speechText).includes(toHiragana(cleanWord)) ||
-                           toKatakana(speechText).includes(toKatakana(cleanWord));
+                           toKatakana(speechText).includes(toKatakana(cleanWord)) ||
+                           (speechHead !== "" && speechHead === toHiragana(cleanChar));
                 };
 
                 if (matchesItem(activeTargetItem)) {
@@ -1770,7 +1837,10 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
+
+            // v1.42: 読み変換用の辞書を非同期で読み込む（完了前はかな正規化のみで判定）
+            initKuromoji();
+
             // アプリ起動時に前回の合計点数を復元（24時間の寿命チェックも実行）
             loadTotalScore();
             
