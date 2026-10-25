@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.43 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.44 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.43 に更新 -->
+                <!-- バージョン表記を v1.44 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.43</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.44</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -138,6 +138,15 @@
                     <!-- ディバイダー分割線 -->
                     <div class="border-t border-slate-800 my-1 w-full opacity-50"></div>
 
+                    <!-- ひらがなコース (v1.44: 行選択画面へ) -->
+                    <button onclick="showHiraganaRows()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">あ</span>
+                            <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">50音 (あ行 〜 わ行 / ぜんぶ)</span></span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+
                     <!-- 2. テストコース (サブメニュー切り替え) -->
                     <button onclick="showTestCourses()" class="w-full bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-750 hover:to-slate-650 border border-slate-750 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -148,7 +157,24 @@
                     </button>
                 </div>
 
-                <!-- Test Menu Layer (くだもの、ひらがな、カタカナ) -->
+                <!-- Hiragana Row Menu Layer (v1.44: 行選択 / 全体ランダム) -->
+                <div id="hiragana-menu-view" class="flex flex-col gap-2.5 w-full hidden">
+                    <p class="text-center text-xs font-extrabold text-cyan-400 uppercase tracking-widest">あ ひらがな 行をえらぼう</p>
+
+                    <button onclick="selectHiraganaRow('all')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
+                        <span class="text-left text-sm">🎲 ぜんぶ ランダム <span class="block text-[10px] font-normal text-cyan-100">あ 〜 ん (46文字)</span></span>
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    </button>
+
+                    <div id="hiragana-row-buttons" class="grid grid-cols-2 gap-2 w-full"></div>
+
+                    <button onclick="showMainMenu()" class="w-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold py-2 px-4 rounded-xl transition-all duration-150 transform active:scale-95 flex items-center justify-center gap-1.5 text-xs mt-1">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>もどる</span>
+                    </button>
+                </div>
+
+                <!-- Test Menu Layer (くだもの、カタカナ) -->
                 <div id="test-menu-view" class="flex flex-col gap-2.5 w-full hidden">
                     <p class="text-center text-xs font-bold text-slate-500 tracking-wider font-extrabold text-pink-400 uppercase tracking-widest">🧪 テストコース</p>
 
@@ -161,16 +187,7 @@
                         <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                     </button>
 
-                    <!-- 2. ひらがなコース -->
-                    <button onclick="startGame('hiragana')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-450 hover:to-blue-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl">あ</span>
-                            <span class="text-left text-sm">ひらがなコース <span class="block text-[10px] font-normal text-cyan-100">Hiragana (あめ, いす, うち, etc.)</span></span>
-                        </div>
-                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-                    </button>
-
-                    <!-- 3. カタカナコース -->
+                    <!-- 2. カタカナコース -->
                     <button onclick="startGame('katakana')" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-450 hover:to-emerald-550 text-white font-black py-2.5 px-4 rounded-xl shadow-md transition-all duration-200 transform active:scale-95 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-3xl">ア</span>
@@ -373,13 +390,8 @@
                 { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
                 { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
-            hiragana: [
-                { word: "あめ", display: "あ (あめ)", kanji: "飴", emoji: "あ", char: "あ" },
-                { word: "いす", display: "い (いす)", kanji: "椅子", emoji: "い", char: "い" },
-                { word: "うち", display: "う (うち)", kanji: "家", emoji: "う", char: "う" },
-                { word: "えんぴつ", display: "え (えんぴつ)", kanji: "鉛筆", emoji: "え", char: "え" },
-                { word: "おにぎり", display: "お (おにぎり)", kanji: "おにぎり", emoji: "お", char: "お" }
-            ],
+            // 【ひらがなコース：出題前に selectHiraganaRow() が選んだ行（または全体）の内容で上書きされます】
+            hiragana: [],
             katakana: [
                 { word: "アイス", display: "ア (アイス)", kanji: "アイス", emoji: "ア", char: "ア" },
                 { word: "イチゴ", display: "イ (イチゴ)", kanji: "いちご", emoji: "イ", char: "イ" },
@@ -388,6 +400,39 @@
                 { word: "オバケ", display: "オ (オバケ)", kanji: "おばけ", emoji: "オ", char: "オ" }
             ]
         };
+
+        // --- ひらがな50音データ (v1.44) ---
+        // [文字, 例ことば, 漢字表記]。strict=true は「ん」「を」など短すぎて部分一致が危険な文字。
+        // headAlts は読みの先頭の音として同じ扱いにする別の音（「を」→「お」）
+        const hiraganaRows = [
+            { id: 'a', label: 'あ行', items: [["あ","あめ","飴"],["い","いす","椅子"],["う","うち","家"],["え","えんぴつ","鉛筆"],["お","おにぎり","おにぎり"]] },
+            { id: 'ka', label: 'か行', items: [["か","かさ","傘"],["き","きつね","狐"],["く","くるま","車"],["け","けむし","毛虫"],["こ","こおり","氷"]] },
+            { id: 'sa', label: 'さ行', items: [["さ","さかな","魚"],["し","しか","鹿"],["す","すいか","西瓜"],["せ","せみ","蝉"],["そ","そら","空"]] },
+            { id: 'ta', label: 'た行', items: [["た","たこ","蛸"],["ち","ちず","地図"],["つ","つくえ","机"],["て","てがみ","手紙"],["と","とけい","時計"]] },
+            { id: 'na', label: 'な行', items: [["な","なす","茄子"],["に","にわとり","鶏"],["ぬ","ぬいぐるみ","ぬいぐるみ"],["ね","ねこ","猫"],["の","のり","海苔"]] },
+            { id: 'ha', label: 'は行', items: [["は","はな","花"],["ひ","ひこうき","飛行機"],["ふ","ふね","船"],["へ","へび","蛇"],["ほ","ほし","星"]] },
+            { id: 'ma', label: 'ま行', items: [["ま","まめ","豆"],["み","みかん","蜜柑"],["む","むし","虫"],["め","めがね","眼鏡"],["も","もも","桃"]] },
+            { id: 'ya', label: 'や行', items: [["や","やま","山"],["ゆ","ゆき","雪"],["よ","よる","夜"]] },
+            { id: 'ra', label: 'ら行', items: [["ら","らくだ","駱駝"],["り","りんご","林檎"],["る","るす","留守"],["れ","れもん","檸檬"],["ろ","ろば","驢馬"]] },
+            { id: 'wa', label: 'わ行', items: [["わ","わに","鰐"],["を","を","を",{ strict: true, headAlts: ["お"], hint: "ほんを" }],["ん","ん","ん",{ strict: true, hint: "ほん" }]] }
+        ];
+
+        function buildHiraganaItems(rows) {
+            const list = [];
+            rows.forEach(row => row.items.forEach(([c, w, k, opt]) => {
+                const o = opt || {};
+                list.push({
+                    word: w,
+                    display: `${c} (${o.hint || w})`,
+                    kanji: k,
+                    emoji: c,
+                    char: c,
+                    strict: !!o.strict,
+                    headAlts: o.headAlts || []
+                });
+            }));
+            return list;
+        }
 
         // --- LEVEL構成 (v1.40: 新しいすうじレベル設定を定義) ---
         const numbersLevelConfig = {
@@ -944,6 +989,14 @@
                     const cleanKanji = clean(item.kanji);
                     const cleanChar = clean(item.char);
 
+                    // v1.44: 「ん」「を」は部分一致だと誤判定しやすいので完全一致と先頭の音だけで判定
+                    const headOk = speechHeads.length > 0 &&
+                        (speechHeads.includes(toHiragana(cleanChar)) ||
+                         (item.headAlts && item.headAlts.some(a => speechHeads.includes(a))));
+                    if (item.strict) {
+                        return speechText === cleanWord || speechText === cleanChar || headOk;
+                    }
+
                     return speechText === cleanWord ||
                            speechText === cleanKanji ||
                            speechText === cleanChar ||
@@ -951,7 +1004,7 @@
                            speechText.includes(cleanKanji) ||
                            toHiragana(speechText).includes(toHiragana(cleanWord)) ||
                            toKatakana(speechText).includes(toKatakana(cleanWord)) ||
-                           (speechHeads.length > 0 && speechHeads.includes(toHiragana(cleanChar)));
+                           headOk;
                 };
 
                 if (matchesItem(activeTargetItem)) {
@@ -1811,7 +1864,31 @@
 
         function showMainMenu() {
             document.getElementById('test-menu-view').classList.add('hidden');
+            document.getElementById('hiragana-menu-view').classList.add('hidden');
             document.getElementById('main-menu-view').classList.remove('hidden');
+        }
+
+        // ひらがな 行選択画面 (v1.44)
+        function showHiraganaRows() {
+            const box = document.getElementById('hiragana-row-buttons');
+            if (!box.childElementCount) {
+                hiraganaRows.forEach(row => {
+                    const btn = document.createElement('button');
+                    btn.className = "bg-slate-800 hover:bg-slate-700 border border-cyan-500/30 text-white font-black py-2.5 px-2 rounded-xl shadow-md transition-all duration-150 transform active:scale-95 flex flex-col items-center";
+                    btn.innerHTML = `<span class="text-lg">${row.label}</span><span class="text-[10px] font-normal text-cyan-200">${row.items.map(i => i[0]).join(' ')}</span>`;
+                    btn.onclick = () => selectHiraganaRow(row.id);
+                    box.appendChild(btn);
+                });
+            }
+            document.getElementById('main-menu-view').classList.add('hidden');
+            document.getElementById('hiragana-menu-view').classList.remove('hidden');
+        }
+
+        function selectHiraganaRow(rowId) {
+            const rows = rowId === 'all' ? hiraganaRows : hiraganaRows.filter(r => r.id === rowId);
+            courses.hiragana = buildHiraganaItems(rows);
+            selectedItemIndex = 0;
+            startGame('hiragana');
         }
 
         function requestMicAccess() {
