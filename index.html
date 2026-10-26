@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.51 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.52 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.51 に更新 -->
+                <!-- バージョン表記を v1.52 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.51</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.52</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -313,7 +313,7 @@
             <div class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800 text-sm text-slate-300 font-bold flex flex-col gap-2.5 mb-6">
                 <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-900 pb-1.5">
                     <span>クリアした数</span>
-                    <span class="text-slate-100 font-extrabold">3 / 3 ゲート</span>
+                    <span id="result-cleared" class="text-slate-100 font-extrabold">3 / 3 ゲート</span>
                 </div>
                 <div class="flex justify-between items-center text-xs text-slate-400">
                     <span>基本固定点</span>
@@ -578,14 +578,24 @@
             updateStartScreenUI();
         }
 
-        // --- 得点ルール (v1.45) ---
-        // 今は「正解1回につき1点」。コンボ連動(3コンボで1点など)にするときはこの関数だけ変える
-        function calcAnswerPoints() {
-            return 1;
+        // --- 得点ルール (v1.52: ステージクリア制) ---
+        // すうじ: 3問で1ステージ。クリア得点は Lv1,2 = 1点 / Lv3 = 2点 / Lv4,5 = 3点
+        // ひらがな・かたかな: 6問で1ステージ。クリアで3点
+        // それ以外(アルファベット・くだもの)は従来どおり正解1回につき1点 (stage が null)
+        // コンボ連動(3コンボで1点など)にするときは addPoints() を呼ぶ側の点数計算を変える
+        const NUMBERS_STAGE_POINTS = { 1: 1, 2: 1, 3: 2, 4: 3, 5: 3 };
+
+        function getStageConfig() {
+            if (currentCourse === 'numbers') {
+                return { questions: 3, points: NUMBERS_STAGE_POINTS[currentNumbersLevel] || 1 };
+            }
+            if (currentCourse === 'hiragana' || currentCourse === 'katakana') {
+                return { questions: 6, points: 3 };
+            }
+            return null;
         }
 
-        function awardAnswerPoints() {
-            const pts = calcAnswerPoints();
+        function addPoints(pts) {
             if (pts <= 0) return;
             const oldScore = globalScore;
             globalScore += pts;
@@ -594,6 +604,12 @@
             if (globalScore >= 5 && oldScore < 5 && !hasAchieved5Points) {
                 pendingAwardTrigger = true;
             }
+        }
+
+        // 正解したときの加点。ステージ制のコースではここでは加点しない
+        function awardAnswerPoints() {
+            if (getStageConfig()) return;
+            addPoints(1);
         }
 
         function resetTotalScore() {
@@ -1588,7 +1604,7 @@
                             playSound('crash');
                             combo = 0; 
                             
-                            if (currentCourse === 'numbers') {
+                            if (getStageConfig()) {
                                 runMistakesCount += 1;
                             }
 
@@ -1614,10 +1630,11 @@
                 } else if (this.state === 'passed') {
                     this.z += 0.014; 
                     if (this.z > 1.4) {
-                        if (currentCourse === 'numbers') {
+                        const stage = getStageConfig();
+                        if (stage) {
                             runQuestionsCount += 1;
-                            if (runQuestionsCount >= 3) {
-                                triggerRunAggregation(); 
+                            if (runQuestionsCount >= stage.questions) {
+                                triggerRunAggregation(stage);
                             } else {
                                 spawnNext();
                             }
@@ -1905,13 +1922,22 @@
         }
 
         // --- STREAMING_CHUNK: Managing Level Score Aggregation ---
-        function triggerRunAggregation() {
+        function triggerRunAggregation(stage) {
             isPlaying = false; 
-            
-            const cfg = numbersLevelConfig[currentNumbersLevel] || { title: "Lv1" };
 
-            // v1.45: 得点は回答ごとに awardAnswerPoints() で加算済み。ここでは今回の内訳を表示するだけ
-            document.getElementById('result-title').innerText = `すうじコース ${cfg.title} 結果`;
+            // v1.52: ステージクリアの得点をここで加算する
+            addPoints(stage.points);
+            updateHUD();
+
+            let title;
+            if (currentCourse === 'numbers') {
+                const cfg = numbersLevelConfig[currentNumbersLevel] || { title: "Lv1" };
+                title = `すうじコース ${cfg.title} 結果`;
+            } else {
+                title = `${currentCourse === 'hiragana' ? 'ひらがな' : 'かたかな'}コース 結果`;
+            }
+            document.getElementById('result-title').innerText = title;
+            document.getElementById('result-cleared').innerText = `${stage.questions} / ${stage.questions} ゲート`;
             document.getElementById('result-fixed-points').innerText = `+${runEarnedPoints}点`;
             document.getElementById('result-mistakes').innerText = `${runMistakesCount}回 (減点なし)`;
             document.getElementById('result-earned-points').innerText = `+${runEarnedPoints}点`;
