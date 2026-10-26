@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.46 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.47 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.46 に更新 -->
+                <!-- バージョン表記を v1.47 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.46</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.47</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -364,12 +364,13 @@
             numbers: [],
             // 【テストコース群】
             fruits: [
-                { word: "Banana", emoji: "🍌", prompt: "バナナ" },
-                { word: "Apple", emoji: "🍎", prompt: "アップル" },
-                { word: "Grape", emoji: "🍇", prompt: "グレープ" },
-                { word: "Lemon", emoji: "🍋", prompt: "レモン" },
-                { word: "Peach", emoji: "🍑", prompt: "ピーチ" },
-                { word: "Cherry", emoji: "🍒", prompt: "チェリー" }
+                // v1.47: char を持たせる(以前は無くて undefined === undefined となり、何を言っても正解になっていた)
+                { word: "Banana", char: "Banana", emoji: "🍌", prompt: "バナナ" },
+                { word: "Apple", char: "Apple", emoji: "🍎", prompt: "アップル" },
+                { word: "Grape", char: "Grape", emoji: "🍇", prompt: "グレープ" },
+                { word: "Lemon", char: "Lemon", emoji: "🍋", prompt: "レモン" },
+                { word: "Peach", char: "Peach", emoji: "🍑", prompt: "ピーチ" },
+                { word: "Cherry", char: "Cherry", emoji: "🍒", prompt: "チェリー" }
             ],
             // 【ひらがなコース：出題前に selectKanaRow() が選んだ行（または全体）の内容で上書きされます】
             hiragana: [],
@@ -648,6 +649,7 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isSpeechActive = false;
+        let ttsActive = false; // お手本(音声合成)の再生中は true
         let lastProcessedResultIndex = -1; 
 
         function initSpeech() {
@@ -677,7 +679,7 @@
 
                 recognition.onresult = async (event) => {
                     // 【iOS通知対策】ゲーム中でない（メニュー画面にいる）場合は音声入力を完全にスルーする
-                    if (!isPlaying) return;
+                    if (!isPlaying || ttsActive) return;
 
                     const lastResultIndex = event.results.length - 1;
                     const resList = event.results[lastResultIndex]; 
@@ -755,6 +757,7 @@
         }
 
         function tryRestartSpeech() {
+            if (ttsActive) return; // お手本の再生中は再開しない(再生終了時に再開される)
             if (!isSpeechActive && recognition) {
                 try {
                     const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
@@ -1146,23 +1149,23 @@
                     matched = list.find(item => matchesItem(item));
                 }
             } else {
-                const spokenWords = speechText.split(/\s+/);
-                const activeTargetClean = clean(activeTargetItem.word);
-                
-                const isTargetSpoken = spokenWords.some(w => w === activeTargetClean || activeTargetClean.includes(w)) || speechText.includes(activeTargetClean);
-                
-                if (isTargetSpoken) {
+                // v1.47: 英単語は大文字小文字を無視して照合。以前は1〜2文字の断片(例:「a」)でも部分一致して正解になっていたので、
+                // 「単語全体を含む」か「3文字以上の先頭部分(話している途中)」だけを許可する
+                const spokenWords = rawText.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+                const matchesWord = (item) => {
+                    const target = clean(item.word).toLowerCase();
+                    return spokenWords.some(w => w === target || (w.length >= 3 && target.startsWith(w))) || spokenWords.join("").includes(target);
+                };
+
+                if (matchesWord(activeTargetItem)) {
                     matched = activeTargetItem;
                 } else {
-                    matched = list.find(item => {
-                        const itemWord = clean(item.word);
-                        return spokenWords.some(w => w === itemWord || itemWord.includes(w)) || speechText.includes(itemWord);
-                    });
+                    matched = list.find(matchesWord);
                 }
             }
 
             if (matched) {
-                player.transformTo(matched.char, matched.emoji);
+                player.transformTo(matched.char || matched.word, matched.emoji);
                 return true; 
             }
             return false; 
@@ -1235,7 +1238,24 @@
             
             const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
             utterance.lang = isJapaneseCourse ? 'ja-JP' : 'en-US';
-            utterance.rate = 0.85; 
+            utterance.rate = 0.85;
+
+            // v1.47: お手本の再生中にマイクを開いたままだと、認識が止まったまま戻らなくなる(自分の声を拾う/音声セッションが切れる)ため、
+            // 再生中は認識を止めて結果を無視し、再生が終わったら再開する
+            ttsActive = true;
+            if (recognition && isSpeechActive) {
+                try { recognition.abort(); } catch (e) { console.warn("recognition.abort failed:", e); }
+                isSpeechActive = false;
+            }
+            const finishTts = () => {
+                if (!ttsActive) return;
+                ttsActive = false;
+                setTimeout(tryRestartSpeech, 400);
+                setTimeout(tryRestartSpeech, 1500); // 1回目で失敗しても取りこぼさないための保険(動作中なら何もしない)
+            };
+            utterance.onend = finishTts;
+            utterance.onerror = finishTts;
+            setTimeout(finishTts, 8000); // onend が来ない環境でも、ずっとマイクが止まらないようにする
             synth.speak(utterance);
         }
 
@@ -1537,7 +1557,7 @@
                     this.z += this.speed;
 
                     const currentTargetItem = courses[currentCourse].find(item => item.word === this.target);
-                    const isPlayerCorrectShape = currentTargetItem && player.currentAnimal === currentTargetItem.char;
+                    const isPlayerCorrectShape = !!currentTargetItem && !!currentTargetItem.char && player.currentAnimal === currentTargetItem.char;
 
                     if (this.z >= 0.82) {
                         if (isPlayerCorrectShape) {
