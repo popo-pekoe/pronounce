@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.49 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.50 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.49 に更新 -->
+                <!-- バージョン表記を v1.50 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.49</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.50</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -695,6 +695,12 @@
 
                         speechResult = resList[0].transcript;
 
+                        // v1.50: 第2候補以降も判定に使う(一文字の発音は第1候補が "see" でなく別の語になりやすいため)
+                        const allAlternatives = [];
+                        for (let k = 1; k < resList.length; k++) {
+                            allAlternatives.push(resList[k].transcript);
+                        }
+
                         if (speechResult.trim() !== '') {
                             // v1.43: ひらがな・カタカナコースでは、漢字で返ってきたときに吹き出しへ「読みの先頭の音」も併記する
                             let shownText = speechResult;
@@ -704,7 +710,7 @@
                             }
                             updateSpeechBubbleMonitor(shownText, isFinal, alternativeTexts);
 
-                            const success = await handleSpeechInput(speechResult);
+                            const success = await handleSpeechInput(speechResult, allAlternatives);
                             
                             if (success || isFinal) {
                                 lastProcessedResultIndex = lastResultIndex;
@@ -1064,7 +1070,7 @@
         }
 
         // --- STREAMING_CHUNK: Processing speech analysis and context inclusion ---
-        async function handleSpeechInput(rawText) {
+        async function handleSpeechInput(rawText, alternatives = []) {
             const isJapaneseCourse = (currentCourse === 'numbers' || currentCourse === 'hiragana' || currentCourse === 'katakana');
 
             // かな・カタカナ相互変換
@@ -1136,11 +1142,12 @@
                 }
             } else if (currentCourse === 'alphabet') {
                 // v1.46: 一文字の名前(エー/ビー…)。認識結果の各単語を aliases と完全一致で照合する
-                const tokens = rawText.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-                const joined = tokens.join("");
+                // v1.50: 第1候補だけでなく全候補(最大10)の単語を対象にする。"capital C" と言わなくても通りやすくする
+                const candidateTexts = [rawText, ...alternatives];
+                const tokenSets = candidateTexts.map(t => t.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
                 const matchesItem = (item) => {
                     const names = [item.word.toLowerCase(), ...item.aliases];
-                    return tokens.some(t => names.includes(t)) || names.includes(joined);
+                    return tokenSets.some(tokens => tokens.some(t => names.includes(t)) || names.includes(tokens.join("")));
                 };
 
                 if (matchesItem(activeTargetItem)) {
@@ -1193,7 +1200,7 @@
             if (alternativesArea) {
                 alternativesArea.innerHTML = "";
                 if (alternatives && alternatives.length > 0) {
-                    const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 3);
+                    const uniqueAlts = [...new Set(alternatives)].filter(a => a !== text).slice(0, 5);
                     if (uniqueAlts.length > 0) {
                         const spanLabel = document.createElement('span');
                         spanLabel.className = "text-slate-600 mr-1";
