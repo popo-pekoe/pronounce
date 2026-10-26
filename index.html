@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.48 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.49 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.48 に更新 -->
+                <!-- バージョン表記を v1.49 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.48</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.49</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -1242,15 +1242,18 @@
 
             // v1.47: お手本の再生中にマイクを開いたままだと、認識が止まったまま戻らなくなる(自分の声を拾う/音声セッションが切れる)ため、
             // 再生中は認識を止めて結果を無視し、再生が終わったら再開する
-            // v1.48: 認識を止めて再起動すると、そのたびに「マイク許可」の通知が出てしまうので止めない。
-            // 再生中(と終了直後)は結果を無視するだけにして、認識が自然に切れていたときだけ再開する
+            // v1.49: v1.48 で「止めずに結果を無視するだけ」を試したが、再生後に認識が戻らなかった(再起動が必須)。
+            // マイク許可の通知が出ても確実に動く v1.47 方式に戻す: 再生前に止め、再生後に再開する
             ttsActive = true;
+            if (recognition && isSpeechActive) {
+                try { recognition.abort(); } catch (e) { console.warn("recognition.abort failed:", e); }
+                isSpeechActive = false;
+            }
             const finishTts = () => {
                 if (!ttsActive) return;
-                setTimeout(() => {
-                    ttsActive = false;
-                    tryRestartSpeech(); // 動作中なら何もしない
-                }, 700);
+                ttsActive = false;
+                setTimeout(tryRestartSpeech, 400);
+                setTimeout(tryRestartSpeech, 1500); // 1回目で失敗しても取りこぼさないための保険(動作中なら何もしない)
             };
             utterance.onend = finishTts;
             utterance.onerror = finishTts;
