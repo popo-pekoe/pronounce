@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<!-- 発音マスター - 変身ロードランナー  Version: v1.44 -->
+<!-- 発音マスター - 変身ロードランナー  Version: v1.45 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,10 +76,10 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-violet-400 tracking-wide">発音ロードランナー</h1>
                 
-                <!-- バージョン表記を v1.44 に更新 -->
+                <!-- バージョン表記を v1.45 に更新 -->
                 <div class="flex justify-center items-center gap-2 mt-1">
                     <p class="text-xs text-purple-300 font-bold tracking-widest uppercase">Pronunciation Runner 3D</p>
-                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.44</span>
+                    <span class="bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v1.45</span>
                     <span id="dict-status" class="text-[10px] text-slate-500 font-bold">読み表: 読込中…</span>
                 </div>
                 
@@ -87,7 +87,8 @@
                 <div class="my-4 bg-slate-900/80 border border-purple-500/20 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-4 max-w-xs w-full shadow-inner">
                     <div class="text-left">
                         <p class="text-[9px] text-purple-300 font-extrabold uppercase tracking-widest leading-none">TOTAL SCORE</p>
-                        <p id="start-total-score" class="text-xl font-black text-amber-400 mt-1">0 点</p>
+                        <div id="start-score-stars" class="grid grid-cols-10 gap-x-0.5 text-base leading-tight mt-1 w-[10.5rem]"></div>
+                        <p id="start-total-score" class="text-[11px] font-black text-amber-400 mt-0.5">0 点</p>
                         <p id="score-timer-status" class="text-[8px] text-slate-500 font-normal leading-none mt-0.5">有効期限: 24時間</p>
                     </div>
                     <button onclick="resetTotalScore()" class="bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border border-rose-500/20 text-[10px] font-extrabold px-3 py-1.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5">
@@ -451,7 +452,9 @@
         let screenShake = 0;
         let selectedItemIndex = 0;        
 
-        let runQuestionsCount = 0;        
+        let runQuestionsCount = 0;
+        let runEarnedPoints = 0;
+        const SCORE_MAX_STARS = 20;
         let runMistakesCount = 0;         
         let pendingAwardTrigger = false;  
         let hasAchieved5Points = false;   
@@ -559,6 +562,24 @@
             updateStartScreenUI();
         }
 
+        // --- 得点ルール (v1.45) ---
+        // 今は「正解1回につき1点」。コンボ連動(3コンボで1点など)にするときはこの関数だけ変える
+        function calcAnswerPoints() {
+            return 1;
+        }
+
+        function awardAnswerPoints() {
+            const pts = calcAnswerPoints();
+            if (pts <= 0) return;
+            const oldScore = globalScore;
+            globalScore += pts;
+            runEarnedPoints += pts;
+            saveTotalScore();
+            if (globalScore >= 5 && oldScore < 5 && !hasAchieved5Points) {
+                pendingAwardTrigger = true;
+            }
+        }
+
         function resetTotalScore() {
             localStorage.setItem('playrunner_total_score', '0');
             localStorage.setItem('playrunner_score_timestamp', Date.now().toString());
@@ -576,6 +597,18 @@
             const timerStatusEl = document.getElementById('score-timer-status');
             if (totalScoreEl) {
                 totalScoreEl.innerText = `${globalScore} 点`;
+            }
+            // v1.45: ☆(未取得) / ★(取得済み) で表示。20個を超えた分は★が全部埋まった状態で表す
+            const starsEl = document.getElementById('start-score-stars');
+            if (starsEl) {
+                const filled = Math.min(globalScore, SCORE_MAX_STARS);
+                starsEl.innerHTML = '';
+                for (let i = 0; i < SCORE_MAX_STARS; i++) {
+                    const s = document.createElement('span');
+                    s.textContent = i < filled ? '★' : '☆';
+                    s.className = i < filled ? 'text-amber-400' : 'text-slate-600';
+                    starsEl.appendChild(s);
+                }
             }
 
             const savedTimestamp = localStorage.getItem('playrunner_score_timestamp');
@@ -1411,6 +1444,7 @@
                             this.state = 'passed';
                             playSound('pass');
                             combo += 1;
+                            awardAnswerPoints();
                             updateHUD();
                             createSparkles(this.emoji);
                             document.getElementById('clash-warning').classList.add('hidden');
@@ -1452,6 +1486,12 @@
                             } else {
                                 spawnNext();
                             }
+                        } else if (pendingAwardTrigger) {
+                            // v1.45: 数字以外のコースでも5点達成でお祝い
+                            isPlaying = false;
+                            pendingAwardTrigger = false;
+                            hasAchieved5Points = true;
+                            triggerAwardEvent();
                         } else {
                             spawnNext();
                         }
@@ -1729,27 +1769,13 @@
         function triggerRunAggregation() {
             isPlaying = false; 
             
-            const cfg = numbersLevelConfig[currentNumbersLevel] || { fixedPoints: 1, additionPoints: 0, title: "Lv1" };
-            
-            let earnedPoints = cfg.fixedPoints + cfg.additionPoints - runMistakesCount;
-            if (earnedPoints < 0) {
-                earnedPoints = 0;
-            }
+            const cfg = numbersLevelConfig[currentNumbersLevel] || { title: "Lv1" };
 
-            const oldScore = globalScore;
-            globalScore += earnedPoints;
-
-            // スコア変動を24時間マネージャーでセーブ
-            saveTotalScore();
-
-            if (globalScore >= 5 && oldScore < 5 && !hasAchieved5Points) {
-                pendingAwardTrigger = true;
-            }
-
+            // v1.45: 得点は回答ごとに awardAnswerPoints() で加算済み。ここでは今回の内訳を表示するだけ
             document.getElementById('result-title').innerText = `すうじコース ${cfg.title} 結果`;
-            document.getElementById('result-fixed-points').innerText = `+${cfg.fixedPoints}点`;
-            document.getElementById('result-mistakes').innerText = `-${runMistakesCount}回`;
-            document.getElementById('result-earned-points').innerText = `+${earnedPoints}点`;
+            document.getElementById('result-fixed-points').innerText = `+${runEarnedPoints}点`;
+            document.getElementById('result-mistakes').innerText = `${runMistakesCount}回 (減点なし)`;
+            document.getElementById('result-earned-points').innerText = `+${runEarnedPoints}点`;
             
             const modal = document.getElementById('result-modal');
             if (modal) modal.classList.remove('hidden');
@@ -1806,6 +1832,7 @@
             
             runQuestionsCount = 0;
             runMistakesCount = 0;
+            runEarnedPoints = 0;
             pendingAwardTrigger = false;
 
             isPlaying = true;
